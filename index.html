@@ -141,7 +141,7 @@
     </h1>
   </div>
 
-  <button onclick="toggleSidebar()" class="absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-lg">
+  <button onclick="toggleSidebar()" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-lg z-10">
     <span class="material-symbols-outlined">chevron_left</span>
   </button>
 
@@ -345,7 +345,7 @@
       <input id="searchInput" oninput="filterContent()" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
     </div>
     <div class="flex items-center gap-4">
-      <button class="bg-tech-accent text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-lg shadow-tech-accent/20 hover:bg-[#c96614]">
+      <button onclick="window.open('https://mailweb.cann.osinfra.cn/mailman3/lists/recipes.cann.osinfra.cn/', '_blank')" class="bg-tech-accent text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-lg shadow-tech-accent/20 hover:bg-[#c96614]">
         Subscribe
       </button>
     </div>
@@ -472,7 +472,7 @@
         <h4 class="text-lg font-bold mb-2">Stay Updated</h4>
         <p class="text-white/70 text-sm mb-4">Get the latest tech reports delivered to your inbox.</p>
         <input class="w-full mb-3 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-sm focus:ring-1 focus:ring-tech-accent outline-none" placeholder="Email address" type="email"/>
-        <button class="w-full bg-tech-accent text-white font-bold py-2 rounded-xl transition-colors hover:bg-[#c96614]">Subscribe</button>
+        <button onclick="window.open('https://mailweb.cann.osinfra.cn/mailman3/lists/recipes.cann.osinfra.cn/', '_blank')" class="w-full bg-tech-accent text-white font-bold py-2 rounded-xl transition-colors hover:bg-[#c96614]">Subscribe</button>
       </div>
 
       <!-- Popular Reports -->
@@ -560,13 +560,12 @@
             </div>
             <div>
               <p class="font-bold text-slate-900">CANN Team</p>
-              <p class="text-sm text-slate-500">Technical Writer</p>
             </div>
           </div>
           <div class="flex items-center gap-4 text-sm text-slate-500">
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-base">calendar_today</span>
-              <span>March 15, 2024</span>
+              <span id="reportDate">Loading...</span>
             </span>
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-base">schedule</span>
@@ -671,6 +670,30 @@
       } catch (e) {
         console.warn('CORS proxy failed:', e.message);
       }
+    }
+    return null;
+  }
+
+  // Fetch latest commit date for a file from GitCode API
+  async function fetchLatestCommitDate(repo, branch, filePath) {
+    const ns = 'cann';
+    const repoId = `${ns}%2F${repo}`;
+    const commitsUrl = `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/commits?ref_name=${encodeURIComponent(branch)}&path=${encodeURIComponent(filePath)}&per_page=1`;
+    console.log('Fetching commit date:', commitsUrl);
+    try {
+      const resp = await fetchWithCorsProxy(commitsUrl);
+      if (resp) {
+        const commits = await resp.json();
+        if (Array.isArray(commits) && commits.length > 0) {
+          const dateStr = commits[0].committed_date || commits[0].created_at;
+          if (dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch commit date:', e);
     }
     return null;
   }
@@ -813,7 +836,24 @@
     md = md.replace(/<style\b[\s\S]*?<\/style>/gi, '');
     md = md.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
 
+    // Rewrite HTML <img> tags with relative src to raw GitCode URLs
+    if (repo && baseDir) {
+      md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
+        try {
+          const resolved = resolvePath(baseDir, src);
+          const rawUrl = rawGitCodeUrl(repo, branch, resolved);
+          const proxyFallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
+          console.log('HTML img rewrite:', { src, resolved, rawUrl });
+          return `<img${before}src="${rawUrl}"${after} loading="lazy" onerror="this.onerror=null;this.src='${proxyFallback}'">`;
+        } catch (e) {
+          console.warn('HTML img rewrite failed:', e.message, { src, baseDir });
+          return match;
+        }
+      });
+    }
+
     // Remove other unwanted HTML tags but keep their content (strip tags only)
+    // Note: we no longer strip <img> since we want to preserve rewritten img tags
     md = md.replace(/<\/?(div|span|p|br|hr|section|article|nav|header|footer|aside|main|figure|figcaption)[^>]*>/gi, '');
 
     // Re-write relative image src to raw GitCode URLs with CORS proxy fallback
@@ -847,9 +887,32 @@
       });
     }
 
+    // Generate slug from heading text (matches marked default + common TOC generators)
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .replace(/<[^>]*>/g, '')           // strip HTML tags
+        .replace(/[^\w\s\u4e00-\u9fff-]/g, '') // keep word chars, spaces, Chinese chars, hyphens
+        .replace(/\s+/g, '-')              // spaces to hyphens
+        .replace(/-+/g, '-')               // collapse multiple hyphens
+        .replace(/^-|-$/g, '');            // trim leading/trailing hyphens
+    }
+
     // Use marked with safe options
     try {
       const renderer = new marked.Renderer();
+      const headingIds = {};
+      renderer.heading = (text, level) => {
+        let slug = slugify(text);
+        // Handle duplicate headings by appending a counter
+        if (headingIds[slug] !== undefined) {
+          headingIds[slug]++;
+          slug = slug + '-' + headingIds[slug];
+        } else {
+          headingIds[slug] = 0;
+        }
+        return `<h${level} id="${slug}">${text}</h${level}>\n`;
+      };
       renderer.link = (href, title, text) => {
         const isInternal = href.startsWith('#');
         const target = isInternal ? '' : ' target="_blank" rel="noopener"';
@@ -872,7 +935,7 @@
         gfm: true,
         sanitize: false, // We already cleaned HTML
         silent: false,
-        headerIds: true,
+        headerIds: false, // We handle IDs ourselves in the heading renderer
         headerPrefix: ''
       });
       return `<div class="report-markdown">${parsed}</div>`;
@@ -1258,6 +1321,25 @@
     document.getElementById('breadcrumbModel').textContent = model;
     document.getElementById('reportCategory').textContent = category;
     document.getElementById('reportTitle').textContent = title;
+
+    // Show loading for date initially
+    document.getElementById('reportDate').textContent = 'Loading...';
+
+    // Fetch and display latest commit date
+    if (reportFile) {
+      const config = repoConfig[category];
+      const modelsSource = actualRepoModels[category] || repoModels[category];
+      const modelData = modelsSource.find(m => m.name === model);
+      if (config && modelData) {
+        const docPath = modelData.docPath || '';
+        const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+        fetchLatestCommitDate(config.repo, config.branch, filePath).then(date => {
+          document.getElementById('reportDate').textContent = date || 'N/A';
+        });
+      }
+    } else {
+      document.getElementById('reportDate').textContent = 'N/A';
+    }
 
     // Load content via proxy
     const reportContent = document.getElementById('reportContent');
