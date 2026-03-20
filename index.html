@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CANN RECIPES BLOGS</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'beige-light': '#F9F8F6',
+            'coffee-brown': '#3E2723',
+            'tech-accent': '#E77A1D',
+            'glass-bg': 'rgba(255, 255, 255, 0.7)',
+            'primary': '#E77A1D',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Public Sans', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .glass-sidebar {
+      background: rgba(245, 245, 240, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    .logo-gradient {
+      background: linear-gradient(135deg, #E77A1D 0%, #C85D00 100%);
+    }
+    details[open] summary svg.chevron {
+      transform: rotate(180deg);
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    .sidebar-hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .content-expanded {
+      margin-left: 0;
+    }
+    .content-expanded #homeView {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+    .content-expanded #reportView {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .content-expanded #reportView > div {
+      max-width: 80rem; /* Wider max-width when sidebar hidden */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .content-expanded #categoryView > div {
+      max-width: 80rem; /* Wider max-width when sidebar hidden */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #sidebar {
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Custom scrollbar */
+    .overflow-y-auto::-webkit-scrollbar {
+      width: 6px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: rgba(231, 122, 29, 0.3);
+      border-radius: 3px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+      background: rgba(231, 122, 29, 0.5);
+    }
+    /* Report markdown content styles */
+    .report-markdown h1, .report-markdown h2, .report-markdown h3, .report-markdown h4 { color: #3E2723; font-weight: 700; line-height: 1.3; }
+    .report-markdown h1 { font-size: 1.875rem; margin: 2rem 0 1rem; }
+    .report-markdown h2 { font-size: 1.5rem; margin: 1.75rem 0 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+    .report-markdown h3 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
+    .report-markdown h4 { font-size: 1.125rem; margin: 1.25rem 0 0.5rem; }
+    .report-markdown p { color: #475569; line-height: 1.8; margin-bottom: 1rem; }
+    .report-markdown ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+    .report-markdown ol { list-style: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
+    .report-markdown li { color: #475569; line-height: 1.75; margin-bottom: 0.25rem; }
+    .report-markdown pre { background: #0f172a; color: #cbd5e1; padding: 1.25rem; border-radius: 0.75rem; margin: 1.25rem 0; overflow-x: auto; font-size: 0.875rem; line-height: 1.625; }
+    .report-markdown code { background: #f1f5f9; color: #1e293b; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; font-family: ui-monospace, monospace; }
+    .report-markdown pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    .report-markdown img { max-width: 100%; border-radius: 0.75rem; margin: 1.25rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: block; }
+    .report-markdown a { color: #E77A1D; }
+    .report-markdown a:hover { text-decoration: underline; }
+    .report-markdown blockquote { border-left: 4px solid #E77A1D; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(231,122,29,0.05); border-radius: 0 0.5rem 0.5rem 0; }
+    .report-markdown hr { border-color: #e2e8f0; margin: 1.75rem 0; }
+    .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+    .report-markdown th { background: #f1f5f9; font-weight: 600; color: #3E2723; padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #e2e8f0; }
+    .report-markdown td { padding: 0.75rem 1rem; color: #475569; border-bottom: 1px solid #e2e8f0; }
+    .report-markdown tr:hover td { background: #f8fafc; }
+    .report-markdown strong { color: #1e293b; font-weight: 600; }
+    .report-markdown em { font-style: italic; }
+  </style>
+</head>
+<body class="bg-beige-light text-slate-900 font-sans min-h-screen flex">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-72 glass-sidebar h-screen sticky top-0 flex-shrink-0 z-50 flex flex-col p-6 transition-all duration-300">
+  <div class="mb-10 px-2 flex items-center justify-between">
+    <h1 class="text-2xl font-bold tracking-tight flex items-center gap-2">
+      <span class="w-12 h-12 rounded-xl logo-gradient flex items-center justify-center text-white text-[10px] font-black shrink-0">CANN</span>
+      <span class="text-coffee-brown leading-tight text-lg">CANN RECIPES<br/>BLOGS</span>
+    </h1>
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-white/50 rounded-lg transition-colors">
+      <span class="material-symbols-outlined text-coffee-brown">chevron_left</span>
+    </button>
+  </div>
+
+  <nav class="flex-grow space-y-1 overflow-y-auto">
+    <!-- Home -->
+    <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
+      <span class="material-symbols-outlined">home</span>
+      Home
+    </a>
+
+    <!-- Categories with expandable models -->
+    <div class="mt-4 space-y-1">
+      <!-- Infer -->
+      <details open class="group">
+        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
+          <span class="material-symbols-outlined text-slate-500">memory</span>
+          <span class="text-slate-600 font-medium flex-1">Infer</span>
+          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        </summary>
+        <div class="ml-8 mt-1 space-y-1">
+          <!-- deepseek-r1 has multiple reports -->
+          <details class="group">
+            <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
+              <span class="material-symbols-outlined text-xs">folder</span>
+              <span>deepseek-r1</span>
+              <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </summary>
+            <div class="ml-4 mt-1 space-y-1">
+              <a onclick="showModelReport('Infer', 'deepseek-r1', 'Deepseek R1 Decode Optimization', 'deepseek_r1_decode_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                deepseek_r1_decode_optimization.md
+              </a>
+              <a onclick="showModelReport('Infer', 'deepseek-r1', 'Deepseek R1 Prefill Optimization', 'deepseek_r1_prefill_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                deepseek_r1_prefill_optimization.md
+              </a>
+            </div>
+          </details>
+          <a onclick="showModelReport('Infer', 'deepseek-v3.2-exp', 'Deepseek V3.2 Exp', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            deepseek-v3.2-exp
+          </a>
+          <a onclick="showModelReport('Infer', 'gpt-oss', 'GPT OSS', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            gpt-oss
+          </a>
+          <a onclick="showModelReport('Infer', 'hstu', 'HSTU', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            hstu
+          </a>
+          <a onclick="showModelReport('Infer', 'kimi-k2-thinking', 'Kimi K2 Thinking', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            kimi-k2-thinking
+          </a>
+          <a onclick="showModelReport('Infer', 'longcat-flash', 'Longcat Flash', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            longcat-flash
+          </a>
+          <a onclick="showModelReport('Infer', 'qwen3-moe', 'Qwen3 MoE', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            qwen3-moe
+          </a>
+          <a onclick="showModelReport('Infer', 'qwen3-next', 'Qwen3 Next', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            qwen3-next
+          </a>
+          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-infer', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+            Browse Repo
+          </a>
+        </div>
+      </details>
+
+      <!-- Train -->
+      <details class="group">
+        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
+          <span class="material-symbols-outlined text-slate-500">model_training</span>
+          <span class="text-slate-600 font-medium flex-1">Train</span>
+          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        </summary>
+        <div class="ml-8 mt-1 space-y-1">
+          <!-- llm_pretrain has one report -->
+          <a onclick="showModelReport('Train', 'llm_pretrain', 'LLM PreTrain Optimization', 'deepseekv32_pre_train_optimization.md')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            llm_pretrain
+          </a>
+          <!-- llm_rl has multiple reports -->
+          <details class="group">
+            <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
+              <span class="material-symbols-outlined text-xs">folder</span>
+              <span>llm_rl</span>
+              <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </summary>
+            <div class="ml-4 mt-1 space-y-1">
+              <a onclick="showModelReport('Train', 'llm_rl', 'Deepseek RL Train Optimization', 'deepseek_rl_train_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                deepseek_rl_train_optimization.md
+              </a>
+              <a onclick="showModelReport('Train', 'llm_rl', 'Qwen3 235B 32K RL', 'qwen3_235B_32k_longseq_rl_train_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                qwen3_235B_32k_longseq_rl_train_optimization.md
+              </a>
+              <a onclick="showModelReport('Train', 'llm_rl', 'SAM Decoding', 'sam_decoding.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                sam_decoding.md
+              </a>
+            </div>
+          </details>
+          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-train', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+            Browse Repo
+          </a>
+        </div>
+      </details>
+
+      <!-- Embodied Intelligence -->
+      <details class="group">
+        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
+          <span class="material-symbols-outlined text-slate-500">smart_toy</span>
+          <span class="text-slate-600 font-medium flex-1">Embodied Intelligence</span>
+          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        </summary>
+        <div class="ml-8 mt-1 space-y-1">
+          <a onclick="showModelReport('Embodied Intelligence', 'pi0', 'PI0 Robot VLA', 'README.md')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            manipulation/pi0
+          </a>
+          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-embodied-intelligence', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+            Browse Repo
+          </a>
+        </div>
+      </details>
+
+      <!-- Spatial Intelligence -->
+      <details class="group">
+        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
+          <span class="material-symbols-outlined text-slate-500">language</span>
+          <span class="text-slate-600 font-medium flex-1">Spatial Intelligence</span>
+          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        </summary>
+        <div class="ml-8 mt-1 space-y-1">
+          <!-- Hunyuan3D has one report -->
+          <a onclick="showModelReport('Spatial Intelligence', 'Hunyuan3D', 'Hunyuan3D Optimization', 'Hunyuan3D_optimization.md')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">description</span>
+            Hunyuan3D
+          </a>
+          <!-- vggt has multiple reports -->
+          <details class="group">
+            <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
+              <span class="material-symbols-outlined text-xs">folder</span>
+              <span>vggt</span>
+              <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </summary>
+            <div class="ml-4 mt-1 space-y-1">
+              <a onclick="showModelReport('Spatial Intelligence', 'vggt', 'VGGT Optimization', 'vggt_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                vggt_optimization.md
+              </a>
+              <a onclick="showModelReport('Spatial Intelligence', 'vggt', 'VGGT Accuracy Evaluation', 'vggt_accurancy_evaluation.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                vggt_accurancy_evaluation.md
+              </a>
+            </div>
+          </details>
+          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-spatial-intelligence', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+            Browse Repo
+          </a>
+        </div>
+      </details>
+    </div>
+  </nav>
+
+  <div class="mt-auto pt-6 border-t border-black/5">
+    <div class="flex items-center gap-3 p-2">
+      <div class="w-10 h-10 rounded-full bg-tech-accent/20 flex items-center justify-center">
+        <span class="material-symbols-outlined text-tech-accent">person</span>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-coffee-brown">CANN Team</p>
+        <p class="text-xs text-slate-500">Tech Blog</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Collapsed Sidebar Toggle Button (hidden by default) -->
+<button id="sidebarToggle" onclick="toggleSidebar()" class="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-lg hidden">
+  <span class="material-symbols-outlined">chevron_right</span>
+</button>
+
+<!-- Main Content -->
+<div id="mainContent" class="flex-grow flex flex-col min-w-0 transition-all duration-300">
+  <!-- Top Bar -->
+  <header class="h-20 flex items-center justify-between px-10 bg-transparent">
+    <div class="relative w-full max-w-2xl">
+      <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+        <span class="material-symbols-outlined">search</span>
+      </span>
+      <input id="searchInput" oninput="filterContent()" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="bg-tech-accent text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-lg shadow-tech-accent/20 hover:bg-[#c96614]">
+        Subscribe
+      </button>
+    </div>
+  </header>
+
+  <!-- Home View -->
+  <main id="homeView" class="flex-grow px-10 py-4 flex gap-10">
+    <section class="flex-grow space-y-8">
+      <!-- Recent Reports -->
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-2xl font-bold text-coffee-brown">Recent Reports</h2>
+      </div>
+
+      <div class="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+        <!-- Card 1 -->
+        <!-- Card 1 -->
+        <article onclick="showReport('Infer', 'Model-A', 'Optimization Techniques')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Infer</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Optimization Techniques for Model Inference</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Exploring advanced optimization strategies for efficient model inference.
+            </p>
+            <span class="text-xs text-slate-400">March 15, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article onclick="showReport('Train', 'TrainModel-X', 'Training Guide')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Train</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Complete Training Guide for TrainModel-X</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              A comprehensive guide to training large-scale models with best practices.
+            </p>
+            <span class="text-xs text-slate-400">March 12, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article onclick="showReport('Embodied Intelligence', 'Robot-Alpha', 'Robot Systems')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Embodied</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Robot-Alpha: Advanced Robotic Systems</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Building intelligent robotic systems with embodied AI for real-world applications.
+            </p>
+            <span class="text-xs text-slate-400">March 10, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article onclick="showReport('Spatial Intelligence', 'SpatialNet', 'Spatial Mapping')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Spatial</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">SpatialNet: Spatial Mapping & Navigation</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Deep learning approaches for 3D spatial understanding and autonomous navigation.
+            </p>
+            <span class="text-xs text-slate-400">March 8, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article onclick="showReport('Infer', 'Model-B', 'Inference Pipeline')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Infer</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Model-B Inference Pipeline Architecture</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Designing scalable inference pipelines for production-ready ML models.
+            </p>
+            <span class="text-xs text-slate-400">March 5, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Train</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Distributed Training Best Practices</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Strategies for efficient distributed training across multiple GPUs and nodes.
+            </p>
+            <span class="text-xs text-slate-400">March 3, 2024</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Sidebar Widgets -->
+    <aside class="w-56 flex-shrink-0 space-y-6">
+      <!-- Stay Updated (Newsletter) -->
+      <div class="bg-coffee-brown rounded-3xl p-6 text-white shadow-xl">
+        <h4 class="text-lg font-bold mb-2">Stay Updated</h4>
+        <p class="text-white/70 text-sm mb-4">Get the latest tech reports delivered to your inbox.</p>
+        <input class="w-full mb-3 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-sm focus:ring-1 focus:ring-tech-accent outline-none" placeholder="Email address" type="email"/>
+        <button class="w-full bg-tech-accent text-white font-bold py-2 rounded-xl transition-colors hover:bg-[#c96614]">Subscribe</button>
+      </div>
+
+      <!-- Popular Reports -->
+      <div class="glass-card rounded-3xl p-6">
+        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Popular Reports</h4>
+        <div class="space-y-3">
+          <div onclick="showReport('Infer', 'Model-A', 'Optimization Techniques')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
+            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">1</span>
+            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Optimization Techniques</span>
+          </div>
+          <div onclick="showReport('Train', 'TrainModel-X', 'Training Guide')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
+            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">2</span>
+            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Training Guide</span>
+          </div>
+          <div onclick="showReport('Embodied Intelligence', 'Robot-Alpha', 'Robot Systems')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
+            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">3</span>
+            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Robot Systems</span>
+          </div>
+          <div onclick="showReport('Spatial Intelligence', 'SpatialNet', 'Spatial Mapping')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
+            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">4</span>
+            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Spatial Mapping</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-6">
+        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Categories</h4>
+        <div id="categoryList" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600">Loading...</span>
+            <span class="text-xs bg-tech-accent/10 text-tech-accent px-2 py-1 rounded-full">-</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Category View (hidden by default) -->
+  <main id="categoryView" class="hidden flex-grow px-10 py-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+        <a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">home</span>
+          Home
+        </a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span id="categoryTitle" class="text-slate-900 font-medium">Category</span>
+      </nav>
+
+      <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-8">Tech Reports</h2>
+
+      <div id="categoryReports" class="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+        <!-- Reports will be dynamically loaded here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Report View (hidden by default) -->
+  <main id="reportView" class="hidden flex-grow px-10 py-4">
+    <div class="max-w-4xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+        <a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">home</span>
+          Home
+        </a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span id="breadcrumbCategory" class="text-slate-900 font-medium">Category</span>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span id="breadcrumbModel" class="text-slate-900 font-medium">Model</span>
+      </nav>
+
+      <article class="glass-card rounded-3xl p-8 md:p-12 fade-in">
+        <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Category</span>
+
+        <h1 id="reportTitle" class="text-4xl lg:text-5xl font-extrabold text-coffee-brown leading-tight mt-6 mb-6">
+          Report Title
+        </h1>
+
+        <div class="flex items-center gap-6 pb-8 border-b border-tech-accent/10">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-tech-accent/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-tech-accent">person</span>
+            </div>
+            <div>
+              <p class="font-bold text-slate-900">CANN Team</p>
+              <p class="text-sm text-slate-500">Technical Writer</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-sm text-slate-500">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-base">calendar_today</span>
+              <span>March 15, 2024</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-base">schedule</span>
+              <span>8 min read</span>
+            </span>
+          </div>
+        </div>
+
+        <div id="reportContent" class="mt-8">
+          <!-- Dynamic content loaded here -->
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="px-10 py-8 border-t border-black/5 mt-12 flex justify-between items-center text-slate-400 text-xs">
+    <div>© 2024 CANN Recipes Blog. All rights reserved.</div>
+    <div class="flex gap-6">
+      <a class="hover:text-tech-accent transition-colors cursor-pointer">Privacy Policy</a>
+      <a class="hover:text-tech-accent transition-colors cursor-pointer">Terms of Service</a>
+      <a class="hover:text-tech-accent transition-colors cursor-pointer">RSS Feed</a>
+    </div>
+  </footer>
+</div>
+
+<!-- Floating Navigation Buttons -->
+<div class="fixed bottom-8 right-8 flex flex-col gap-3 z-[100]">
+  <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-12 h-12 glass-card rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg border border-white/40 group" title="Back to Top">
+    <span class="material-symbols-outlined">keyboard_arrow_up</span>
+  </button>
+  <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="w-12 h-12 glass-card rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg border border-white/40 group" title="Go to Bottom">
+    <span class="material-symbols-outlined">keyboard_arrow_down</span>
+  </button>
+</div>
+
+<script>
+  // Configure marked.js: open links in new tab
+  (() => {
+    const r = new marked.Renderer();
+    r.link = (href, title, text) =>
+      `<a href="${href}"${title ? ` title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
+    marked.setOptions({ renderer: r, breaks: true, gfm: true });
+  })();
+
+  // GitCode Repo Configuration - 4 repos for 4 categories
+  const repoConfig = {
+    "Infer": {
+      repo: "cann-recipes-infer",
+      branch: "master",
+      basePath: "docs/models"
+    },
+    "Train": {
+      repo: "cann-recipes-train",
+      branch: "master",
+      basePath: "docs"
+    },
+    "Spatial Intelligence": {
+      repo: "cann-recipes-spatial-intelligence",
+      branch: "master",
+      basePath: "docs/models"
+    },
+    "Embodied Intelligence": {
+      repo: "cann-recipes-embodied-intelligence",
+      branch: "master",
+      basePath: "docs"
+    }
+  };
+
+  // Model data from GitCode repos - with actual doc paths
+  const repoModels = {
+    "Infer": [
+      { name: "deepseek-r1", docPath: "deepseek-r1", reports: ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"] },
+      { name: "deepseek-v3.2-exp", docPath: "deepseek-v3.2-exp", reports: [] },
+      { name: "gpt-oss", docPath: "gpt-oss", reports: [] },
+      { name: "hstu", docPath: "hstu", reports: [] },
+      { name: "kimi-k2-thinking", docPath: "kimi-k2-thinking", reports: [] },
+      { name: "longcat-flash", docPath: "longcat-flash", reports: [] },
+      { name: "qwen3-moe", docPath: "qwen3-moe", reports: [] },
+      { name: "qwen3-next", docPath: "qwen3-next", reports: [] }
+    ],
+    "Train": [
+      { name: "llm_pretrain", docPath: "", reports: ["deepseekv32_pre_train_optimization.md"] },
+      { name: "llm_rl", docPath: "", reports: ["deepseek_rl_train_optimization.md", "qwen3_235B_32k_longseq_rl_train_optimization.md", "sam_decoding.md"] }
+    ],
+    "Embodied Intelligence": [
+      { name: "pi0", docPath: "manipulation/pi0", reports: ["README.md"] }
+    ],
+    "Spatial Intelligence": [
+      { name: "Hunyuan3D", docPath: "Hunyuan3D", reports: ["Hunyuan3D_optimization.md"] },
+      { name: "vggt", docPath: "vggt", reports: ["vggt_accurancy_evaluation.md", "vggt_optimization.md"] }
+    ]
+  };
+
+  // Dynamic repo models loaded from actual GitCode repos (for counts and homepage)
+  let actualRepoModels = { ...repoModels }; // Start with hardcoded data
+
+  // Generate GitCode URL for a report
+  function getReportUrl(category, model, reportFile) {
+    const config = repoConfig[category];
+    // Try actualRepoModels first, fallback to repoModels
+    const modelsSource = actualRepoModels[category] || repoModels[category];
+    const modelData = modelsSource.find(m => m.name === model);
+    if (!modelData || !reportFile) return null;
+    const docPath = modelData.docPath || '';
+    // Handle empty docPath (flat structure)
+    const fullPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+    return `https://gitcode.com/cann/${config.repo}/blob/${config.branch}/${fullPath}`;
+  }
+
+  // Local proxy base URL – proxy.js forwards to web-api.gitcode.com
+  // Build a raw GitCode URL for a given repo file path
+  function proxyUrl(repo, branch, filePath) {
+    return `https://gitcode.com/cann/${repo}/raw/${branch}/${filePath}`;
+  }
+
+  // Resolve a path that may contain ".." segments
+  function resolvePath(baseDir, relativeSrc) {
+    // Normalise: join baseDir + src, then collapse ".." and "."
+    const parts = (baseDir.replace(/\/$/, '') + '/' + relativeSrc).split('/');
+    const out = [];
+    for (const p of parts) {
+      if (p === '..') out.pop();
+      else if (p && p !== '.') out.push(p);
+    }
+    return out.join('/');
+  }
+
+  // Fetch file content via the local proxy (fast, no jina.ai)
+  async function fetchReportContent(category, model, reportFile) {
+    console.log('fetchReportContent', { category, model, reportFile });
+    const config    = repoConfig[category];
+    // Try actualRepoModels first, fallback to repoModels
+    const modelsSource = actualRepoModels[category] || repoModels[category];
+    const modelData = modelsSource.find(m => m.name === model);
+    console.log('modelData', modelData, 'source:', actualRepoModels[category] ? 'actual' : 'hardcoded');
+    if (!modelData || !reportFile) return null;
+
+    // Handle empty docPath (flat structure)
+    const docPath = modelData.docPath || '';
+    const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+    const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
+    console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
+
+    // Try GitCode raw URL first
+    const rawUrl = proxyUrl(config.repo, config.branch, filePath);
+    console.log('Fetching from GitCode raw URL:', rawUrl);
+    let response = await fetch(rawUrl).catch(e => null);
+    if (response && response.ok) {
+      const content = await response.text();
+      console.log('Content length:', content.length);
+      return renderMarkdown(content, config.repo, config.branch, baseDir);
+    }
+
+    // Fallback to corsproxy.io
+    const corsProxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
+    console.log('Fallback to corsproxy.io:', corsProxyUrl);
+    response = await fetch(corsProxyUrl).catch(e => null);
+    if (response && response.ok) {
+      const content = await response.text();
+      console.log('Content length via corsproxy:', content.length);
+      return renderMarkdown(content, config.repo, config.branch, baseDir);
+    }
+
+    console.warn('All fetch attempts failed');
+    return null;
+  }
+
+
+  // Render markdown using marked.js; resolve relative images through the proxy
+  function renderMarkdown(md, repo = '', branch = 'master', baseDir = '') {
+    console.log('renderMarkdown', { repo, branch, baseDir, mdLength: md.length });
+    // Strip YAML front matter if present
+    md = md.replace(/^---[\s\S]*?---\n/, '');
+
+    // Remove HTML comments
+    md = md.replace(/<!--[\s\S]*?-->/g, '');
+
+    // Remove script, style, iframe tags (including their content)
+    md = md.replace(/<script\b[\s\S]*?<\/script>/gi, '');
+    md = md.replace(/<style\b[\s\S]*?<\/style>/gi, '');
+    md = md.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
+
+    // Remove other unwanted HTML tags but keep their content (strip tags only)
+    md = md.replace(/<\/?(div|span|p|br|hr|section|article|nav|header|footer|aside|main|figure|figcaption)[^>]*>/gi, '');
+
+    // Re-write relative image src to GitCode raw URLs
+    if (repo && baseDir) {
+      md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g, (match, alt, src) => {
+        try {
+          const resolved = resolvePath(baseDir, src);
+          const rawUrl = proxyUrl(repo, branch, resolved);
+          const corsProxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
+          console.log('Image rewrite:', { alt, src, resolved, rawUrl });
+          // Return HTML img tag with raw GitCode URL and fallback to corsproxy
+          return `<img src="${rawUrl}" alt="${alt}" loading="lazy" onerror="this.src='${corsProxyUrl}'">`;
+        } catch (e) {
+          console.warn('Image rewrite failed:', e.message, { src, baseDir });
+          return match;
+        }
+      });
+    }
+
+    // Also rewrite relative links for markdown files to use proxy
+    if (repo && baseDir) {
+      md = md.replace(/\[([^\]]*)\]\((?!https?:\/\/|#)([^)]+\.md)\)/g, (match, text, href) => {
+        try {
+          const resolved = resolvePath(baseDir, href);
+          const proxy = proxyUrl(repo, branch, resolved);
+          console.log('Link rewrite:', { text, href, resolved, proxy });
+          return `[${text}](${proxy})`;
+        } catch (e) {
+          console.warn('Link rewrite failed:', e.message, { href, baseDir });
+          return match;
+        }
+      });
+    }
+
+    // Use marked with safe options - sanitize is true by default in marked 4.x
+    try {
+      const renderer = new marked.Renderer();
+      // Ensure links open in new tab
+      renderer.link = (href, title, text) =>
+        `<a href="${href}"${title ? ` title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
+      // Custom image renderer with fallback to raw gitcode URL
+      renderer.image = (href, title, text) => {
+        // If href is already a proxy URL, keep it; otherwise, it's likely already processed by regex
+        let proxyHref = href;
+        let rawHref = '';
+        let corsProxyHref = '';
+        // Construct raw gitcode URL if we have repo and branch
+        if (repo && branch && href.startsWith('http://localhost:8081/')) {
+          // Extract path from proxy URL
+          const match = href.match(/\?repo=([^&]+)&branch=([^&]+)&path=([^&]+)/);
+          if (match) {
+            const [, repoName, branchName, path] = match;
+            rawHref = `https://gitcode.com/cann/${repoName}/raw/${branchName}/${path}`;
+          }
+        }
+        // If rawHref is not set, try to guess from relative path (should have been resolved earlier)
+        if (!rawHref && repo && branch && !href.startsWith('http')) {
+          // This case shouldn't happen because regex already rewrites relative images
+        }
+        // Add corsproxy fallback for any raw gitcode URL
+        if (proxyHref.startsWith('https://gitcode.com/cann/')) {
+          corsProxyHref = `https://corsproxy.io/?${encodeURIComponent(proxyHref)}`;
+        }
+        // Use proxyHref, add onerror fallback to rawHref if available
+        let onerror = '';
+        if (rawHref) {
+          onerror = ` onerror="this.src='${rawHref}'"`;
+        } else if (corsProxyHref) {
+          onerror = ` onerror="this.src='${corsProxyHref}'"`;
+        }
+        return `<img src="${proxyHref}" alt="${text}"${title ? ` title="${title}"` : ''}${onerror} loading="lazy">`;
+      };
+
+      const parsed = marked.parse(md, {
+        renderer,
+        breaks: true,
+        gfm: true,
+        sanitize: false, // We already cleaned HTML
+        silent: false,
+        headerIds: true,
+        headerPrefix: ''
+      });
+      return `<div class="report-markdown">${parsed}</div>`;
+    } catch (error) {
+      console.error('Marked parsing error:', error);
+      return `<div class="report-markdown"><pre class="bg-red-50 p-4 rounded">Markdown parsing error: ${error.message}</pre></div>`;
+    }
+  }
+
+  // Get repo URL for a category
+  function getRepoUrl(category) {
+    return `https://gitcode.com/cann/${repoConfig[category].repo}`;
+  }
+
+  // Count total reports per category
+  function getCategoryCounts() {
+    const counts = {};
+    const source = Object.keys(actualRepoModels).length > 0 ? actualRepoModels : repoModels;
+    for (const [category, models] of Object.entries(source)) {
+      counts[category] = models.reduce((sum, m) => sum + m.reports.length, 0);
+    }
+    return counts;
+  }
+
+  // Render categories with counts
+  function renderCategories() {
+    const categoryList = document.getElementById('categoryList');
+    const counts = getCategoryCounts();
+
+    let html = '';
+    for (const [category, count] of Object.entries(counts)) {
+      html += `
+        <div class="flex items-center justify-between cursor-pointer hover:bg-white/30 p-2 -mx-2 rounded-lg transition-colors" onclick="showCategory('${category}')">
+          <span class="text-slate-600">${category}</span>
+          <span class="text-xs bg-tech-accent/10 text-tech-accent px-2 py-1 rounded-full">${count}</span>
+        </div>
+      `;
+    }
+    categoryList.innerHTML = html;
+  }
+
+
+
+  // Minimal HTML / JS string escaping for dynamic sidebar generation
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escJs(s) {
+    return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  }
+
+  // Re-render the sidebar <nav> from the current repoModels data
+  function renderSidebar() {
+    const icons = {
+      "Infer": "memory",
+      "Train": "model_training",
+      "Embodied Intelligence": "smart_toy",
+      "Spatial Intelligence": "language",
+    };
+
+    let html = `
+      <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
+        <span class="material-symbols-outlined">home</span>
+        Home
+      </a>
+      <div class="mt-4 space-y-1">
+    `;
+
+    for (const [category, models] of Object.entries(repoModels)) {
+      const icon    = icons[category] || 'folder';
+      const repoUrl = getRepoUrl(category);
+      const open    = category === 'Infer' ? ' open' : '';
+
+      html += `
+        <details${open} class="group">
+          <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
+            <span class="material-symbols-outlined text-slate-500">${icon}</span>
+            <span class="text-slate-600 font-medium flex-1">${escHtml(category)}</span>
+            <svg class="chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          </summary>
+          <div class="ml-8 mt-1 space-y-1">
+      `;
+
+      for (const model of models) {
+        if (model.reports.length > 1) {
+          html += `
+            <details class="group">
+              <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
+                <span class="material-symbols-outlined text-xs">folder</span>
+                <span>${escHtml(model.name)}</span>
+                <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              </summary>
+              <div class="ml-4 mt-1 space-y-1">
+          `;
+          for (const report of model.reports) {
+            const rTitle = report.replace('.md','').replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+            html += `
+              <a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(rTitle)}','${escJs(report)}')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">article</span>
+                ${escHtml(report)}
+              </a>
+            `;
+          }
+          html += `</div></details>`;
+        } else if (model.reports.length === 1) {
+          const report = model.reports[0];
+          const rTitle = report.replace('.md','').replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+          html += `
+            <a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(rTitle)}','${escJs(report)}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+              <span class="material-symbols-outlined text-xs">description</span>
+              ${escHtml(model.name)}
+            </a>
+          `;
+        } else {
+          html += `
+            <a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(model.name)}','')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
+              <span class="material-symbols-outlined text-xs">description</span>
+              ${escHtml(model.name)}
+            </a>
+          `;
+        }
+      }
+
+      html += `
+            <a onclick="window.open('${escHtml(repoUrl)}', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
+              <span class="material-symbols-outlined text-xs">open_in_new</span>
+              Browse Repo
+            </a>
+          </div>
+        </details>
+      `;
+    }
+
+    html += `</div>`;
+    document.querySelector('#sidebar nav').innerHTML = html;
+  }
+
+  // Update homepage with real reports from repos
+  function updateHomePage() {
+    console.log('Updating homepage with real reports...');
+    // Always use hardcoded repoModels for homepage to ensure consistency
+    const source = repoModels;
+    console.log('Using data source:', source === repoModels ? 'hardcoded repoModels' : 'actualRepoModels');
+
+    // Collect all reports
+    const allReports = [];
+    for (const [category, models] of Object.entries(source)) {
+      console.log(`Category ${category}: ${models.length} models`);
+      for (const model of models) {
+        console.log(`  Model ${model.name}: ${model.reports.length} reports, docPath: ${model.docPath}`);
+        for (const reportFile of model.reports) {
+          const reportTitle = reportFile.replace('.md', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          allReports.push({
+            category,
+            model: model.name,
+            reportFile,
+            reportTitle,
+            docPath: model.docPath
+          });
+        }
+      }
+    }
+
+    console.log(`Found ${allReports.length} total reports`);
+
+    // Update Recent Reports section (show first 6 reports)
+    const recentReportsContainer = document.querySelector('#homeView .space-y-4');
+    if (recentReportsContainer && allReports.length > 0) {
+      const thumbs = [
+        'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop'
+      ];
+
+      let html = '';
+      const reportsToShow = allReports.slice(0, 6); // Show first 6 reports
+
+      reportsToShow.forEach((report, index) => {
+        const thumb = thumbs[index % thumbs.length];
+        const shortCategory = report.category.split(' ')[0]; // Get first word for badge
+        html += `
+          <article onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="w-48 h-32 shrink-0 overflow-hidden">
+              <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${thumb}"/>
+            </div>
+            <div class="p-4 flex flex-col justify-center">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${shortCategory}</span>
+              </div>
+              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${report.reportTitle}</h3>
+              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${report.model} in ${report.category}.</p>
+              <span class="text-xs text-slate-400">${report.model}</span>
+            </div>
+          </article>
+        `;
+      });
+
+      recentReportsContainer.innerHTML = html;
+    }
+
+    // Update Popular Reports section (show first 4 reports)
+    const popularReportsContainer = document.querySelector('#homeView aside .space-y-3');
+    if (popularReportsContainer && allReports.length > 0) {
+      let html = '';
+      const popularToShow = allReports.slice(0, 4); // Show first 4 reports as popular
+
+      popularToShow.forEach((report, index) => {
+        html += `
+          <div onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
+            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">${index + 1}</span>
+            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">${report.reportTitle}</span>
+          </div>
+        `;
+      });
+
+      popularReportsContainer.innerHTML = html;
+    }
+  }
+
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    renderSidebar(); // Use hardcoded repoModels for sidebar
+    renderCategories();
+    updateHomePage(); // Show real reports from hardcoded data
+  });
+
+  let sidebarVisible = true;
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    sidebarVisible = !sidebarVisible;
+
+    if (sidebarVisible) {
+      sidebar.classList.remove('sidebar-hidden');
+      toggleBtn.classList.add('hidden');
+      mainContent.classList.remove('content-expanded');
+    } else {
+      sidebar.classList.add('sidebar-hidden');
+      toggleBtn.classList.remove('hidden');
+      mainContent.classList.add('content-expanded');
+    }
+  }
+
+  function showHome() {
+    document.getElementById('homeView').classList.remove('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+
+    // Show sidebar if hidden
+    if (!sidebarVisible) {
+      toggleSidebar();
+    }
+  }
+
+  function showCategory(category) {
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.remove('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+
+    // Update category title and header
+    document.getElementById('categoryTitle').textContent = category;
+    const headerEl = document.getElementById('categoryHeader');
+    if (headerEl) headerEl.textContent = category + ' Tech Reports';
+
+    // Render ALL models for this category (including those without dedicated reports)
+    const reportsContainer = document.getElementById('categoryReports');
+    // Use actualRepoModels if available, otherwise fallback to hardcoded repoModels
+    const modelsSource = actualRepoModels[category] || repoModels[category] || [];
+    const models = modelsSource;
+    let html = '';
+
+    const thumbs = [
+      'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
+    ];
+    let thumbIdx = 0;
+
+    for (const model of models) {
+      if (model.reports.length > 0) {
+        // Model has dedicated report files — show one card per report
+        for (const report of model.reports) {
+          const reportTitle = report.replace('.md', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          const thumb = thumbs[thumbIdx++ % thumbs.length];
+          html += `
+            <article onclick="showReport('${category}', '${model.name}', '${reportTitle}', '${report}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+              <div class="w-48 h-32 shrink-0 overflow-hidden">
+                <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${thumb}"/>
+              </div>
+              <div class="p-4 flex flex-col justify-center">
+                <div class="flex gap-2 mb-2">
+                  <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${category}</span>
+                </div>
+                <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${reportTitle}</h3>
+                <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${model.name} in ${category}.</p>
+                <span class="text-xs text-slate-400">${model.name}</span>
+              </div>
+            </article>
+          `;
+        }
+      } else {
+        // Model exists but has no specific report file — show card linking to repo
+        const repoUrl = getRepoUrl(category);
+        html += `
+          <article onclick="window.open('${repoUrl}', '_blank')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="w-48 h-32 shrink-0 bg-slate-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-5xl text-slate-300">folder_open</span>
+            </div>
+            <div class="p-4 flex flex-col justify-center">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${category}</span>
+              </div>
+              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${model.name}</h3>
+              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">No dedicated tech report yet. View available files in repository.</p>
+              <span class="text-xs text-tech-accent flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:13px">open_in_new</span>Browse GitCode Repo
+              </span>
+            </div>
+          </article>
+        `;
+      }
+    }
+
+    if (html === '') {
+      html = '<p class="text-slate-500">No reports available for this category yet.</p>';
+    }
+
+    reportsContainer.innerHTML = html;
+
+    // Hide sidebar when viewing category
+    if (sidebarVisible) {
+      toggleSidebar();
+    }
+
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // Show report directly from model name in sidebar
+  function showModelReport(category, model, title, reportFile) {
+    showReport(category, model, title, reportFile);
+  }
+
+  async function showReport(category, model, title, reportFile = '') {
+    console.log('showReport', { category, model, title, reportFile });
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('reportView').classList.remove('hidden');
+
+    // Update breadcrumb
+    document.getElementById('breadcrumbCategory').innerHTML = '<a onclick="showCategory(\'' + escJs(category) + '\')" class="hover:text-tech-accent transition-colors cursor-pointer">' + escHtml(category) + '</a>';
+    document.getElementById('breadcrumbModel').textContent = model;
+    document.getElementById('reportCategory').textContent = category;
+    document.getElementById('reportTitle').textContent = title;
+
+    // Load content via proxy
+    const reportContent = document.getElementById('reportContent');
+
+    // Show loading state
+    reportContent.innerHTML = `
+      <div class="flex items-center justify-center py-12">
+        <span class="material-symbols-outlined text-4xl text-tech-accent animate-spin">sync</span>
+        <span class="ml-3 text-slate-500">Loading content...</span>
+      </div>
+    `;
+
+    if (reportFile) {
+      const url = getReportUrl(category, model, reportFile);
+      if (url) {
+        const content = await fetchReportContent(category, model, reportFile);
+        if (content) {
+          reportContent.innerHTML = content;
+        } else {
+          // Fallback to link if fetch failed
+          reportContent.innerHTML = `
+            <div class="text-center py-12 glass-card rounded-2xl">
+              <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
+              <p class="text-slate-500 mb-2">Could not load content.</p>
+              <p class="text-slate-400 text-sm mb-4">Make sure the local proxy is running:<br><code class="bg-slate-100 px-2 py-1 rounded text-xs">node proxy.js</code></p>
+              <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-tech-accent text-white rounded-xl hover:bg-tech-accent/90 transition-colors">
+                <span>Open in GitCode</span>
+                <span class="material-symbols-outlined text-sm">open_in_new</span>
+              </a>
+            </div>
+          `;
+        }
+      } else {
+        reportContent.innerHTML = '<p class="text-slate-500">Report not available.</p>';
+      }
+    } else {
+      // No report file - show message or link to repo
+      const repoUrl = getRepoUrl(category);
+      reportContent.innerHTML = `
+        <div class="text-center py-12">
+          <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
+          <p class="text-slate-500 mb-4">No tech report available for this model yet.</p>
+          <a href="${repoUrl}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-tech-accent text-white rounded-xl hover:bg-tech-accent/90 transition-colors">
+            <span>Browse in GitCode</span>
+            <span class="material-symbols-outlined text-sm">open_in_new</span>
+          </a>
+        </div>
+      `;
+    }
+
+    // Hide sidebar when viewing report
+    if (sidebarVisible) {
+      toggleSidebar();
+    }
+
+    // Scroll to top
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  function filterContent() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    console.log('Searching for:', searchTerm);
+    // Add search filtering logic here
+  }
+</script>
+
+</body>
+</html>
