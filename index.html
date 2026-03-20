@@ -6,6 +6,8 @@
   <title>CANN RECIPES BLOGS</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script>
@@ -50,33 +52,31 @@
       display: none;
     }
     .sidebar-hidden {
-      transform: translateX(-100%);
+      width: 0 !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
       opacity: 0;
       pointer-events: none;
-    }
-    .content-expanded {
-      margin-left: 0;
+      flex-shrink: 1 !important;
+      border-right: none !important;
     }
     .content-expanded #homeView {
       padding-left: 3rem;
       padding-right: 3rem;
     }
-    .content-expanded #reportView {
-      padding-left: 0;
-      padding-right: 0;
-    }
     .content-expanded #reportView > div {
-      max-width: 80rem; /* Wider max-width when sidebar hidden */
-      margin-left: auto;
-      margin-right: auto;
+      max-width: 80rem !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
     }
     .content-expanded #categoryView > div {
-      max-width: 80rem; /* Wider max-width when sidebar hidden */
+      max-width: 80rem;
       margin-left: auto;
       margin-right: auto;
     }
     #sidebar {
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
     }
     .fade-in {
       animation: fadeIn 0.3s ease-in-out;
@@ -109,9 +109,14 @@
     .report-markdown ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
     .report-markdown ol { list-style: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
     .report-markdown li { color: #475569; line-height: 1.75; margin-bottom: 0.25rem; }
-    .report-markdown pre { background: #0f172a; color: #cbd5e1; padding: 1.25rem; border-radius: 0.75rem; margin: 1.25rem 0; overflow-x: auto; font-size: 0.875rem; line-height: 1.625; }
+    .report-markdown pre { background: #282c34; color: #abb2bf; padding: 1.25rem; border-radius: 0.75rem; margin: 1.25rem 0; overflow-x: auto; font-size: 0.875rem; line-height: 1.625; position: relative; }
     .report-markdown code { background: #f1f5f9; color: #1e293b; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; font-family: ui-monospace, monospace; }
     .report-markdown pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    .report-markdown pre code.hljs { background: none; padding: 0; }
+    .code-block-wrapper { position: relative; }
+    .code-copy-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(255,255,255,0.15); color: #abb2bf; border: none; padding: 0.3rem 0.6rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem; transition: background 0.2s, color 0.2s; z-index: 10; }
+    .code-copy-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
+    .code-copy-btn.copied { background: rgba(72, 187, 120, 0.3); color: #48bb78; }
     .report-markdown img { max-width: 100%; border-radius: 0.75rem; margin: 1.25rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: block; }
     .report-markdown a { color: #E77A1D; }
     .report-markdown a:hover { text-decoration: underline; }
@@ -128,16 +133,17 @@
 <body class="bg-beige-light text-slate-900 font-sans min-h-screen flex">
 
 <!-- Sidebar -->
-<aside id="sidebar" class="w-72 glass-sidebar h-screen sticky top-0 flex-shrink-0 z-50 flex flex-col p-6 transition-all duration-300">
-  <div class="mb-10 px-2 flex items-center justify-between">
+<aside id="sidebar" class="relative w-72 glass-sidebar h-screen sticky top-0 flex-shrink-0 z-50 flex flex-col p-6 transition-all duration-300">
+  <div class="mb-10 px-2 flex items-center">
     <h1 class="text-2xl font-bold tracking-tight flex items-center gap-2">
       <span class="w-12 h-12 rounded-xl logo-gradient flex items-center justify-center text-white text-[10px] font-black shrink-0">CANN</span>
       <span class="text-coffee-brown leading-tight text-lg">CANN RECIPES<br/>BLOGS</span>
     </h1>
-    <button onclick="toggleSidebar()" class="p-2 hover:bg-white/50 rounded-lg transition-colors">
-      <span class="material-symbols-outlined text-coffee-brown">chevron_left</span>
-    </button>
   </div>
+
+  <button onclick="toggleSidebar()" class="absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-lg">
+    <span class="material-symbols-outlined">chevron_left</span>
+  </button>
 
   <nav class="flex-grow space-y-1 overflow-y-auto">
     <!-- Home -->
@@ -630,24 +636,63 @@
     }
   };
 
+  // Local proxy server URL (optional, for development)
+  const proxyBase = 'http://localhost:8081';
+  function localProxyUrl(repo, branch, filePath) {
+    return `${proxyBase}/?repo=${encodeURIComponent(repo)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
+  }
+  // Raw GitCode URL
+  function rawGitCodeUrl(repo, branch, filePath) {
+    return `https://gitcode.com/cann/${repo}/raw/${branch}/${filePath}`;
+  }
+
+  // Multiple CORS proxies for reliability
+  const corsProxies = [
+    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+
+  // Try fetching a URL through multiple CORS proxies
+  async function fetchWithCorsProxy(url, options = {}) {
+    // Try direct fetch first (may work for some URLs)
+    try {
+      const resp = await fetch(url, { ...options, mode: 'cors' });
+      if (resp.ok) return resp;
+    } catch (e) { /* CORS blocked, try proxies */ }
+
+    // Try each CORS proxy
+    for (const makeProxyUrl of corsProxies) {
+      try {
+        const proxyUrl = makeProxyUrl(url);
+        console.log('Trying CORS proxy:', proxyUrl);
+        const resp = await fetch(proxyUrl);
+        if (resp.ok) return resp;
+      } catch (e) {
+        console.warn('CORS proxy failed:', e.message);
+      }
+    }
+    return null;
+  }
+
   // Model data from GitCode repos - with actual doc paths
   const repoModels = {
     "Infer": [
       { name: "deepseek-r1", docPath: "deepseek-r1", reports: ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"] },
-      { name: "deepseek-v3.2-exp", docPath: "deepseek-v3.2-exp", reports: [] },
-      { name: "gpt-oss", docPath: "gpt-oss", reports: [] },
-      { name: "hstu", docPath: "hstu", reports: [] },
-      { name: "kimi-k2-thinking", docPath: "kimi-k2-thinking", reports: [] },
-      { name: "longcat-flash", docPath: "longcat-flash", reports: [] },
-      { name: "qwen3-moe", docPath: "qwen3-moe", reports: [] },
-      { name: "qwen3-next", docPath: "qwen3-next", reports: [] }
+      { name: "deepseek-v3.2-exp", docPath: "deepseek-v3.2-exp", reports: ["deepseek_v3.2_exp_ascendc_operator_guide.md", "deepseek_v3.2_exp_inference_guide.md", "deepseek_v3.2_exp_pypto_operator_guide.md", "deepseek_v3.2_exp_tilelang_operator_guide.md"] },
+      { name: "gpt-oss", docPath: "gpt-oss", reports: ["gpt_oss_optimization.md"] },
+      { name: "hstu", docPath: "hstu", reports: ["hstu_optimization.md"] },
+      { name: "kimi-k2-thinking", docPath: "kimi-k2-thinking", reports: ["kimi_k2_thinking_inference_guide.md"] },
+      { name: "longcat-flash", docPath: "longcat-flash", reports: ["longcat_flash_optimization.md"] },
+      { name: "qwen3-moe", docPath: "qwen3-moe", reports: ["qwen3_moe_optimization.md"] },
+      { name: "qwen3-next", docPath: "qwen3-next", reports: ["qwen3_next_optimization.md"] }
     ],
     "Train": [
-      { name: "llm_pretrain", docPath: "", reports: ["deepseekv32_pre_train_optimization.md"] },
-      { name: "llm_rl", docPath: "", reports: ["deepseek_rl_train_optimization.md", "qwen3_235B_32k_longseq_rl_train_optimization.md", "sam_decoding.md"] }
+      { name: "llm_pretrain", docPath: "llm_pretrain", reports: ["deepseekv32_pre_train_optimization.md"] },
+      { name: "llm_rl", docPath: "llm_rl", reports: ["deepseek_rl_train_optimization.md", "qwen3_235B_32k_longseq_rl_train_optimization.md", "sam_decoding.md"] }
     ],
     "Embodied Intelligence": [
-      { name: "pi0", docPath: "manipulation/pi0", reports: ["README.md"] }
+      { name: "pi0", docPath: "manipulation/pi0/infer_with_torch", reports: ["README.md"] }
     ],
     "Spatial Intelligence": [
       { name: "Hunyuan3D", docPath: "Hunyuan3D", reports: ["Hunyuan3D_optimization.md"] },
@@ -671,10 +716,15 @@
     return `https://gitcode.com/cann/${config.repo}/blob/${config.branch}/${fullPath}`;
   }
 
-  // Local proxy base URL – proxy.js forwards to web-api.gitcode.com
-  // Build a raw GitCode URL for a given repo file path
-  function proxyUrl(repo, branch, filePath) {
-    return `https://gitcode.com/cann/${repo}/raw/${branch}/${filePath}`;
+  // Build a GitCode API URL for a given repo file path (returns JSON with base64 content)
+  function apiUrl(repo, branch, filePath) {
+    const ns = 'cann';
+    const repoId = `${ns}%2F${repo}`;
+    return `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/files` +
+      `?repoId=${encodeURIComponent(repoId)}` +
+      `&ref=${encodeURIComponent(branch)}` +
+      `&file_path=${encodeURIComponent(filePath)}` +
+      `&ref_replace_web=${encodeURIComponent(branch)}`;
   }
 
   // Resolve a path that may contain ".." segments
@@ -689,43 +739,62 @@
     return out.join('/');
   }
 
-  // Fetch file content via the local proxy (fast, no jina.ai)
+  // Fetch file content - tries multiple methods for reliability
   async function fetchReportContent(category, model, reportFile) {
     console.log('fetchReportContent', { category, model, reportFile });
     const config    = repoConfig[category];
-    // Try actualRepoModels first, fallback to repoModels
     const modelsSource = actualRepoModels[category] || repoModels[category];
     const modelData = modelsSource.find(m => m.name === model);
     console.log('modelData', modelData, 'source:', actualRepoModels[category] ? 'actual' : 'hardcoded');
     if (!modelData || !reportFile) return null;
 
-    // Handle empty docPath (flat structure)
     const docPath = modelData.docPath || '';
     const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
     const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
     console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
 
-    // Try GitCode raw URL first
-    const rawUrl = proxyUrl(config.repo, config.branch, filePath);
-    console.log('Fetching from GitCode raw URL:', rawUrl);
-    let response = await fetch(rawUrl).catch(e => null);
-    if (response && response.ok) {
-      const content = await response.text();
-      console.log('Content length:', content.length);
-      return renderMarkdown(content, config.repo, config.branch, baseDir);
+    // Method 1: Try local proxy (optional, for development)
+    try {
+      const localUrl = localProxyUrl(config.repo, config.branch, filePath);
+      const response = await fetch(localUrl);
+      if (response.ok) {
+        const content = await response.text();
+        console.log('Loaded via local proxy:', content.length);
+        return renderMarkdown(content, config.repo, config.branch, baseDir);
+      }
+    } catch (e) { /* local proxy not running, continue */ }
+
+    // Method 2: Try GitCode API (returns JSON with base64 content)
+    const api = apiUrl(config.repo, config.branch, filePath);
+    console.log('Trying GitCode API:', api);
+    const apiResp = await fetchWithCorsProxy(api);
+    if (apiResp) {
+      try {
+        const json = await apiResp.json();
+        if (json.content) {
+          const content = atob(json.content);
+          console.log('Loaded via GitCode API:', content.length);
+          return renderMarkdown(content, config.repo, config.branch, baseDir);
+        }
+      } catch (e) {
+        console.warn('API parse error:', e);
+      }
     }
 
-    // Fallback to corsproxy.io
-    const corsProxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
-    console.log('Fallback to corsproxy.io:', corsProxyUrl);
-    response = await fetch(corsProxyUrl).catch(e => null);
-    if (response && response.ok) {
-      const content = await response.text();
-      console.log('Content length via corsproxy:', content.length);
-      return renderMarkdown(content, config.repo, config.branch, baseDir);
+    // Method 3: Try raw GitCode URL
+    const rawUrl = rawGitCodeUrl(config.repo, config.branch, filePath);
+    console.log('Trying raw GitCode URL:', rawUrl);
+    const rawResp = await fetchWithCorsProxy(rawUrl);
+    if (rawResp) {
+      const text = await rawResp.text();
+      // Check if we got actual markdown (not an HTML page)
+      if (text && !text.trimStart().startsWith('<!DOCTYPE') && !text.trimStart().startsWith('<html')) {
+        console.log('Loaded via raw URL:', text.length);
+        return renderMarkdown(text, config.repo, config.branch, baseDir);
+      }
     }
 
-    console.warn('All fetch attempts failed');
+    console.warn('All fetch attempts failed for:', filePath);
     return null;
   }
 
@@ -747,16 +816,15 @@
     // Remove other unwanted HTML tags but keep their content (strip tags only)
     md = md.replace(/<\/?(div|span|p|br|hr|section|article|nav|header|footer|aside|main|figure|figcaption)[^>]*>/gi, '');
 
-    // Re-write relative image src to GitCode raw URLs
+    // Re-write relative image src to raw GitCode URLs with CORS proxy fallback
     if (repo && baseDir) {
       md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g, (match, alt, src) => {
         try {
           const resolved = resolvePath(baseDir, src);
-          const rawUrl = proxyUrl(repo, branch, resolved);
-          const corsProxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
+          const rawUrl = rawGitCodeUrl(repo, branch, resolved);
+          const proxyFallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
           console.log('Image rewrite:', { alt, src, resolved, rawUrl });
-          // Return HTML img tag with raw GitCode URL and fallback to corsproxy
-          return `<img src="${rawUrl}" alt="${alt}" loading="lazy" onerror="this.src='${corsProxyUrl}'">`;
+          return `<img src="${rawUrl}" alt="${alt}" loading="lazy" onerror="this.onerror=null;this.src='${proxyFallback}'">`;
         } catch (e) {
           console.warn('Image rewrite failed:', e.message, { src, baseDir });
           return match;
@@ -764,14 +832,14 @@
       });
     }
 
-    // Also rewrite relative links for markdown files to use proxy
+    // Rewrite relative .md links to GitCode blob URLs
     if (repo && baseDir) {
       md = md.replace(/\[([^\]]*)\]\((?!https?:\/\/|#)([^)]+\.md)\)/g, (match, text, href) => {
         try {
           const resolved = resolvePath(baseDir, href);
-          const proxy = proxyUrl(repo, branch, resolved);
-          console.log('Link rewrite:', { text, href, resolved, proxy });
-          return `[${text}](${proxy})`;
+          const blobUrl = `https://gitcode.com/cann/${repo}/blob/${branch}/${resolved}`;
+          console.log('Link rewrite:', { text, href, resolved, blobUrl });
+          return `[${text}](${blobUrl})`;
         } catch (e) {
           console.warn('Link rewrite failed:', e.message, { href, baseDir });
           return match;
@@ -779,43 +847,23 @@
       });
     }
 
-    // Use marked with safe options - sanitize is true by default in marked 4.x
+    // Use marked with safe options
     try {
       const renderer = new marked.Renderer();
-      // Ensure links open in new tab
-      renderer.link = (href, title, text) =>
-        `<a href="${href}"${title ? ` title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
-      // Custom image renderer with fallback to raw gitcode URL
+      renderer.link = (href, title, text) => {
+        const isInternal = href.startsWith('#');
+        const target = isInternal ? '' : ' target="_blank" rel="noopener"';
+        return `<a href="${href}"${title ? ` title="${title}"` : ''}${target}>${text}</a>`;
+      };
       renderer.image = (href, title, text) => {
-        // If href is already a proxy URL, keep it; otherwise, it's likely already processed by regex
-        let proxyHref = href;
-        let rawHref = '';
-        let corsProxyHref = '';
-        // Construct raw gitcode URL if we have repo and branch
-        if (repo && branch && href.startsWith('http://localhost:8081/')) {
-          // Extract path from proxy URL
-          const match = href.match(/\?repo=([^&]+)&branch=([^&]+)&path=([^&]+)/);
-          if (match) {
-            const [, repoName, branchName, path] = match;
-            rawHref = `https://gitcode.com/cann/${repoName}/raw/${branchName}/${path}`;
-          }
-        }
-        // If rawHref is not set, try to guess from relative path (should have been resolved earlier)
-        if (!rawHref && repo && branch && !href.startsWith('http')) {
-          // This case shouldn't happen because regex already rewrites relative images
-        }
-        // Add corsproxy fallback for any raw gitcode URL
-        if (proxyHref.startsWith('https://gitcode.com/cann/')) {
-          corsProxyHref = `https://corsproxy.io/?${encodeURIComponent(proxyHref)}`;
-        }
-        // Use proxyHref, add onerror fallback to rawHref if available
+        let imgSrc = href;
         let onerror = '';
-        if (rawHref) {
-          onerror = ` onerror="this.src='${rawHref}'"`;
-        } else if (corsProxyHref) {
-          onerror = ` onerror="this.src='${corsProxyHref}'"`;
+        // For gitcode raw URLs, add CORS proxy fallback
+        if (href.includes('gitcode.com')) {
+          const proxyFallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(href)}`;
+          onerror = ` onerror="this.onerror=null;this.src='${proxyFallback}'"`;
         }
-        return `<img src="${proxyHref}" alt="${text}"${title ? ` title="${title}"` : ''}${onerror} loading="lazy">`;
+        return `<img src="${imgSrc}" alt="${text}"${title ? ` title="${title}"` : ''}${onerror} loading="lazy">`;
       };
 
       const parsed = marked.parse(md, {
@@ -839,12 +887,18 @@
     return `https://gitcode.com/cann/${repoConfig[category].repo}`;
   }
 
-  // Count total reports per category
+  // Count total reports per category (matches what showCategory displays)
   function getCategoryCounts() {
     const counts = {};
     const source = Object.keys(actualRepoModels).length > 0 ? actualRepoModels : repoModels;
     for (const [category, models] of Object.entries(source)) {
-      counts[category] = models.reduce((sum, m) => sum + m.reports.length, 0);
+      let total = 0;
+      for (const m of models) {
+        // Each model with reports shows one card per report file
+        // Models without reports still show one card (linking to repo)
+        total += Math.max(m.reports.length, 1);
+      }
+      counts[category] = total;
     }
     return counts;
   }
@@ -1053,6 +1107,19 @@
     renderSidebar(); // Use hardcoded repoModels for sidebar
     renderCategories();
     updateHomePage(); // Show real reports from hardcoded data
+
+    // Handle anchor link clicks within report content
+    document.getElementById('reportContent')?.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (link && link.getAttribute('href')?.startsWith('#')) {
+        e.preventDefault();
+        const id = link.getAttribute('href').substring(1);
+        const target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
   });
 
   let sidebarVisible = true;
@@ -1181,6 +1248,11 @@
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.remove('hidden');
 
+    // Hide sidebar when viewing report
+    if (sidebarVisible) {
+      toggleSidebar();
+    }
+
     // Update breadcrumb
     document.getElementById('breadcrumbCategory').innerHTML = '<a onclick="showCategory(\'' + escJs(category) + '\')" class="hover:text-tech-accent transition-colors cursor-pointer">' + escHtml(category) + '</a>';
     document.getElementById('breadcrumbModel').textContent = model;
@@ -1204,13 +1276,14 @@
         const content = await fetchReportContent(category, model, reportFile);
         if (content) {
           reportContent.innerHTML = content;
+          enhanceCodeBlocks(reportContent);
         } else {
           // Fallback to link if fetch failed
           reportContent.innerHTML = `
             <div class="text-center py-12 glass-card rounded-2xl">
               <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
-              <p class="text-slate-500 mb-2">Could not load content.</p>
-              <p class="text-slate-400 text-sm mb-4">Make sure the local proxy is running:<br><code class="bg-slate-100 px-2 py-1 rounded text-xs">node proxy.js</code></p>
+              <p class="text-slate-500 mb-2">Could not load content directly.</p>
+              <p class="text-slate-400 text-sm mb-4">Start the proxy first: <code class="bg-slate-100 px-2 py-1 rounded text-xs">python proxy.py</code></p>
               <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-tech-accent text-white rounded-xl hover:bg-tech-accent/90 transition-colors">
                 <span>Open in GitCode</span>
                 <span class="material-symbols-outlined text-sm">open_in_new</span>
@@ -1249,6 +1322,40 @@
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     console.log('Searching for:', searchTerm);
     // Add search filtering logic here
+  }
+
+  // Apply syntax highlighting and add copy buttons to all code blocks in a container
+  function enhanceCodeBlocks(container) {
+    const preBlocks = container.querySelectorAll('pre');
+    preBlocks.forEach(pre => {
+      const code = pre.querySelector('code');
+      if (code) {
+        hljs.highlightElement(code);
+      }
+
+      // Wrap pre in a div for positioning
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      // Add copy button
+      const btn = document.createElement('button');
+      btn.className = 'code-copy-btn';
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px">content_copy</span> Copy';
+      btn.addEventListener('click', () => {
+        const text = pre.querySelector('code') ? pre.querySelector('code').textContent : pre.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('copied');
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px">check</span> Copied!';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px">content_copy</span> Copy';
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
   }
 </script>
 
