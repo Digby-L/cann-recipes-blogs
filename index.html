@@ -1030,17 +1030,17 @@
   function renderMarkdownWithImages(md, repo, branch, baseDir, images) {
     // Replace relative image references with pre-fetched base64 data URIs
     if (images && Object.keys(images).length > 0) {
-      // Replace markdown images
+      // Replace markdown images — keep as markdown syntax so marked.js renders them properly
       md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g, (match, alt, src) => {
         if (images[src]) {
-          return `<img src="${images[src]}" alt="${alt}" loading="lazy">`;
+          return `![${alt}](${images[src]})`;
         }
         return match;
       });
-      // Replace HTML img tags
+      // Replace HTML img tags with base64 data URIs
       md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
         if (images[src]) {
-          return `<img${before}src="${images[src]}"${after} loading="lazy">`;
+          return `<img${before}src="${images[src]}"${after}>`;
         }
         return match;
       });
