@@ -18,14 +18,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  fetch-content:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,13 +39,39 @@ jobs:
       - name: Commit pre-fetched content (if changed)
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add content/
           if git diff --staged --quiet; then
             echo "No content changes detected"
           else
             git commit -m "chore: update pre-fetched content from GitCode repos"
             git push
+          fi
+
+  deploy:
+    needs: fetch-content
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with latest content)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Ensure content exists
+        run: |
+          if [ ! -f content/index.json ]; then
+            echo "Content not found, re-fetching..."
+            python build_content.py
+          else
+            echo "Content already present"
           fi
 
       - name: Setup Pages
