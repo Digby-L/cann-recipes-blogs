@@ -919,7 +919,7 @@
 
     // Rewrite HTML <img> tags with relative src to raw GitCode URLs
     if (repo && baseDir) {
-      md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
+      md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
         try {
           const resolved = resolvePath(baseDir, src);
           const rawUrl = rawGitCodeUrl(repo, branch, resolved);
@@ -939,7 +939,7 @@
 
     // Re-write relative image src to raw GitCode URLs with CORS proxy fallback
     if (repo && baseDir) {
-      md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g, (match, alt, src) => {
+      md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/|data:)([^)]+)\)/g, (match, alt, src) => {
         try {
           const resolved = resolvePath(baseDir, src);
           const rawUrl = rawGitCodeUrl(repo, branch, resolved);
