@@ -674,8 +674,23 @@
     return null;
   }
 
-  // Fetch latest commit date for a file from GitCode API
+  // Fetch latest commit date for a file from GitCode API (with pre-fetched fallback)
   async function fetchLatestCommitDate(repo, branch, filePath) {
+    // Try pre-fetched manifest first
+    const manifest = await loadManifest();
+    if (manifest) {
+      for (const [cat, catData] of Object.entries(manifest)) {
+        const reports = catData.reports || catData;
+        if (!Array.isArray(reports)) continue;
+        for (const r of reports) {
+          if (r.commitDate && filePath.endsWith(r.reportFile)) {
+            console.log('Using pre-fetched commit date:', r.commitDate);
+            return r.commitDate;
+          }
+        }
+      }
+    }
+
     const ns = 'cann';
     const repoId = `${ns}%2F${repo}`;
     const commitsUrl = `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/commits?ref_name=${encodeURIComponent(branch)}&path=${encodeURIComponent(filePath)}&per_page=1`;
@@ -683,9 +698,11 @@
     try {
       const resp = await fetchWithCorsProxy(commitsUrl);
       if (resp) {
-        const commits = await resp.json();
+        const data = await resp.json();
+        // API may return a list or an object with a "content" array
+        const commits = Array.isArray(data) ? data : (data.content || []);
         if (Array.isArray(commits) && commits.length > 0) {
-          const dateStr = commits[0].committed_date || commits[0].created_at;
+          const dateStr = commits[0].committed_date || commits[0].authored_date || commits[0].created_at;
           if (dateStr) {
             const d = new Date(dateStr);
             return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -698,33 +715,37 @@
     return null;
   }
 
-  // Model data from GitCode repos - with actual doc paths
-  const repoModels = {
-    "Infer": [
-      { name: "deepseek-r1", docPath: "deepseek-r1", reports: ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"] },
-      { name: "deepseek-v3.2-exp", docPath: "deepseek-v3.2-exp", reports: ["deepseek_v3.2_exp_ascendc_operator_guide.md", "deepseek_v3.2_exp_inference_guide.md", "deepseek_v3.2_exp_pypto_operator_guide.md", "deepseek_v3.2_exp_tilelang_operator_guide.md"] },
-      { name: "gpt-oss", docPath: "gpt-oss", reports: ["gpt_oss_optimization.md"] },
-      { name: "hstu", docPath: "hstu", reports: ["hstu_optimization.md"] },
-      { name: "kimi-k2-thinking", docPath: "kimi-k2-thinking", reports: ["kimi_k2_thinking_inference_guide.md"] },
-      { name: "longcat-flash", docPath: "longcat-flash", reports: ["longcat_flash_optimization.md"] },
-      { name: "qwen3-moe", docPath: "qwen3-moe", reports: ["qwen3_moe_optimization.md"] },
-      { name: "qwen3-next", docPath: "qwen3-next", reports: ["qwen3_next_optimization.md"] }
-    ],
-    "Train": [
-      { name: "llm_pretrain", docPath: "llm_pretrain", reports: ["deepseekv32_pre_train_optimization.md"] },
-      { name: "llm_rl", docPath: "llm_rl", reports: ["deepseek_rl_train_optimization.md", "qwen3_235B_32k_longseq_rl_train_optimization.md", "sam_decoding.md"] }
-    ],
-    "Embodied Intelligence": [
-      { name: "pi0", docPath: "manipulation/pi0/infer_with_torch", reports: ["README.md"] }
-    ],
-    "Spatial Intelligence": [
-      { name: "Hunyuan3D", docPath: "Hunyuan3D", reports: ["Hunyuan3D_optimization.md"] },
-      { name: "vggt", docPath: "vggt", reports: ["vggt_accurancy_evaluation.md", "vggt_optimization.md"] }
-    ]
+  // Fallback model data (used before manifest loads)
+  let repoModels = {
+    "Infer": [],
+    "Train": [],
+    "Embodied Intelligence": [],
+    "Spatial Intelligence": []
   };
 
-  // Dynamic repo models loaded from actual GitCode repos (for counts and homepage)
-  let actualRepoModels = { ...repoModels }; // Start with hardcoded data
+  // Load models from pre-fetched manifest into repoModels
+  async function loadModelsFromManifest() {
+    const manifest = await loadManifest();
+    if (!manifest || Object.keys(manifest).length === 0) return false;
+
+    for (const [category, catData] of Object.entries(manifest)) {
+      const models = catData.models || [];
+      repoModels[category] = models.map(m => ({
+        name: m.name,
+        docPath: m.docPath,
+        reports: m.reports || []
+      }));
+      // Also populate repoConfig if repo/branch info is in manifest
+      if (catData.repo && !repoConfig[category]) {
+        repoConfig[category] = { repo: catData.repo, branch: catData.branch || 'master' };
+      }
+    }
+    console.log('Loaded models from manifest:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length} models`));
+    return true;
+  }
+
+  // Reference kept for compatibility
+  let actualRepoModels = repoModels;
 
   // Generate GitCode URL for a report
   function getReportUrl(category, model, reportFile) {
@@ -762,6 +783,29 @@
     return out.join('/');
   }
 
+  // Pre-fetched content manifest (loaded once)
+  let prefetchedManifest = null;
+  async function loadManifest() {
+    if (prefetchedManifest !== null) return prefetchedManifest;
+    try {
+      const resp = await fetch('content/index.json');
+      if (resp.ok) {
+        prefetchedManifest = await resp.json();
+        console.log('Loaded pre-fetched manifest');
+        return prefetchedManifest;
+      }
+    } catch (e) { /* not available */ }
+    prefetchedManifest = {};
+    return prefetchedManifest;
+  }
+
+  // Get pre-fetched content path for a report
+  function getPrefetchedPath(category, model, reportFile) {
+    const safeCategory = category.replace(/ /g, '_');
+    const safeModel = model;
+    return `content/reports/${safeCategory}/${safeModel}/${reportFile.replace('.md', '.json')}`;
+  }
+
   // Fetch file content - tries multiple methods for reliability
   async function fetchReportContent(category, model, reportFile) {
     console.log('fetchReportContent', { category, model, reportFile });
@@ -775,6 +819,25 @@
     const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
     const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
     console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
+
+    // Method 0: Try pre-fetched static content (works on GitHub Pages without proxy)
+    try {
+      const prefetchPath = getPrefetchedPath(category, model, reportFile);
+      console.log('Trying pre-fetched content:', prefetchPath);
+      const resp = await fetch(prefetchPath);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.markdown) {
+          console.log('Loaded via pre-fetched content:', data.markdown.length);
+          // Update commit date from pre-fetched data
+          if (data.commitDate) {
+            const dateEl = document.getElementById('reportDate');
+            if (dateEl) dateEl.textContent = data.commitDate;
+          }
+          return renderMarkdownWithImages(data.markdown, config.repo, config.branch, baseDir, data.images || {});
+        }
+      }
+    } catch (e) { console.log('Pre-fetched content not available:', e.message); }
 
     // Method 1: Try local proxy (optional, for development)
     try {
@@ -943,6 +1006,29 @@
       console.error('Marked parsing error:', error);
       return `<div class="report-markdown"><pre class="bg-red-50 p-4 rounded">Markdown parsing error: ${error.message}</pre></div>`;
     }
+  }
+
+  // Render markdown with pre-fetched base64 images (no CORS needed)
+  function renderMarkdownWithImages(md, repo, branch, baseDir, images) {
+    // Replace relative image references with pre-fetched base64 data URIs
+    if (images && Object.keys(images).length > 0) {
+      // Replace markdown images
+      md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g, (match, alt, src) => {
+        if (images[src]) {
+          return `<img src="${images[src]}" alt="${alt}" loading="lazy">`;
+        }
+        return match;
+      });
+      // Replace HTML img tags
+      md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
+        if (images[src]) {
+          return `<img${before}src="${images[src]}"${after} loading="lazy">`;
+        }
+        return match;
+      });
+    }
+    // Use the standard renderMarkdown for remaining processing (heading IDs, links, etc.)
+    return renderMarkdown(md, repo, branch, baseDir);
   }
 
   // Get repo URL for a category
@@ -1166,10 +1252,14 @@
 
 
   // Initialize on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    renderSidebar(); // Use hardcoded repoModels for sidebar
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Load models from pre-fetched manifest (dynamic discovery)
+    const loaded = await loadModelsFromManifest();
+    console.log('Manifest loaded:', loaded, 'models:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length}`));
+
+    renderSidebar();
     renderCategories();
-    updateHomePage(); // Show real reports from hardcoded data
+    updateHomePage();
 
     // Handle anchor link clicks within report content
     document.getElementById('reportContent')?.addEventListener('click', (e) => {
