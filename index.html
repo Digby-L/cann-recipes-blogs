@@ -1028,25 +1028,38 @@
 
   // Render markdown with pre-fetched base64 images (no CORS needed)
   function renderMarkdownWithImages(md, repo, branch, baseDir, images) {
-    // Replace relative image references with pre-fetched base64 data URIs
-    if (images && Object.keys(images).length > 0) {
-      // Replace markdown images — keep as markdown syntax so marked.js renders them properly
-      md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g, (match, alt, src) => {
-        if (images[src]) {
-          return `![${alt}](${images[src]})`;
-        }
-        return match;
-      });
-      // Replace HTML img tags with base64 data URIs
-      md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
-        if (images[src]) {
-          return `<img${before}src="${images[src]}"${after}>`;
-        }
-        return match;
-      });
+    // First: render markdown to HTML normally (images become <img src="relative"> or <img src="rawUrl">)
+    const html = renderMarkdown(md, repo, branch, baseDir);
+
+    // Then: post-process the rendered HTML to replace image src with pre-fetched base64 data URIs
+    if (!images || Object.keys(images).length === 0) return html;
+
+    // Build a lookup: resolve all possible src variations to data URIs
+    const srcMap = {};
+    for (const [relPath, dataUri] of Object.entries(images)) {
+      srcMap[relPath] = dataUri;
+      // Also map the resolved raw GitCode URL back to the data URI
+      if (repo && baseDir) {
+        try {
+          const resolved = resolvePath(baseDir, relPath);
+          const rawUrl = rawGitCodeUrl(repo, branch, resolved);
+          srcMap[rawUrl] = dataUri;
+          // Also map the allorigins proxy fallback URL
+          srcMap[`https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`] = dataUri;
+        } catch (e) {}
+      }
     }
-    // Use the standard renderMarkdown for remaining processing (heading IDs, links, etc.)
-    return renderMarkdown(md, repo, branch, baseDir);
+
+    // Replace all <img src="..."> in the rendered HTML with base64 data URIs
+    return html.replace(/<img\b([^>]*)\bsrc\s*=\s*"([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
+      if (srcMap[src]) {
+        // Remove any onerror handler since we have the image data inline
+        const cleanBefore = before.replace(/\s*onerror\s*=\s*"[^"]*"/gi, '');
+        const cleanAfter = after.replace(/\s*onerror\s*=\s*"[^"]*"/gi, '');
+        return `<img${cleanBefore}src="${srcMap[src]}"${cleanAfter}>`;
+      }
+      return match;
+    });
   }
 
   // Get repo URL for a category
@@ -1509,9 +1522,96 @@
   }
 
   function filterContent() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    console.log('Searching for:', searchTerm);
-    // Add search filtering logic here
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!searchTerm) {
+      showHome();
+      return;
+    }
+
+    // Collect all matching reports across all categories
+    const results = [];
+    const thumbs = [
+      'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
+    ];
+
+    for (const category of Object.keys(repoModels)) {
+      const modelsSource = actualRepoModels[category] || repoModels[category] || [];
+      for (const model of modelsSource) {
+        const modelMatch = model.name.toLowerCase().includes(searchTerm);
+        if (model.reports.length > 0) {
+          for (const report of model.reports) {
+            const reportTitle = report.replace('.md', '').replace(/_/g, ' ');
+            if (modelMatch || reportTitle.toLowerCase().includes(searchTerm) || category.toLowerCase().includes(searchTerm)) {
+              results.push({ category, model: model.name, report, reportTitle: reportTitle.replace(/\b\w/g, l => l.toUpperCase()) });
+            }
+          }
+        } else if (modelMatch || category.toLowerCase().includes(searchTerm)) {
+          results.push({ category, model: model.name, report: null, reportTitle: model.name });
+        }
+      }
+    }
+
+    // Switch to categoryView to display results
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.remove('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+
+    document.getElementById('categoryTitle').textContent = 'Search Results';
+    const headerEl = document.getElementById('categoryHeader');
+    if (headerEl) headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for "${searchTerm}"`;
+
+    const reportsContainer = document.getElementById('categoryReports');
+    let html = '';
+    let thumbIdx = 0;
+
+    for (const r of results) {
+      const thumb = thumbs[thumbIdx++ % thumbs.length];
+      if (r.report) {
+        html += `
+          <article onclick="showReport('${r.category}', '${r.model}', '${r.reportTitle}', '${r.report}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="w-48 h-32 shrink-0 overflow-hidden">
+              <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${thumb}"/>
+            </div>
+            <div class="p-4 flex flex-col justify-center">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${r.category}</span>
+              </div>
+              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${r.reportTitle}</h3>
+              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${r.model} in ${r.category}.</p>
+              <span class="text-xs text-slate-400">${r.model}</span>
+            </div>
+          </article>
+        `;
+      } else {
+        const repoUrl = getRepoUrl(r.category);
+        html += `
+          <article onclick="window.open('${repoUrl}', '_blank')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="w-48 h-32 shrink-0 bg-slate-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-5xl text-slate-300">folder_open</span>
+            </div>
+            <div class="p-4 flex flex-col justify-center">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${r.category}</span>
+              </div>
+              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${r.model}</h3>
+              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">No dedicated tech report yet. View available files in repository.</p>
+              <span class="text-xs text-tech-accent flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:13px">open_in_new</span>Browse GitCode Repo
+              </span>
+            </div>
+          </article>
+        `;
+      }
+    }
+
+    if (html === '') {
+      html = '<p class="text-slate-500 text-center py-8">No reports found matching your search.</p>';
+    }
+
+    reportsContainer.innerHTML = html;
   }
 
   // Apply syntax highlighting and add copy buttons to all code blocks in a container
