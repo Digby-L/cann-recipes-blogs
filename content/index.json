@@ -1,0 +1,336 @@
+{
+  "Infer": {
+    "repo": "cann-recipes-infer",
+    "branch": "master",
+    "models": [
+      {
+        "name": "deepseek-r1",
+        "docPath": "deepseek-r1",
+        "reports": [
+          "deepseek_r1_decode_optimization.md",
+          "deepseek_r1_prefill_optimization.md"
+        ]
+      },
+      {
+        "name": "deepseek-v3.2-exp",
+        "docPath": "deepseek-v3.2-exp",
+        "reports": [
+          "deepseek_v3.2_exp_ascendc_operator_guide.md",
+          "deepseek_v3.2_exp_inference_guide.md",
+          "deepseek_v3.2_exp_pypto_operator_guide.md",
+          "deepseek_v3.2_exp_tilelang_operator_guide.md"
+        ]
+      },
+      {
+        "name": "gpt-oss",
+        "docPath": "gpt-oss",
+        "reports": [
+          "gpt_oss_optimization.md"
+        ]
+      },
+      {
+        "name": "hstu",
+        "docPath": "hstu",
+        "reports": [
+          "hstu_optimization.md"
+        ]
+      },
+      {
+        "name": "hunyuan-image-3.0",
+        "docPath": "hunyuan-image-3.0",
+        "reports": [
+          "hunyuan_image_3_optimization.md"
+        ]
+      },
+      {
+        "name": "hunyuan-video",
+        "docPath": "hunyuan-video",
+        "reports": [
+          "hunyuan_video_optimization.md"
+        ]
+      },
+      {
+        "name": "kimi-k2-thinking",
+        "docPath": "kimi-k2-thinking",
+        "reports": [
+          "kimi_k2_thinking_inference_guide.md"
+        ]
+      },
+      {
+        "name": "longcat-flash",
+        "docPath": "longcat-flash",
+        "reports": [
+          "longcat_flash_optimization.md"
+        ]
+      },
+      {
+        "name": "qwen3-moe",
+        "docPath": "qwen3-moe",
+        "reports": [
+          "qwen3_moe_optimization.md"
+        ]
+      },
+      {
+        "name": "qwen3-next",
+        "docPath": "qwen3-next",
+        "reports": [
+          "qwen3_next_optimization.md"
+        ]
+      },
+      {
+        "name": "wan2.2-i2v",
+        "docPath": "wan2.2-i2v",
+        "reports": [
+          "wan2.2-i2v_optimization.md"
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "reportFile": "deepseek_r1_decode_optimization.md",
+        "commitDate": "December 23, 2025",
+        "path": "content/reports/Infer/deepseek-r1/deepseek_r1_decode_optimization.json",
+        "docDir": "docs/models/deepseek-r1",
+        "model": "deepseek-r1"
+      },
+      {
+        "reportFile": "deepseek_r1_prefill_optimization.md",
+        "commitDate": "October 31, 2025",
+        "path": "content/reports/Infer/deepseek-r1/deepseek_r1_prefill_optimization.json",
+        "docDir": "docs/models/deepseek-r1",
+        "model": "deepseek-r1"
+      },
+      {
+        "reportFile": "deepseek_v3.2_exp_ascendc_operator_guide.md",
+        "commitDate": "October 22, 2025",
+        "path": "content/reports/Infer/deepseek-v3.2-exp/deepseek_v3.2_exp_ascendc_operator_guide.json",
+        "docDir": "docs/models/deepseek-v3.2-exp",
+        "model": "deepseek-v3.2-exp"
+      },
+      {
+        "reportFile": "deepseek_v3.2_exp_inference_guide.md",
+        "commitDate": "December 18, 2025",
+        "path": "content/reports/Infer/deepseek-v3.2-exp/deepseek_v3.2_exp_inference_guide.json",
+        "docDir": "docs/models/deepseek-v3.2-exp",
+        "model": "deepseek-v3.2-exp"
+      },
+      {
+        "reportFile": "deepseek_v3.2_exp_pypto_operator_guide.md",
+        "commitDate": "October 28, 2025",
+        "path": "content/reports/Infer/deepseek-v3.2-exp/deepseek_v3.2_exp_pypto_operator_guide.json",
+        "docDir": "docs/models/deepseek-v3.2-exp",
+        "model": "deepseek-v3.2-exp"
+      },
+      {
+        "reportFile": "deepseek_v3.2_exp_tilelang_operator_guide.md",
+        "commitDate": "September 29, 2025",
+        "path": "content/reports/Infer/deepseek-v3.2-exp/deepseek_v3.2_exp_tilelang_operator_guide.json",
+        "docDir": "docs/models/deepseek-v3.2-exp",
+        "model": "deepseek-v3.2-exp"
+      },
+      {
+        "reportFile": "gpt_oss_optimization.md",
+        "commitDate": "December 19, 2025",
+        "path": "content/reports/Infer/gpt-oss/gpt_oss_optimization.json",
+        "docDir": "docs/models/gpt-oss",
+        "model": "gpt-oss"
+      },
+      {
+        "reportFile": "hstu_optimization.md",
+        "commitDate": "January 31, 2026",
+        "path": "content/reports/Infer/hstu/hstu_optimization.json",
+        "docDir": "docs/models/hstu",
+        "model": "hstu"
+      },
+      {
+        "reportFile": "hunyuan_image_3_optimization.md",
+        "commitDate": "March 16, 2026",
+        "path": "content/reports/Infer/hunyuan-image-3.0/hunyuan_image_3_optimization.json",
+        "docDir": "docs/models/hunyuan-image-3.0",
+        "model": "hunyuan-image-3.0"
+      },
+      {
+        "reportFile": "hunyuan_video_optimization.md",
+        "commitDate": "February 24, 2026",
+        "path": "content/reports/Infer/hunyuan-video/hunyuan_video_optimization.json",
+        "docDir": "docs/models/hunyuan-video",
+        "model": "hunyuan-video"
+      },
+      {
+        "reportFile": "kimi_k2_thinking_inference_guide.md",
+        "commitDate": "November 06, 2025",
+        "path": "content/reports/Infer/kimi-k2-thinking/kimi_k2_thinking_inference_guide.json",
+        "docDir": "docs/models/kimi-k2-thinking",
+        "model": "kimi-k2-thinking"
+      },
+      {
+        "reportFile": "longcat_flash_optimization.md",
+        "commitDate": "January 26, 2026",
+        "path": "content/reports/Infer/longcat-flash/longcat_flash_optimization.json",
+        "docDir": "docs/models/longcat-flash",
+        "model": "longcat-flash"
+      },
+      {
+        "reportFile": "qwen3_moe_optimization.md",
+        "commitDate": "December 31, 2025",
+        "path": "content/reports/Infer/qwen3-moe/qwen3_moe_optimization.json",
+        "docDir": "docs/models/qwen3-moe",
+        "model": "qwen3-moe"
+      },
+      {
+        "reportFile": "qwen3_next_optimization.md",
+        "commitDate": "March 11, 2026",
+        "path": "content/reports/Infer/qwen3-next/qwen3_next_optimization.json",
+        "docDir": "docs/models/qwen3-next",
+        "model": "qwen3-next"
+      },
+      {
+        "reportFile": "wan2.2-i2v_optimization.md",
+        "commitDate": "January 18, 2026",
+        "path": "content/reports/Infer/wan2.2-i2v/wan2.2-i2v_optimization.json",
+        "docDir": "docs/models/wan2.2-i2v",
+        "model": "wan2.2-i2v"
+      }
+    ]
+  },
+  "Train": {
+    "repo": "cann-recipes-train",
+    "branch": "master",
+    "models": [
+      {
+        "name": "features",
+        "docPath": "features",
+        "reports": [
+          "rollout_rebalance.md",
+          "sam_speculative_decoding.md"
+        ]
+      },
+      {
+        "name": "llm_pretrain",
+        "docPath": "llm_pretrain",
+        "reports": [
+          "deepseekv32_pre_train_optimization.md"
+        ]
+      },
+      {
+        "name": "llm_rl",
+        "docPath": "llm_rl",
+        "reports": [
+          "deepseek_rl_train_optimization.md",
+          "qwen3_235B_32k_longseq_rl_train_optimization.md",
+          "sam_decoding.md"
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "reportFile": "rollout_rebalance.md",
+        "commitDate": "January 06, 2026",
+        "path": "content/reports/Train/features/rollout_rebalance.json",
+        "docDir": "docs/features",
+        "model": "features"
+      },
+      {
+        "reportFile": "sam_speculative_decoding.md",
+        "commitDate": "January 06, 2026",
+        "path": "content/reports/Train/features/sam_speculative_decoding.json",
+        "docDir": "docs/features",
+        "model": "features"
+      },
+      {
+        "reportFile": "deepseekv32_pre_train_optimization.md",
+        "commitDate": "February 13, 2026",
+        "path": "content/reports/Train/llm_pretrain/deepseekv32_pre_train_optimization.json",
+        "docDir": "docs/llm_pretrain",
+        "model": "llm_pretrain"
+      },
+      {
+        "reportFile": "deepseek_rl_train_optimization.md",
+        "commitDate": "December 03, 2025",
+        "path": "content/reports/Train/llm_rl/deepseek_rl_train_optimization.json",
+        "docDir": "docs/llm_rl",
+        "model": "llm_rl"
+      },
+      {
+        "reportFile": "qwen3_235B_32k_longseq_rl_train_optimization.md",
+        "commitDate": "December 17, 2025",
+        "path": "content/reports/Train/llm_rl/qwen3_235B_32k_longseq_rl_train_optimization.json",
+        "docDir": "docs/llm_rl",
+        "model": "llm_rl"
+      },
+      {
+        "reportFile": "sam_decoding.md",
+        "commitDate": "January 06, 2026",
+        "path": "content/reports/Train/llm_rl/sam_decoding.json",
+        "docDir": "docs/llm_rl",
+        "model": "llm_rl"
+      }
+    ]
+  },
+  "Spatial Intelligence": {
+    "repo": "cann-recipes-spatial-intelligence",
+    "branch": "master",
+    "models": [
+      {
+        "name": "Hunyuan3D",
+        "docPath": "Hunyuan3D",
+        "reports": [
+          "Hunyuan3D_optimization.md"
+        ]
+      },
+      {
+        "name": "vggt",
+        "docPath": "vggt",
+        "reports": [
+          "vggt_accurancy_evaluation.md",
+          "vggt_optimization.md"
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "reportFile": "Hunyuan3D_optimization.md",
+        "commitDate": "January 29, 2026",
+        "path": "content/reports/Spatial_Intelligence/Hunyuan3D/Hunyuan3D_optimization.json",
+        "docDir": "docs/models/Hunyuan3D",
+        "model": "Hunyuan3D"
+      },
+      {
+        "reportFile": "vggt_accurancy_evaluation.md",
+        "commitDate": "February 13, 2026",
+        "path": "content/reports/Spatial_Intelligence/vggt/vggt_accurancy_evaluation.json",
+        "docDir": "docs/models/vggt",
+        "model": "vggt"
+      },
+      {
+        "reportFile": "vggt_optimization.md",
+        "commitDate": "February 13, 2026",
+        "path": "content/reports/Spatial_Intelligence/vggt/vggt_optimization.json",
+        "docDir": "docs/models/vggt",
+        "model": "vggt"
+      }
+    ]
+  },
+  "Embodied Intelligence": {
+    "repo": "cann-recipes-embodied-intelligence",
+    "branch": "master",
+    "models": [
+      {
+        "name": "manipulation/pi0/infer_with_torch",
+        "docPath": "manipulation/pi0/infer_with_torch",
+        "reports": [
+          "README.md"
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "reportFile": "README.md",
+        "commitDate": "December 30, 2025",
+        "path": "content/reports/Embodied_Intelligence/manipulation/pi0/infer_with_torch/README.json",
+        "docDir": "docs/manipulation/pi0/infer_with_torch",
+        "model": "manipulation/pi0/infer_with_torch"
+      }
+    ]
+  }
+}

@@ -33,7 +33,8 @@ jobs:
           python-version: '3.11'
 
       - name: Fetch content from GitCode repos
-        run: python build_content.py
+        run: |
+          python build_content.py || echo "WARNING: GitCode fetch failed, using committed content"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

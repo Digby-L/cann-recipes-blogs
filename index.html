@@ -715,27 +715,45 @@
     return null;
   }
 
-  // Fallback model data (used before manifest loads)
+  // Model data - hardcoded fallback, updated from manifest if available
   let repoModels = {
-    "Infer": [],
-    "Train": [],
-    "Embodied Intelligence": [],
-    "Spatial Intelligence": []
+    "Infer": [
+      { name: "deepseek-r1", docPath: "deepseek-r1", reports: ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"] },
+      { name: "deepseek-v3.2-exp", docPath: "deepseek-v3.2-exp", reports: ["deepseek_v3.2_exp_ascendc_operator_guide.md", "deepseek_v3.2_exp_inference_guide.md", "deepseek_v3.2_exp_pypto_operator_guide.md", "deepseek_v3.2_exp_tilelang_operator_guide.md"] },
+      { name: "gpt-oss", docPath: "gpt-oss", reports: ["gpt_oss_optimization.md"] },
+      { name: "hstu", docPath: "hstu", reports: ["hstu_optimization.md"] },
+      { name: "kimi-k2-thinking", docPath: "kimi-k2-thinking", reports: ["kimi_k2_thinking_inference_guide.md"] },
+      { name: "longcat-flash", docPath: "longcat-flash", reports: ["longcat_flash_optimization.md"] },
+      { name: "qwen3-moe", docPath: "qwen3-moe", reports: ["qwen3_moe_optimization.md"] },
+      { name: "qwen3-next", docPath: "qwen3-next", reports: ["qwen3_next_optimization.md"] }
+    ],
+    "Train": [
+      { name: "llm_pretrain", docPath: "llm_pretrain", reports: ["deepseekv32_pre_train_optimization.md"] },
+      { name: "llm_rl", docPath: "llm_rl", reports: ["deepseek_rl_train_optimization.md", "qwen3_235B_32k_longseq_rl_train_optimization.md", "sam_decoding.md"] }
+    ],
+    "Embodied Intelligence": [
+      { name: "pi0", docPath: "manipulation/pi0/infer_with_torch", reports: ["README.md"] }
+    ],
+    "Spatial Intelligence": [
+      { name: "Hunyuan3D", docPath: "Hunyuan3D", reports: ["Hunyuan3D_optimization.md"] },
+      { name: "vggt", docPath: "vggt", reports: ["vggt_accurancy_evaluation.md", "vggt_optimization.md"] }
+    ]
   };
 
-  // Load models from pre-fetched manifest into repoModels
+  // Load models from pre-fetched manifest into repoModels (replaces with discovered models)
   async function loadModelsFromManifest() {
     const manifest = await loadManifest();
     if (!manifest || Object.keys(manifest).length === 0) return false;
 
     for (const [category, catData] of Object.entries(manifest)) {
       const models = catData.models || [];
-      repoModels[category] = models.map(m => ({
-        name: m.name,
-        docPath: m.docPath,
-        reports: m.reports || []
-      }));
-      // Also populate repoConfig if repo/branch info is in manifest
+      if (models.length > 0) {
+        repoModels[category] = models.map(m => ({
+          name: m.name,
+          docPath: m.docPath,
+          reports: m.reports || []
+        }));
+      }
       if (catData.repo && !repoConfig[category]) {
         repoConfig[category] = { repo: catData.repo, branch: catData.branch || 'master' };
       }
