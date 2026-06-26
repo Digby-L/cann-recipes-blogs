@@ -1,10 +1,81 @@
 # Recipe Blog Website - Technical Documentation
 
-> Last updated: 2026-03-21 — pre-fetch architecture, dynamic discovery, GitHub Pages deployment, image/TOC fixes.
+> Last updated: 2026-06-23 — added feature inventory chapter.
 
 ## Overview
 
 The CANN Recipes Blog website displays tech reports from 4 GitCode repositories. Reports are **pre-fetched at build time** into static JSON files, eliminating the need for a local proxy or CORS workarounds when deployed to GitHub Pages.
+
+## Supported Features
+
+### 1. Content Browsing
+
+| Feature | Description |
+|---------|-------------|
+| **Four-category navigation** | Reports organized under Infer, Train, Spatial Intelligence, Embodied Intelligence |
+| **Hierarchical sidebar** | Collapsible left sidebar (w-72) with categories → models → reports tree |
+| **Dynamic model discovery** | `build_content.py` auto-discovers new models/reports from GitCode repos via tree API — no hardcoded lists |
+| **Three main views** | Home (recent + popular), Category (card grid), Report (full article) |
+| **Home page recommendations** | "Recent Reports" (sorted by commitDate) and "Popular Reports" sections on landing page |
+| **Breadcrumb navigation** | Category → Model → Report path displayed in report view |
+
+### 2. Report Rendering
+
+| Feature | Description |
+|---------|-------------|
+| **Markdown rendering** | Full markdown via marked.js v4.3.0 (headings, lists, tables, blockquotes, links) |
+| **Code syntax highlighting** | highlight.js with Atom One Dark theme, supports all major languages |
+| **Copy-to-clipboard** | Each code block has a "Copy" button with visual feedback |
+| **Embedded images** | Images pre-fetched as base64 data URIs, no external requests at view time（⚠️ 部分图片渲染异常，待修复，详见 requirements.md 3.1.3） |
+| **Commit date display** | Shows latest commit date per report (from manifest or GitCode API) |
+| **Heading anchors** | Custom `slugify()` generates IDs for CJK + Latin headings, supporting TOC/anchor links |
+
+### 3. Search
+
+| Feature | Description |
+|---------|-------------|
+| **Keyword search** | Filters by model name, report title, and category |
+| **Real-time results** | Results displayed as card grid with count ("N results for ...") |
+| **No-result fallback** | Friendly message when nothing matches |
+
+### 4. UI / UX
+
+| Feature | Description |
+|---------|-------------|
+| **Glassmorphism design** | Cards and sidebar use backdrop-filter blur + translucent backgrounds |
+| **Responsive grid** | 2-3 report cards per row with hover scale/shadow effects |
+| **Sidebar toggle** | Hide/show button on right edge with smooth width animation |
+| **Floating nav buttons** | Fixed bottom-right: back-to-top and go-to-bottom |
+| **Custom scrollbar** | Orange-tinted thin scrollbar on WebKit browsers |
+| **Fade-in animations** | View transitions use CSS keyframe `fadeIn` |
+| **Material icons** | Google Material Symbols Outlined for all UI icons |
+
+### 5. Deployment & CI/CD
+
+| Feature | Description |
+|---------|-------------|
+| **GitHub Pages hosting** | Static site deployed via GitHub Actions |
+| **Daily auto-refresh** | Cron at 2:17 AM UTC re-fetches content from upstream repos |
+| **Graceful fallback** | If `build_content.py` fails, committed `content/` is used as baseline |
+| **No git push needed** | Workflow uses `actions/deploy-pages`, avoids branch protection issues |
+| **Manual dispatch** | Can trigger rebuild manually from GitHub Actions UI |
+
+### 6. Development Support
+
+| Feature | Description |
+|---------|-------------|
+| **Local proxy** | `proxy.py` (Python, zero-dependency, localhost:8081) for live GitCode access |
+| **Multi-method fetch chain** | Pre-fetched JSON → local proxy → corsproxy.io → raw URL (4 fallbacks) |
+| **Cross-platform launchers** | `start_proxy.sh` (Linux/Mac) and `start_proxy.bat` (Windows) |
+| **Static serve mode** | Works with any HTTP server (`python -m http.server`) using pre-fetched content |
+
+### 7. Subscriptions & External Links
+
+| Feature | Description |
+|---------|-------------|
+| **Subscribe button** | Opens CANN recipes mailing list (mailman3) |
+| **Browse Repo links** | Models without dedicated reports link to their GitCode repo folder |
+| **External link handling** | All links open in new tab with `rel="noopener"` |
 
 ## Source Repositories
 
@@ -277,3 +348,245 @@ python build_content.py
 3. `build_content.py` discovers new models/reports via tree API
 4. Fresh `content/` is built and deployed to GitHub Pages
 5. No manual intervention needed — fully automatic
+
+---
+
+## 开发约束（DO NOT）
+
+以下规则为硬性约束，所有对本项目的修改必须遵守：
+
+| # | 禁止事项 | 原因 |
+|---|----------|------|
+| 1 | 引入 npm / node / webpack / vite 等构建工具 | 项目定位为零构建静态站，部署环境只有 Python + HTTP server |
+| 2 | 将 `index.html` 拆分为多个文件 | 单文件 SPA 是核心设计决策，简化部署链路 |
+| 3 | 给 `build_content.py` 添加第三方 pip 依赖 | CI 环境无 `pip install` 步骤，脚本必须纯标准库运行 |
+| 4 | 引入需要后端/数据库的功能 | 纯静态站，GitHub/GitCode Pages 无服务端能力 |
+| 5 | 硬编码模型列表（绕过 manifest 动态发现） | 动态发现是核心设计，不可退化为手动维护 |
+| 6 | 删除 4 级内容加载 fallback 中的任何一级 | 保证开发/部署/离线等各种环境下内容可加载 |
+| 7 | 引入外部 CDN 库时不提供 fallback | CDN 不可用时页面不能白屏 |
+| 8 | 修改已有功能但不执行回归测试 | 任何修改都可能影响现有功能，必须验证 |
+
+---
+
+## 测试规范
+
+### 基础验证（每次提交前必须通过）
+
+```bash
+# 1. 构建脚本无报错
+python build_content.py
+
+# 2. 启动本地服务
+python -m http.server 8080
+```
+
+然后在浏览器中依次验证：
+
+| # | 检查项 | 预期结果 |
+|---|--------|----------|
+| 1 | 打开 `http://localhost:8080` | 首页正常加载，无 console error |
+| 2 | 侧边栏展示 | 四个分类均可展开，模型列表正确 |
+| 3 | 点击任一报告 | Markdown 渲染正常（标题、代码块、表格） |
+| 4 | 搜索框输入关键词 | 结果卡片正确展示，数量提示准确 |
+| 5 | 代码块 Copy 按钮 | 点击后文本复制到剪贴板，按钮显示 "Copied!" |
+
+### 回归验证（修改已有功能时额外执行）
+
+| # | 检查项 | 预期结果 |
+|---|--------|----------|
+| 6 | 侧边栏折叠/展开 | 动画流畅，内容区自动填满 |
+| 7 | 视图切换 | Home → Category → Report → Home 循环无异常 |
+| 8 | 面包屑导航 | 每级可点击跳转，路径正确 |
+| 9 | 浮动按钮 | 回到顶部/跳到底部正常工作 |
+| 10 | 报告 commit 日期 | 显示且格式正确（如 "March 15, 2026"） |
+| 11 | 外部链接 | 新标签页打开，无安全警告 |
+| 12 | 无网络时 | 使用已有 `content/` 静态文件仍能正常浏览 |
+
+### 功能专项验证（新功能开发时）
+
+- 执行 `recipe_blog_requirements.md` 中对应章节的"验证方法"，逐条通过
+- 确保 DevTools Console 无新增 error/warning
+- 如涉及 `build_content.py` 改动，确认 `content/index.json` 格式未破坏
+
+### 浏览器兼容性
+
+最低要求支持：
+- Chrome/Edge 90+
+- Firefox 90+
+- Safari 15+
+
+关键依赖：`backdrop-filter`（玻璃拟态）、`<details>` 元素、ES6+ 语法。
+
+---
+
+## 与 requirements.md 的关系
+
+| 文档 | 职责 | 何时使用 |
+|------|------|----------|
+| **本文档 (skill.md)** | 技术规范：架构细节、API 格式、开发约束、测试规范 | 写代码时参考"怎么做"和"不能做什么" |
+| **requirements.md** | 需求源：需求背景、方案设计、验证方法、验收标准 | 接任务时参考"做什么"和"做到什么程度" |
+
+**协作流程：** requirements.md 定义目标和验收标准 → skill.md 提供技术约束和测试规范 → 开发者在两者框架内实现 → 按 requirements 的验证方法确认完成 → 按 skill 的测试规范确认无回归。
+
+---
+
+## Deploying to GitCode Pages (Migration Guide)
+
+GitCode (gitcode.com) is based on GitLab, uses GitLab CI/CD (`.gitlab-ci.yml`)，Pages 功能与 GitLab Pages 基本一致。从当前 GitHub Pages 部署迁移到 GitCode Pages，需要修改以下内容：
+
+### Overview of Changes
+
+| Component | Current (GitHub) | Target (GitCode) |
+|-----------|-----------------|-------------------|
+| CI config file | `.github/workflows/deploy.yml` | `.gitlab-ci.yml` |
+| Deploy mechanism | `actions/deploy-pages@v4` | GitLab Pages (artifact → `public/`) |
+| Pages URL | `https://<user>.github.io/cann-recipes-blogs/` | `https://<user>.gitcode.io/cann-recipes-blogs/` 或自定义域名 |
+| Jekyll bypass | `.nojekyll` file | 不需要 (GitLab Pages 不用 Jekyll) |
+| Cron scheduling | GitHub Actions `schedule` | GitLab CI `schedules` (在 Web UI 中配置) |
+
+---
+
+### Step 1: Create `.gitlab-ci.yml`
+
+在项目根目录创建 `.gitlab-ci.yml`，替代 `.github/workflows/deploy.yml`：
+
+```yaml
+image: python:3.11-slim
+
+stages:
+  - build
+  - deploy
+
+build_content:
+  stage: build
+  script:
+    - python build_content.py || echo "WARNING: GitCode fetch failed, using committed content"
+  artifacts:
+    paths:
+      - content/
+    expire_in: 1 hour
+
+pages:
+  stage: deploy
+  dependencies:
+    - build_content
+  script:
+    - mkdir -p public
+    - cp -r index.html content/ assets/ public/
+    - cp .nojekyll public/ 2>/dev/null || true
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+    - master
+```
+
+**Key points:**
+- GitLab Pages 要求部署产物放在 `public/` 目录
+- `pages` 是 GitLab 的保留 job 名称，用这个名字才会触发 Pages 部署
+- `artifacts.paths: [public]` 是 GitLab Pages 的固定要求
+
+---
+
+### Step 2: Adjust file copying in the deploy script
+
+`index.html` 中通过相对路径 `content/index.json` 和 `content/reports/...` 加载内容。迁移时需确保 `public/` 目录下的结构与原来一致：
+
+```
+public/
+├── index.html
+├── content/
+│   ├── index.json
+│   └── reports/...
+└── assets/
+```
+
+如果项目根目录还有其他需要 serve 的文件（如 favicon），也一并复制到 `public/`。
+
+---
+
+### Step 3: Handle sub-path deployment (if repo name ≠ `<user>.gitcode.io`)
+
+如果仓库不是用户/组织的同名仓库（即 URL 会是 `https://<user>.gitcode.io/cann-recipes-blogs/` 而不是根路径），需要确认 `index.html` 中的资源路径是否使用相对路径。
+
+**当前代码已使用相对路径** (`content/index.json`, `content/reports/...`)，所以无需修改。但如果未来加入了 `<base href="/">` 或绝对路径，则需要改为相对路径或添加正确的 base path。
+
+---
+
+### Step 4: Configure scheduled pipeline (替代 GitHub Actions cron)
+
+GitLab/GitCode 的定时任务不在 `.gitlab-ci.yml` 中声明，而是在 Web UI 配置：
+
+1. 进入项目 → **CI/CD** → **Schedules**（或 **流水线** → **定时任务**）
+2. 点击 **New schedule**
+3. 配置：
+   - Description: `Daily content refresh`
+   - Cron: `17 2 * * *` (UTC 2:17 AM，与当前 GitHub 一致)
+   - Target branch: `main` (或 `master`)
+4. 保存
+
+---
+
+### Step 5: Adjust `build_content.py` (if needed)
+
+`build_content.py` 调用的是 GitCode 的 API (`https://web-api.gitcode.com/api/v2`)。这些 API 在 GitCode CI 环境中应该**无需修改**即可访问（同平台内部调用，无跨域问题）。
+
+但需注意：
+- GitCode CI runner 的网络是否能访问 `web-api.gitcode.com`（通常可以）
+- 如果 GitCode 对 API 有 rate limit，CI 环境中可能需要配置 Token：
+  ```yaml
+  build_content:
+    variables:
+      GITCODE_TOKEN: $GITCODE_API_TOKEN  # 在 CI/CD Settings → Variables 中配置
+  ```
+  并在 `build_content.py` 中的请求头加上 `Authorization: Bearer ${GITCODE_TOKEN}`（当前脚本未使用 token，公开仓库通常不需要）。
+
+---
+
+### Step 6: Remove GitHub-specific files (optional)
+
+迁移完成后可以清理：
+
+| File | Action |
+|------|--------|
+| `.github/workflows/deploy.yml` | 删除（GitCode 不使用） |
+| `.nojekyll` | 可保留（无害）或删除 |
+| `README.md` | 更新部署说明中的 URL |
+
+---
+
+### Step 7: Verify deployment
+
+1. Push 代码到 GitCode 仓库的 `main`/`master` 分支
+2. 进入 **CI/CD** → **Pipelines**，确认流水线执行成功
+3. 进入 **Settings** → **Pages**，查看部署 URL
+4. 打开 Pages URL，验证：
+   - 首页加载正常（sidebar、cards）
+   - 点击报告能正常渲染 markdown
+   - 搜索功能正常
+   - 图片正常显示（base64 不依赖外部请求）
+
+---
+
+### 完整修改清单 (Checklist)
+
+- [ ] 创建 `.gitlab-ci.yml`（见 Step 1）
+- [ ] 确认 `public/` 中的文件结构正确
+- [ ] 在 GitCode Web UI 配置定时流水线 (Schedule)
+- [ ] （可选）在 CI/CD Variables 中添加 `GITCODE_API_TOKEN`
+- [ ] Push 并验证 Pages 部署
+- [ ] 更新 README.md 中的部署 URL
+- [ ] （可选）删除 `.github/workflows/deploy.yml`
+
+---
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Pages 页面 404 | 确认 `pages` job 的 `artifacts.paths` 是 `["public"]`，且 `public/index.html` 存在 |
+| 内容加载失败 | 检查 `public/content/index.json` 是否存在；确认 `cp -r content/ public/` 在 `build_content` 之后执行 |
+| 图片不显示 | 图片已是 base64，不应有此问题；若有新增非 base64 图片，检查相对路径 |
+| 定时任务不触发 | GitCode Schedules 需要项目有活跃的 CI runner；确认 schedule 状态为 Active |
+| CI 中 `build_content.py` 超时 | GitCode API rate limit；配置 token 或在脚本中增加 retry/sleep |
