@@ -47,6 +47,29 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 
 按功能域拆分为以下模块：
 
+### 2.1 待讨论事项汇总
+
+> 以下事项需在评审会议中讨论确认，讨论结论请直接记录在各条目下方。
+
+| # | 事项 | 所属模块 | 关键问题 | 讨论结论 |
+|---|------|----------|----------|----------|
+| D-1 | [配色方案（玻璃拟态 + 橙色主题）](#341-配色方案已完成) | 视觉设计 §3.4.1 | 当前配色是否满足品牌需求？是否需要调整主色调或整体风格？ | _待讨论_ |
+| D-2 | [技术文章封面图选择与生成](#discuss-cover-image) | 视觉设计 §3.4.6 | 封面图来源方案选型：A. 提取报告首图 / B. 按模型生成占位图 / C. 预设素材轮换 | 用技术报告里的图片，不使用ai生成 |
+| D-3 | [邮件列表订阅](#discuss-subscribe) | 订阅通知 §3.6.1 | 邮件列表订阅是否保留？跳转目标和用户体验是否需要优化？ | 不要了，避免non offilical email address |
+| D-4 | [子页面路径支持](#discuss-routing) | 路由 §3.8.1 | ① 是否需要 SEO（决定方案 A vs B）② URL 风格偏好 ③ 子路径粒度 | 子路径粒度到每一层 |
+| D-5 | [技术文档分类及整理](#discuss-docs-organize) | 开发者体验 §3.11.3 | docs/ 目录下三份文档的职责划分和去重方案是否合理？ |  |
+| D-6 | [Issue 讨论区引流与模板设计](#discuss-issue-feedback) | 反馈互动 §3.7.1 | ① Issue 入口放在报告页还是全局都要有？② 模板分几种类型？③ 是否需要引导选择仓库？ | 引流回gitcode 仓库的issue区，按照文档的分类来，提交文档时，加一个标签，表示原始的仓来源，用于引流回去，需要设计这个tag怎么提供，网站怎么获取 |
+| D-7 | [报告关联仓库可执行 README 链接](#discuss-readme-link) | 内容质量 §3.9.3 | ① 缺失 README 链接的报告如何补充？② 链接格式和位置是否统一？③ 构建时检测策略 | 检查各个仓的docs，没有的需要增加 |
+| D-8 | [各仓目录结构风格统一与原子化特性](#discuss-repo-structure) | 内容质量 §3.9.4 | ① 4 个仓的目录结构差异如何统一？② 目录栏展示风格如何体现原子化特性？③ 仓间规范对齐方案 | 各个仓先整理 |
+
+---
+
+> **会议纪要（2026-07-03）：** 目录层级已确认，详见 [§3.9.4](#discuss-repo-structure)。遗留问题：技术/优化文章移出到 Blog，框架设计/使用相关文章保留在原代码仓 — 边界待确认。
+
+---
+
+### 2.2 功能域拆分
+
 | 功能域 | 子项 | 状态 |
 |--------|------|------|
 | **内容展示** | 分类浏览（四大类 → 模型 → 报告） | ✅ 已完成 |
@@ -65,21 +88,22 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 | | GitCode Pages 部署 | 🔲 TODO |
 | | 定时刷新（每日 cron） | ✅ 已完成 |
 | | 内容预拉取（build_content.py） | ✅ 已完成 |
-| **视觉设计** | 配色方案（玻璃拟态 + 橙色主题） | ✅ 已完成 |
+| **视觉设计** | 配色方案（玻璃拟态 + 橙色主题）**[待讨论]** | ✅ 已完成 |
 | | 关键图标选型（Material Icons） | ✅ 已完成 |
 | | **[技术文章封面图选择与生成 — 待讨论](#discuss-cover-image)** | 🔲 TODO |
 | | 暗色模式 | 🔲 TODO |
 | | 移动端适配 | 🔲 TODO |
 | | 打印友好样式 | 🔲 TODO |
 | **国际化** | 中英文 UI 切换 | 🔲 TODO |
-| **订阅通知** | **[邮件列表订阅 — 待讨论](#discuss-subscribe)** | ✅ 已完成 |
+| **订阅通知** | ~~邮件列表订阅~~ — [已取消](#discuss-subscribe) | ❌ 已取消 |
 | | RSS 订阅源（优先级低） | 🔲 TODO |
-| **反馈互动** | 提交 Issue，反馈与建议（引流到 GitCode Issue） | 🔲 TODO |
+| **反馈互动** | **[Issue 讨论区引流与模板设计 — 待讨论](#discuss-issue-feedback)** | 🔲 TODO |
 | **数据驱动** | 访问统计（驱动热门排序） | 🔲 TODO |
 | **路由与子页面** | **[子页面路径支持（如 `/infer/`、`/train/`）— 待讨论](#discuss-routing)** | 🔲 TODO |
 | **内容质量** | 技术文章润色与查虫（Agent 任务） | 🔲 TODO |
 | | 文章规范制定（格式、命名、结构标准） | 🔲 TODO |
-| | 报告关联仓库可执行 README 链接 | 🔲 TODO |
+| | **[报告关联仓库可执行 README 链接 — 待讨论](#discuss-readme-link)** | 🔲 TODO |
+| | **[各仓目录结构风格统一与原子化特性 — 待讨论](#discuss-repo-structure)** | 🔲 TODO |
 | **开发者体验** | 本地代理（proxy.py） | ✅ 已完成 |
 | | 零依赖构建（纯 Python 标准库） | ✅ 已完成 |
 | | **[技术文档分类及整理 — 待讨论](#discuss-docs-organize)** | 🔲 TODO |
@@ -435,23 +459,44 @@ build_content.py
 
 <a id="discuss-cover-image"></a>
 
-#### 3.4.6 技术文章封面图（TODO — 待讨论）
+#### 3.4.6 技术文章封面图（TODO）
 
 **需求：** 每篇报告卡片有一张有辨识度的封面图，提升浏览体验。
 
-**方案设计（待选型）：**
-- 方案 A：从报告 Markdown 中提取第一张图片作为封面
-- 方案 B：按模型/分类生成风格统一的占位图（如带模型名的渐变色块）
-- 方案 C：维护一组预设封面图素材，按分类轮换
+**讨论结论：** 使用技术报告中的图片作为封面，不使用 AI 生成图片。确认采用方案 A。
 
-**当前状态：** 使用固定的 placeholder 图片轮换（`thumbs` 数组），辨识度低。
+**方案设计：**
+- 从报告 Markdown 中提取第一张图片作为封面（`coverImage` 字段）
+- `build_content.py` 构建时解析每篇报告的 Markdown，匹配第一个 `![...](...)` 图片引用
+- 将该图片的 base64 数据写入 manifest 的 `coverImage` 字段
+- 前端卡片优先使用 `coverImage`，若报告无图片则使用分类默认占位图（按分类区分颜色/图标）
 
-**修改文件：** `build_content.py`（提取/生成封面）、`index.html`（卡片图片展示逻辑）
+**提取逻辑（build_content.py）：**
+```python
+import re
+
+def extract_cover_image(markdown_content, images_dict):
+    """从 Markdown 中提取第一张图片作为封面"""
+    match = re.search(r'!\[.*?\]\((.*?)\)', markdown_content)
+    if match:
+        img_path = match.group(1)
+        # 在 images_dict 中查找对应的 base64 数据
+        for key, base64_data in images_dict.items():
+            if img_path.endswith(key) or key.endswith(img_path):
+                return base64_data
+    return None
+```
+
+**Fallback 策略：**
+- 有图片 → 使用报告中第一张图片
+- 无图片 → 使用分类默认占位图（带分类图标 + 模型名文字的纯色块）
+
+**修改文件：** `build_content.py`（提取封面图逻辑）、`index.html`（卡片图片展示逻辑）
 
 **验证方法：**
 1. 运行 `python build_content.py`，检查 manifest 中报告是否有 `coverImage` 字段
-2. 打开 Category 视图，确认卡片封面图不再千篇一律
-3. 对比有/无真实图片的报告，确认 fallback 占位图风格一致
+2. 打开 Category 视图，确认含图片的报告卡片使用了报告中的真实图片
+3. 确认无图片的报告使用分类占位图（而非空白）
 4. 检查不同分类的封面图是否有视觉区分度
 
 ---
@@ -484,11 +529,16 @@ build_content.py
 
 <a id="discuss-subscribe"></a>
 
-#### 3.6.1 邮件列表订阅（已完成 — 待讨论）
+#### 3.6.1 邮件列表订阅（~~已取消~~）
 
-**需求：** 用户可订阅最新报告更新通知。
+**讨论结论：** 移除邮件列表订阅功能，避免 non-official email address 问题。
 
-**当前方案：** Header 和首页底部的 "Subscribe" 按钮，跳转到 CANN 邮件列表（mailman3）。
+**需要执行的变更：**
+- 移除 Header 中的 "Subscribe" 按钮
+- 移除首页底部的订阅入口
+- 清理相关 HTML/CSS/JS 代码
+
+**修改文件：** `index.html`（删除 Subscribe 按钮及相关逻辑）
 
 ---
 
@@ -511,64 +561,261 @@ build_content.py
 
 ---
 
+<a id="discuss-issue-feedback"></a>
+
 ### 3.7 反馈互动模块（TODO）
 
-#### 3.7.1 提交 Issue，反馈与建议
+#### 3.7.1 Issue 讨论区引流与模板设计
 
-**需求：** 用户在阅读报告后可方便地提交反馈或建议。
+**需求：** 用户在浏览报告时可方便地提交反馈或发起讨论，Issue 自动路由回对应的 GitCode 源仓库 Issue 区。
 
-**方案设计：**
-- 在报告底部和页面 footer 添加"反馈建议"按钮
-- 点击后跳转到对应 GitCode 仓库的 Issue 页面（按分类路由到对应仓库）
-- Issue 模板预填报告标题，方便定位上下文
+**讨论结论：** 引流回 GitCode 仓库的 Issue 区，按照文档的分类来路由。提交文档时加一个标签（tag）表示原始仓来源，网站通过该标签实现引流回正确的仓库。
 
-**路由逻辑：**
-| 分类 | 跳转目标 |
+---
+
+**核心设计：来源标签（source tag）机制**
+
+每篇报告在构建时携带一个 `sourceRepo` 标签，标识该报告来自哪个 GitCode 仓库。网站通过该标签决定 Issue 跳转目标。
+
+**标签提供方式（3 个候选方案）：**
+
+| 方案 | 标签来源 | 优点 | 缺点 |
+|------|----------|------|------|
+| **A. 构建时自动推断** | `build_content.py` 根据拉取来源自动写入 `sourceRepo` 字段 | 零人工维护；不会出错 | 仅限构建时已知的映射关系 |
+| **B. Markdown 元数据** | 报告 .md 头部增加 YAML frontmatter：`source_repo: cann-recipes-infer` | 灵活；可覆盖；对迁移场景友好 | 需要各仓维护者手动添加 |
+| **C. 目录路径推断** | 按报告在 Blog 中的分类路径反推仓库 | 无需额外字段 | 若分类与仓库映射变化则失效 |
+
+**推荐：方案 A + B 组合**
+- 默认由 `build_content.py` 根据拉取源自动写入 `sourceRepo`（方案 A）
+- 若 Markdown 头部有 `source_repo` frontmatter，则优先使用（方案 B，用于覆盖场景）
+
+**构建时写入（build_content.py）：**
+```python
+# 每篇报告的 manifest 条目中自动添加 sourceRepo
+report_entry = {
+    "title": report_title,
+    "model": model_name,
+    "sourceRepo": repo_name,      # e.g. "cann-recipes-infer"
+    "sourceRepoUrl": repo_url,    # e.g. "https://gitcode.com/cann/cann-recipes-infer"
+    "sourcePath": file_path,      # e.g. "docs/models/deepseek-r1/prefill_optimization.md"
+    # ...
+}
+```
+
+**网站获取标签方式：**
+- 前端从 `content/index.json` manifest 中读取每篇报告的 `sourceRepo` 和 `sourceRepoUrl`
+- 点击 Issue 按钮时，直接从当前报告数据中获取跳转目标
+
+---
+
+**入口设计：**
+
+| 入口位置 | 形式 | 触发行为 |
+|----------|------|----------|
+| 报告详情页底部 | "反馈建议 / Report Issue" 按钮 | 自动携带报告标题和 sourceRepo，跳转到对应仓库 Issue 页 |
+| 报告详情页右侧浮动栏 | 图标按钮（tooltip: "反馈"） | 同上 |
+| 页面 Footer | "提交反馈" 链接 | 通用入口，用户手动选择目标仓库 |
+
+**仓库路由逻辑（基于 sourceRepo 标签）：**
+
+| sourceRepo 值 | 跳转目标 |
 |------|----------|
-| Infer | `https://gitcode.com/cann/cann-recipes-infer/issues/new` |
-| Train | `https://gitcode.com/cann/cann-recipes-train/issues/new` |
-| Spatial Intelligence | `https://gitcode.com/cann/cann-recipes-spatial-intelligence/issues/new` |
-| Embodied Intelligence | `https://gitcode.com/cann/cann-recipes-embodied-intelligence/issues/new` |
+| `cann-recipes-infer` | `https://gitcode.com/cann/cann-recipes-infer/issues/new` |
+| `cann-recipes-train` | `https://gitcode.com/cann/cann-recipes-train/issues/new` |
+| `cann-recipes-spatial-intelligence` | `https://gitcode.com/cann/cann-recipes-spatial-intelligence/issues/new` |
+| `cann-recipes-embodied-intelligence` | `https://gitcode.com/cann/cann-recipes-embodied-intelligence/issues/new` |
 
-**修改文件：** `index.html`（`showReport()` 末尾添加反馈按钮 + 跳转逻辑）
+**跳转 URL 参数拼接：**
+
+```
+https://gitcode.com/cann/{sourceRepo}/issues/new?title={预填标题}&body={预填正文}
+```
+
+前端拼接逻辑（`index.html` 中）：
+```javascript
+function openIssue(report, issueType) {
+    const { sourceRepo, title: reportTitle, sourcePath } = report;
+    const issueTitle = encodeURIComponent(`[${issueType}] ${reportTitle}`);
+    const body = encodeURIComponent(ISSUE_TEMPLATES[issueType](reportTitle, sourcePath));
+    window.open(
+        `https://gitcode.com/cann/${sourceRepo}/issues/new?title=${issueTitle}&body=${body}`,
+        '_blank'
+    );
+}
+```
+
+---
+
+#### 3.7.2 Issue 模板设计
+
+用户点击反馈按钮时，弹出选择框让用户选择 Issue 类型，然后预填对应模板。
+
+**模板类型：**
+
+| 类型 | 标签前缀 | 适用场景 |
+|------|----------|----------|
+| 📝 内容纠错 | `[内容纠错]` | 报告中有错别字、数据错误、代码片段有误 |
+| 🐛 Bug 报告 | `[Bug]` | 页面渲染异常、图片加载失败、链接失效 |
+| 💡 功能建议 | `[建议]` | 希望增加某功能、改善某体验 |
+| ❓ 技术讨论 | `[讨论]` | 对报告中某技术方案有疑问或想交流 |
+
+**模板正文内容：**
+
+**模板 A — 内容纠错：**
+```markdown
+## 相关报告
+
+- 报告标题：{reportTitle}
+- 报告路径：{reportPath}
+- 阅读地址：{blogURL}
+
+## 问题描述
+
+<!-- 请描述发现的内容问题，如错别字、数据错误、代码有误等 -->
+
+## 建议修改
+
+<!-- 请给出建议的修改内容 -->
+```
+
+**模板 B — Bug 报告：**
+```markdown
+## 相关报告
+
+- 报告标题：{reportTitle}
+- 报告路径：{reportPath}
+- 阅读地址：{blogURL}
+
+## Bug 描述
+
+<!-- 请描述遇到的问题 -->
+
+## 复现步骤
+
+1.
+2.
+3.
+
+## 期望行为
+
+<!-- 期望的正确表现是什么？ -->
+
+## 环境信息
+
+- 浏览器：
+- 操作系统：
+```
+
+**模板 C — 功能建议：**
+```markdown
+## 相关报告（如有）
+
+- 报告标题：{reportTitle}
+
+## 功能描述
+
+<!-- 请描述你希望增加的功能或改善的体验 -->
+
+## 使用场景
+
+<!-- 在什么场景下需要这个功能？ -->
+```
+
+**模板 D — 技术讨论：**
+```markdown
+## 相关报告
+
+- 报告标题：{reportTitle}
+- 报告路径：{reportPath}
+- 阅读地址：{blogURL}
+
+## 讨论主题
+
+<!-- 请描述你想讨论的技术问题 -->
+
+## 你的看法
+
+<!-- 你对这个问题的理解或建议方案 -->
+```
+
+---
+
+#### 3.7.3 交互流程
+
+```
+用户阅读报告
+  → 点击"反馈建议"按钮
+  → 弹出 Issue 类型选择卡片（4 个选项，图标 + 一句话说明）
+  → 用户选择类型
+  → 新窗口打开 GitCode Issue 页面（标题和正文已预填）
+  → 用户补充细节后提交
+```
+
+**已确认事项：**
+- ✅ Issue 按文档分类引流回各自的 GitCode 仓库（不设统一仓）
+- ✅ 通过 `sourceRepo` 标签自动路由，无需用户手动选择仓库
+
+**待确认事项：**
+1. GitCode Issue 是否支持 URL 参数预填 `title` 和 `body`（需确认具体参数格式，GitLab 用 `issue[title]` 和 `issue[description]`）？
+2. 模板类型最终保留几种？（4 种 vs 精简为 2 种）
+
+**修改文件：** `index.html`（`showReport()` 末尾添加反馈按钮 + 类型选择弹窗 + `openIssue()` 跳转逻辑）
 
 **验证方法：**
 1. 打开 Infer 分类的某篇报告，确认底部出现"反馈建议"按钮
-2. 点击按钮，确认跳转到 `gitcode.com/cann/cann-recipes-infer/issues/new`
-3. 确认 Issue 标题中预填了当前报告名
-4. 分别测试 4 个分类的报告，确认跳转到各自对应的仓库
+2. 点击按钮，确认弹出 Issue 类型选择卡片
+3. 选择"内容纠错"，确认新窗口跳转到 `gitcode.com/cann/cann-recipes-infer/issues/new`
+4. 确认 Issue 标题预填了 `[内容纠错] {报告标题}` 格式
+5. 确认 Issue 正文预填了报告路径、阅读地址、提示占位符
+6. 分别测试 4 个分类的报告，确认跳转到各自对应的仓库
+7. 在 Footer 点击"提交反馈"，确认可手动选择目标仓库
 
 ---
 
 <a id="discuss-routing"></a>
 
-### 3.8 路由与子页面模块（TODO — 待讨论）
+### 3.8 路由与子页面模块（TODO）
 
 #### 3.8.1 子页面路径支持
 
 **需求：** 支持类似 `/cann-recipes-blogs/infer/`、`/cann-recipes-blogs/infer/deepseek-r1` 的可分享直链，用户刷新或直接访问子路径不会 404。
 
-**候选方案：**
+**讨论结论：** 子路径粒度到每一层，即支持从分类级到报告级的完整路径。采用方案 A（SPA + 404.html）。
+
+**确认的 URL 路径层级：**
+
+```
+/cann-recipes-blogs/                          ← 首页
+/cann-recipes-blogs/infer/                    ← 分类页
+/cann-recipes-blogs/infer/llm/                ← 子分类页
+/cann-recipes-blogs/infer/llm/deepseek-r1/    ← 模型页
+/cann-recipes-blogs/infer/llm/deepseek-r1/prefill_optimization  ← 报告页
+```
+
+**方案设计（方案 A — SPA + 404.html）：**
 
 | 方案 | 思路 | 优点 | 缺点 |
 |------|------|------|------|
-| **A. SPA 路由 + 404.html** | 保持单文件 `index.html`；新增 `404.html`（内容同 index.html），利用 GitHub/GitCode Pages 的 404 fallback 机制，JS 解析 URL path 路由到对应视图 | 零文件膨胀；URL 可读可分享；架构改动最小 | 依赖平台 404 行为；SEO 不友好（搜索引擎看到 404 状态码） |
-| **B. 物理子目录** | `build_content.py` 构建时为每个分类/模型生成独立的 `infer/index.html`、`train/index.html` 等静态页面 | 真正的 200 状态码；SEO 友好；每个子页面可独立定制 | 构建复杂度增加；多文件维护；需模板引擎或字符串拼接生成 HTML |
-| **C. Hash 路由** | URL 改为 `/#/infer/deepseek-r1` 形式，JS 监听 `hashchange` 事件 | 最简单实现；无需 404.html；所有平台兼容 | URL 不够美观；hash 部分不发送到服务端；SEO 不可用 |
+| **A. SPA 路由 + 404.html** ✅ | 保持单文件 `index.html`；新增 `404.html`（内容同 index.html），利用 GitHub/GitCode Pages 的 404 fallback 机制，JS 解析 URL path 路由到对应视图 | 零文件膨胀；URL 可读可分享；架构改动最小 | 依赖平台 404 行为；SEO 不友好 |
 
-**当前倾向：** 方案 A（SPA + 404.html）改动最小且效果好。但需确认：
-- GitCode Pages 是否支持自定义 404.html fallback（GitLab Pages 默认支持）
-- 是否有 SEO 需求（技术报告是否需要被搜索引擎收录）
+**路由解析逻辑：**
+```javascript
+function parseRoute() {
+    const basePath = '/cann-recipes-blogs';
+    const path = window.location.pathname.replace(basePath, '').replace(/^\/|\/$/g, '');
+    const segments = path.split('/').filter(Boolean);
+    
+    if (segments.length === 0) return { view: 'home' };
+    if (segments.length === 1) return { view: 'category', category: segments[0] };
+    if (segments.length === 2) return { view: 'subcategory', category: segments[0], sub: segments[1] };
+    if (segments.length === 3) return { view: 'model', category: segments[0], sub: segments[1], model: segments[2] };
+    if (segments.length >= 4) return { view: 'report', category: segments[0], sub: segments[1], model: segments[2], report: segments[3] };
+}
+```
 
-**待讨论事项：**
-1. 是否需要 SEO（决定方案 A vs B）
-2. URL 风格偏好：`/infer/deepseek-r1` vs `/#/infer/deepseek-r1`
-3. 子路径粒度：到分类级（`/infer/`）还是到报告级（`/infer/deepseek-r1/report`）
-
-**修改文件（方案 A 为例）：**
+**修改文件：**
 - 新增 `404.html`（内容与 index.html 相同或重定向脚本）
-- `index.html`（新增 URL path 解析逻辑，页面加载时根据路径调用对应 show 函数）
-- `build_content.py`（若方案 B，需生成子目录 HTML）
+- `index.html`（新增 URL path 解析逻辑，页面加载时根据路径调用对应 show 函数；所有内部导航改为 `pushState` 而非直接调用 show 函数）
 
 ---
 
@@ -618,19 +865,32 @@ build_content.py
 
 ---
 
-#### 3.9.3 报告关联仓库可执行 README 链接
+<a id="discuss-readme-link"></a>
+
+#### 3.9.3 报告关联仓库可执行 README 链接（TODO）
 
 **需求：** 每篇技术报告中必须包含指向 GitCode 仓库中对应可执行代码 README 的链接，方便读者从"读文档"直接跳转到"跑代码"。
 
+**讨论结论：** 检查各个仓的 docs，没有 README 链接的报告需要补充增加。
+
 **方案设计：**
-- 在报告 Markdown 头部或末尾固定位置添加"快速开始"链接区：
+
+**第一步：全量扫描摸底**
+- 由 Agent 或脚本扫描 4 个仓库的 `docs/` 目录，列出所有缺失 README 链接的报告
+- 输出缺失清单，作为后续补充工作的任务列表
+
+**第二步：补充 README 链接**
+- 在每篇报告 Markdown 末尾固定位置添加"快速开始"链接区：
   ```markdown
   ## 快速开始
-  
+
   > 可执行代码及环境配置详见：[README](<gitcode仓库对应目录>/README.md)
   ```
+- 链接目标：对应模型目录下的 `README.md`（即代码实际执行的入口文档）
+
+**第三步：构建时检测**
 - `build_content.py` 构建时检测每篇报告是否包含指向仓库 README 的链接
-- 对于缺失链接的报告，输出警告清单，Agent 负责补充
+- 对于缺失链接的报告，输出警告清单
 
 **检测逻辑（build_content.py 中添加）：**
 ```python
@@ -640,15 +900,110 @@ if not has_readme_link:
     warnings.append(f"WARN: {report_path} 缺少 README 链接")
 ```
 
-**修改文件：** 
+**修改文件：**
 - `build_content.py`（添加链接检测 + 警告输出）
-- 各 GitCode 仓库中缺失链接的报告（由 Agent 提交 PR 补充）
+- 各 GitCode 仓库中缺失链接的报告（逐个补充，提交 PR）
+
+**执行计划：**
+1. 先运行全量扫描，输出缺失清单
+2. 按仓库分配任务，由各仓维护者或 Agent 补充 README 链接
+3. 补充完成后，构建时零 warning 为验收标准
 
 **验证方法：**
 1. 运行 `python build_content.py`，确认输出中无 "缺少 README 链接" 警告
 2. 在网站上打开报告，确认"快速开始"区域有可点击的 README 链接
 3. 点击链接，确认跳转到 GitCode 仓库对应目录且 README 存在
 4. 对于新增报告，若未包含链接，构建时能输出明确提示
+
+---
+
+<a id="discuss-repo-structure"></a>
+
+#### 3.9.4 各仓目录结构风格统一与原子化特性（TODO）
+
+**需求：** 4 个 GitCode 仓库的目录结构风格当前不统一，导致 Blog 侧边栏展示混乱、构建脚本需要针对每个仓做特殊适配。需要制定统一的目录规范，并在 Blog 的目录栏中体现"原子化特性"（每个 recipe 是独立可执行、可组合的最小单元）。
+
+**讨论结论：** 各仓先各自整理目录结构，对齐到统一规范。
+
+**现状问题：**
+
+| 仓库 | 当前扫描路径 | 目录结构特点 | 问题 |
+|------|-------------|-------------|------|
+| Infer | `docs/models` | `docs/models/{model_name}/` 下多个 .md | 较规范，模型维度清晰 |
+| Train | `docs` | `docs/` 下直接放 .md | 缺少模型子目录层级，文件扁平 |
+| Spatial Intelligence | `docs/models` | 同 Infer 风格 | 较规范 |
+| Embodied Intelligence | `docs` | 同 Train 风格 | 缺少模型子目录层级 |
+
+**确认的目录层级（Blog 侧边栏展示结构）：**
+
+```
+cann 原子特性（公共）
+
+Infer
+├── llm
+│   ├── model 1
+│   └── model 2
+└── multi_model
+    └── model 3
+
+Train
+├── pretrain
+│   ├── model 1
+│   └── model 2
+├── sft
+└── agentic_rl
+
+Embodied AI
+└── model 1
+```
+
+**层级说明：**
+- 第一层：领域分类（Infer / Train / Embodied AI）
+- 第二层：子分类 / 场景（llm、multi_model、pretrain、sft、agentic_rl）
+- 第三层：具体模型
+- 第四层：报告（原子化特性文档）
+- 另有"cann 原子特性（公共）"作为跨仓通用特性的聚合区
+
+**对应的仓库目录规范：**
+
+```
+cann-recipes-{domain}/
+├── docs/
+│   └── {subcategory}/              ← 子分类（如 llm、pretrain、sft）
+│       └── {model_name}/
+│           ├── {feature}.md        ← 技术报告（原子化特性）
+│           └── figures/            ← 图片资产
+├── {subcategory}/
+│   └── {model_name}/
+│       ├── README.md               ← 可执行代码 + 环境配置
+│       └── run.py / run.sh         ← 实际执行脚本
+└── README.md                       ← 仓库总览
+```
+
+**执行计划：**
+1. 各仓维护者先按上述规范整理自己仓库的目录结构
+2. 整理完成后，更新 `build_content.py` 的扫描路径配置
+3. Blog 侧边栏调整为匹配新的四级结构
+
+**遗留问题：**
+1. 技术、优化文章都移出到 Blog，框架设计、使用相关的文章保留在原代码仓里 — 需确认边界
+
+**对 Blog 侧的影响：**
+- `build_content.py` 的 `discover_models()` 逻辑需要适配新的路径层级（增加子分类层）
+- 侧边栏从三级（分类 → 模型 → 报告）变为四级（分类 → 子分类 → 模型 → 报告）
+- 卡片上可展示特性 tag（与 §3.2.3 标签筛选联动）
+- URL 路由需匹配（与 §3.8.1 子路径设计对齐）
+
+**修改文件：**
+- 各 GitCode 仓库目录结构调整（各仓维护者负责）
+- `build_content.py`（更新扫描路径配置，支持子分类层级）
+- `index.html`（侧边栏增加子分类层级展示）
+
+**验证方法：**
+1. 4 个仓库的目录结构均符合统一规范
+2. `python build_content.py` 能正确发现新目录层级下的所有报告
+3. Blog 侧边栏能清晰展示四级结构（分类 → 子分类 → 模型 → 报告）
+4. 新增 recipe 按照规范放置后，自动被 Blog 发现和展示
 
 ---
 
@@ -779,7 +1134,7 @@ if not has_readme_link:
 
 | # | 功能 | 说明 |
 |---|------|------|
-| 27 | 订阅按钮 | 跳转 CANN 邮件列表 |
+| 27 | ~~订阅按钮~~ | ~~跳转 CANN 邮件列表~~ — 已取消，待移除 |
 | 28 | Browse Repo 链接 | 无独立报告的模型直接链到 GitCode 仓库 |
 | 29 | 外部链接安全 | target="_blank" + rel="noopener" |
 | 30 | 本地开发代理 | proxy.py 零依赖 Python 代理 |
