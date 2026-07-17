@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CANN RECIPES BLOGS</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    // Apply the saved theme BEFORE render to avoid a light-mode flash.
+    // Dark styling is driven by html.dark CSS overrides in the <style> block
+    // below, so no Tailwind darkMode config is needed.
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
@@ -139,6 +145,103 @@
     .report-markdown tr:hover td { background: #f8fafc; }
     .report-markdown strong { color: #1e293b; font-weight: 600; }
     .report-markdown em { font-style: italic; }
+
+    /* ============ Table of Contents (report TOC) ============ */
+    /* Flex layout: centered article column + TOC column side by side. */
+    .report-layout { display: flex; justify-content: center; gap: 2.5rem; align-items: flex-start; }
+    .report-main { flex: 1 1 auto; max-width: 56rem; min-width: 0; }
+    .toc-inner { overflow-y: auto; padding: 1rem 1rem 1rem 0.75rem; border-left: 2px solid rgba(231,122,29,0.15); }
+    .toc-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #3E2723; margin-bottom: 0.75rem; }
+    .toc-list { display: flex; flex-direction: column; gap: 0.1rem; }
+    .toc-link { display: block; padding: 0.3rem 0.6rem; font-size: 0.8rem; line-height: 1.35; color: #64748b; border-radius: 0.4rem; border-left: 2px solid transparent; margin-left: -0.6rem; cursor: pointer; transition: color .15s, background .15s, border-color .15s; text-decoration: none; }
+    .toc-link:hover { color: #E77A1D; background: rgba(231,122,29,0.06); }
+    .toc-link.toc-h3 { padding-left: 1.4rem; font-size: 0.76rem; }
+    .toc-link.toc-active { color: #E77A1D; font-weight: 600; border-left-color: #E77A1D; background: rgba(231,122,29,0.08); }
+    /* Wide screens (>=1280px): TOC is a sticky in-flow column beside the article. */
+    @media (min-width: 1280px) {
+      #tocPanel.toc-available { display: block; flex: 0 0 15rem; width: 15rem; position: sticky; top: 1.5rem; align-self: flex-start; }
+      #tocPanel.toc-available .toc-inner { max-height: calc(100vh - 3rem); }
+    }
+    /* Narrow screens (<1280px): TOC is an off-canvas slide-in drawer. */
+    @media (max-width: 1279px) {
+      #tocPanel { position: fixed; top: 0; right: 0; bottom: 0; width: 17rem; z-index: 45; background: var(--toc-drawer-bg, rgba(249,248,246,0.98)); box-shadow: -8px 0 24px rgba(0,0,0,0.12); padding-top: 4rem; transform: translateX(100%); transition: transform .25s ease; }
+      #tocPanel.toc-open { display: block; transform: translateX(0); }
+      #tocPanel .toc-inner { max-height: 100vh; border-left: none; }
+      #tocToggle.toc-available { display: flex; }
+    }
+
+    /* ============ Dark mode (Warm Coffee) — html.dark overrides ============
+       Palette: bg #1E1715, card #2A211E, text #F5EFE9, accent #E77A1D (kept).
+       Light mode is untouched; these rules only apply under html.dark. */
+    html.dark body,
+    html.dark .bg-beige-light { background-color: #1E1715; }
+    html.dark { color-scheme: dark; }
+
+    /* Text colors */
+    html.dark .text-coffee-brown,
+    html.dark .text-slate-900 { color: #F5EFE9; }
+    html.dark .text-slate-600 { color: #D6CDC5; }
+    html.dark .text-slate-500 { color: #B3A9A0; }
+    html.dark .text-slate-400 { color: #968B82; }
+    html.dark .text-slate-300 { color: #7E736A; }
+    /* text-white and text-tech-accent stay as-is (accent is brand orange) */
+
+    /* Glass surfaces */
+    html.dark .glass-card { background: rgba(42, 33, 30, 0.72); border-color: rgba(255,255,255,0.08); }
+    html.dark .glass-sidebar { background: rgba(30, 23, 21, 0.85); border-right-color: rgba(255,255,255,0.06); }
+
+    /* White-ish backgrounds -> warm dark surfaces */
+    html.dark .bg-white { background-color: #2A211E; }
+    html.dark .bg-white\/60 { background-color: rgba(42, 33, 30, 0.6); }
+    html.dark .bg-white\/50 { background-color: rgba(255,255,255,0.06); }
+    html.dark .bg-white\/40 { background-color: rgba(255,255,255,0.05); }
+    html.dark .bg-white\/30 { background-color: rgba(255,255,255,0.04); }
+    html.dark .bg-slate-100 { background-color: #2A211E; }
+    html.dark .hover\:bg-white\/40:hover,
+    html.dark .hover\:bg-white\/50:hover { background-color: rgba(255,255,255,0.08); }
+
+    /* Borders / rings */
+    html.dark .border-black\/5 { border-color: rgba(255,255,255,0.08); }
+    html.dark .ring-black\/5 { --tw-ring-color: rgba(255,255,255,0.08); }
+    html.dark .border-white\/40 { border-color: rgba(255,255,255,0.15); }
+
+    /* Search input */
+    html.dark #searchInput { background-color: rgba(42,33,30,0.7); color: #F5EFE9; }
+    html.dark #searchInput::placeholder { color: #968B82; }
+
+    /* Markdown report body */
+    html.dark .report-markdown { color: #E4DAD2; }
+    html.dark .report-markdown h1,
+    html.dark .report-markdown h2,
+    html.dark .report-markdown h3,
+    html.dark .report-markdown h4,
+    html.dark .report-markdown h5,
+    html.dark .report-markdown h6 { color: #FBF4EE; }
+    html.dark .report-markdown h2 { border-bottom-color: #4A3B35; }
+    html.dark .report-markdown p,
+    html.dark .report-markdown li { color: #D8CEC6; }
+    html.dark .report-markdown code { background: #2A211E; color: #F5EFE9; }
+    html.dark .report-markdown table { border: 1px solid #4A3B35; border-radius: 0.5rem; overflow: hidden; }
+    html.dark .report-markdown th { background: #3A2D28; color: #FBF4EE; border-bottom: 2px solid #E77A1D; }
+    html.dark .report-markdown td { color: #E4DAD2; border-bottom-color: #453731; }
+    html.dark .report-markdown tbody tr:nth-child(even) td { background: #241C1A; }
+    html.dark .report-markdown tr:hover td { background: #3A2D28; }
+    html.dark .report-markdown strong { color: #F5EFE9; }
+    html.dark .report-markdown blockquote { color: #B3A9A0; }
+    html.dark .report-markdown hr { border-color: #3A2E2A; }
+    /* Mermaid diagrams keep a light canvas for diagram legibility */
+
+    /* Theme toggle icon: show sun in dark, moon in light */
+    #themeIcon::after { content: 'dark_mode'; }
+    html.dark #themeIcon::after { content: 'light_mode'; }
+
+    /* TOC dark mode */
+    html.dark .toc-inner { border-left-color: rgba(231,122,29,0.25); }
+    html.dark .toc-title { color: #F5EFE9; }
+    html.dark .toc-link { color: #B3A9A0; }
+    html.dark .toc-link:hover { color: #E77A1D; background: rgba(231,122,29,0.12); }
+    html.dark .toc-link.toc-active { color: #FF9838; border-left-color: #E77A1D; background: rgba(231,122,29,0.15); }
+    html.dark #tocPanel { --toc-drawer-bg: rgba(30,23,21,0.98); }
   </style>
 </head>
 <body class="bg-beige-light text-slate-900 font-sans min-h-screen flex">
@@ -201,11 +304,9 @@
       </span>
       <input id="searchInput" oninput="filterContent()" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
     </div>
-    <div class="flex items-center gap-4">
-      <button onclick="window.open('https://mailweb.cann.osinfra.cn/mailman3/lists/recipes.cann.osinfra.cn/', '_blank')" class="bg-tech-accent text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-lg shadow-tech-accent/20 hover:bg-[#c96614]">
-        Subscribe
-      </button>
-    </div>
+    <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="ml-4 shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
+      <span id="themeIcon" class="material-symbols-outlined"></span>
+    </button>
   </header>
 
   <!-- Home View -->
@@ -324,14 +425,6 @@
 
     <!-- Sidebar Widgets -->
     <aside class="w-56 flex-shrink-0 space-y-6">
-      <!-- Stay Updated (Newsletter) -->
-      <div class="bg-coffee-brown rounded-3xl p-6 text-white shadow-xl">
-        <h4 class="text-lg font-bold mb-2">Stay Updated</h4>
-        <p class="text-white/70 text-sm mb-4">Get the latest tech reports delivered to your inbox.</p>
-        <input class="w-full mb-3 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-sm focus:ring-1 focus:ring-tech-accent outline-none" placeholder="Email address" type="email"/>
-        <button onclick="window.open('https://mailweb.cann.osinfra.cn/mailman3/lists/recipes.cann.osinfra.cn/', '_blank')" class="w-full bg-tech-accent text-white font-bold py-2 rounded-xl transition-colors hover:bg-[#c96614]">Subscribe</button>
-      </div>
-
       <!-- Popular Reports -->
       <div class="glass-card rounded-3xl p-6">
         <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Popular Reports</h4>
@@ -384,7 +477,13 @@
 
   <!-- Report View (hidden by default) -->
   <main id="reportView" class="hidden flex-grow px-10 py-4">
-    <div class="max-w-4xl mx-auto">
+    <!-- Narrow-screen floating toggle for the TOC drawer -->
+    <button id="tocToggle" onclick="toggleTocPanel()" title="目录" aria-label="Toggle table of contents" class="hidden fixed right-4 bottom-6 z-40 w-12 h-12 rounded-full glass-card flex items-center justify-center text-tech-accent shadow-lg">
+      <span class="material-symbols-outlined">toc</span>
+    </button>
+    <!-- Flex layout: centered article column + sticky TOC column (no overlap) -->
+    <div class="report-layout">
+      <div class="report-main">
       <!-- Breadcrumb (dynamic, rendered by showReport via renderReportCrumb) -->
       <nav id="reportBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
@@ -420,6 +519,14 @@
           <!-- Dynamic content loaded here -->
         </div>
       </article>
+      </div>
+      <!-- TOC column (sticky on wide screens; slide-in drawer on narrow) -->
+      <aside id="tocPanel" class="hidden">
+        <div class="toc-inner">
+          <div class="toc-title"><span class="material-symbols-outlined text-base">toc</span>目录</div>
+          <nav id="tocList" class="toc-list"></nav>
+        </div>
+      </aside>
     </div>
   </main>
 
@@ -1253,6 +1360,98 @@
     });
   });
 
+  // ---- Report Table of Contents (TOC) --------------------------------------
+  let tocHeadings = [];        // [{ id, el }] in document order
+  let tocLinks = {};           // id -> <a> element
+  let tocScrollHandler = null; // window scroll listener (for cleanup)
+  let tocActiveId = null;
+
+  // Build the TOC from h2/h3 in the rendered report. Called after content loads.
+  function buildTOC() {
+    const content = document.getElementById('reportContent');
+    const panel = document.getElementById('tocPanel');
+    const toggle = document.getElementById('tocToggle');
+    const list = document.getElementById('tocList');
+    clearTOC(); // reset any previous report's TOC/listener
+
+    const heads = Array.from(content.querySelectorAll('h2, h3')).filter(h => h.id);
+    if (heads.length < 2) { return; } // not worth a TOC for 0-1 headings
+
+    tocHeadings = heads.map(h => ({ id: h.id, el: h }));
+    list.innerHTML = heads.map(h =>
+      `<a class="toc-link ${h.tagName === 'H3' ? 'toc-h3' : ''}" data-id="${escHtml(h.id)}" onclick="scrollToHeading('${escJs(h.id)}')">${escHtml(h.textContent)}</a>`
+    ).join('');
+
+    tocLinks = {};
+    list.querySelectorAll('.toc-link').forEach(a => { tocLinks[a.dataset.id] = a; });
+
+    // Reveal panel (wide) / floating button (narrow) — media queries decide which.
+    panel.classList.add('toc-available');
+    toggle.classList.add('toc-available');
+
+    // Scroll-spy: highlight the heading nearest the top of the viewport.
+    tocScrollHandler = () => requestAnimationFrame(updateTocActive);
+    window.addEventListener('scroll', tocScrollHandler, { passive: true });
+    updateTocActive();
+  }
+
+  // Highlight the TOC entry for the section currently at/above the viewport top.
+  function updateTocActive() {
+    if (!tocHeadings.length) return;
+    const offset = 120; // account for sticky-ish top spacing
+    let current = tocHeadings[0].id;
+    for (const h of tocHeadings) {
+      if (h.el.getBoundingClientRect().top <= offset) current = h.id;
+      else break;
+    }
+    // Bottom-of-page guard: short trailing sections never reach the offset line,
+    // so when the page is scrolled to (or within 2px of) the bottom, force the
+    // last heading active — otherwise clicking the last TOC item never lights up.
+    const scrollBottom = window.innerHeight + window.scrollY;
+    const docHeight = document.documentElement.scrollHeight;
+    if (scrollBottom >= docHeight - 2) current = tocHeadings[tocHeadings.length - 1].id;
+
+    if (current === tocActiveId) return;
+    if (tocActiveId && tocLinks[tocActiveId]) tocLinks[tocActiveId].classList.remove('toc-active');
+    if (tocLinks[current]) tocLinks[current].classList.add('toc-active');
+    tocActiveId = current;
+  }
+
+  // Smooth-scroll to a heading and (on narrow screens) close the drawer.
+  function scrollToHeading(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('tocPanel').classList.remove('toc-open');
+  }
+
+  // Narrow-screen drawer toggle.
+  function toggleTocPanel() {
+    document.getElementById('tocPanel').classList.toggle('toc-open');
+  }
+
+  // Tear down the TOC when leaving a report (or before building a new one).
+  function clearTOC() {
+    if (tocScrollHandler) { window.removeEventListener('scroll', tocScrollHandler); tocScrollHandler = null; }
+    tocHeadings = []; tocLinks = {}; tocActiveId = null;
+    const panel = document.getElementById('tocPanel');
+    const toggle = document.getElementById('tocToggle');
+    const list = document.getElementById('tocList');
+    if (panel) panel.classList.remove('toc-available', 'toc-open');
+    if (toggle) toggle.classList.remove('toc-available');
+    if (list) list.innerHTML = '';
+  }
+
+  // Toggle light/dark theme. Persists to localStorage; the early <head> script
+  // re-applies it on load. Styling is driven by html.dark CSS overrides.
+  function toggleTheme() {
+    const dark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    // Re-render any already-shown mermaid diagrams for the new theme.
+    if (window.mermaid) {
+      try { window.mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' }); } catch (e) {}
+    }
+  }
+
   let sidebarVisible = true;
 
   function toggleSidebar() {
@@ -1277,11 +1476,8 @@
     document.getElementById('homeView').classList.remove('hidden');
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.add('hidden');
-
-    // Show sidebar if hidden
-    if (!sidebarVisible) {
-      toggleSidebar();
-    }
+    clearTOC();
+    // Sidebar visibility is user-controlled via the toggle button only.
   }
 
   // ---- Directory drill-down (Phase 3) --------------------------------------
@@ -1293,7 +1489,9 @@
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
-    if (sidebarVisible) toggleSidebar();
+    clearTOC();
+    // Sidebar visibility is user-controlled via the toggle button only —
+    // navigation must not collapse/expand it.
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1414,10 +1612,7 @@
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.remove('hidden');
 
-    // Hide sidebar when viewing report
-    if (sidebarVisible) {
-      toggleSidebar();
-    }
+    // Sidebar visibility is user-controlled via the toggle button only.
 
     // Update breadcrumb: Home > Category > [Subcategory > Model >] Report.
     // Intermediate crumbs are clickable to drill back up; flat categories skip
@@ -1471,6 +1666,7 @@
         if (content) {
           reportContent.innerHTML = content;
           enhanceCodeBlocks(reportContent);
+          buildTOC();
         } else {
           // Fallback to link if fetch failed
           reportContent.innerHTML = `
@@ -1503,10 +1699,7 @@
       `;
     }
 
-    // Hide sidebar when viewing report
-    if (sidebarVisible) {
-      toggleSidebar();
-    }
+    // Sidebar visibility is user-controlled via the toggle button only.
 
     // Scroll to top
     window.scrollTo({top: 0, behavior: 'smooth'});
