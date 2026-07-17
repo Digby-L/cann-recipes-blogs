@@ -34,7 +34,8 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
         ))
         repo   = params.get('repo', '')
         path   = params.get('path', '')
-        branch = params.get('branch', 'master')
+        branch = params.get('branch', 'main')
+        ns     = params.get('ns', 'tian-ccs')
 
         if not repo or not path:
             self.send_response(400)
@@ -47,7 +48,6 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
                 b'&branch=master')
             return
 
-        ns = 'cann'
         repo_id = f'{ns}%2F{repo}'
         api_url = (
             f'https://web-api.gitcode.com/api/v2/projects/{repo_id}/repository/files'

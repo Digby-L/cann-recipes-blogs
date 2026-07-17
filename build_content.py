@@ -21,40 +21,42 @@ import urllib.parse
 from datetime import datetime
 
 GITCODE_API = "https://web-api.gitcode.com/api/v2"
-GITCODE_RAW = "https://gitcode.com/cann"
-NS = "cann"
+# GitCode namespace (repo owner). All categories currently live under one repo.
+NS = "tian-ccs"
+GITCODE_RAW = f"https://gitcode.com/{NS}"
+# raw.gitcode.com serves full binary bytes (no auth/headers, no truncation),
+# unlike the web-api files endpoint which caps binaries at ~8 KB (is_limited).
+GITCODE_RAW_CDN = f"https://raw.gitcode.com/{NS}"
 
-# Repo configuration: each category maps to a GitCode repo.
-# scanPaths: list of base directories to scan for model subdirectories.
-#   Each scanPath is scanned recursively for .md files.
+# Full browser-like headers. GitCode's CloudWAF returns HTTP 418 (a challenge
+# page) for requests with a bare "Mozilla/5.0" UA, so we mirror what proxy.py
+# sends. A generic Referer of https://gitcode.com/ is enough to pass the WAF.
+BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Origin": "https://gitcode.com",
+    "Referer": "https://gitcode.com/",
+}
+
+# Repo configuration. Source: GitCode tian-ccs/cann-recipes-docs.
+# Layout is 4-level: basePath(Category) / Subcategory / Model / Report.md
+#   basePath: the category's top directory in the repo.
+#   flat:     True for categories whose .md files sit directly under basePath
+#             (no Subcategory/Model layer), e.g. cann_features.
 REPO_CONFIG = {
-    "Infer": {
-        "repo": "cann-recipes-infer",
-        "branch": "master",
-        "scanPaths": ["docs/models"],
-    },
-    "Train": {
-        "repo": "cann-recipes-train",
-        "branch": "master",
-        "scanPaths": ["docs"],
-    },
-    "Spatial Intelligence": {
-        "repo": "cann-recipes-spatial-intelligence",
-        "branch": "master",
-        "scanPaths": ["docs/models"],
-    },
-    "Embodied Intelligence": {
-        "repo": "cann-recipes-embodied-intelligence",
-        "branch": "master",
-        "scanPaths": ["docs"],
-    },
+    "Infer":                 {"repo": "cann-recipes-docs", "branch": "main", "basePath": "infer"},
+    "Train":                 {"repo": "cann-recipes-docs", "branch": "main", "basePath": "train"},
+    "Embodied Intelligence": {"repo": "cann-recipes-docs", "branch": "main", "basePath": "embodied"},
+    "CANN Features":         {"repo": "cann-recipes-docs", "branch": "main", "basePath": "cann_features", "flat": True},
 }
 
 
 def api_request(url):
     """Make an API request and return parsed JSON, or None on failure."""
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers=BROWSER_HEADERS)
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except Exception as e:
@@ -78,64 +80,50 @@ def list_tree(repo, branch, path):
     return items if isinstance(items, list) else []
 
 
-def discover_models(repo, branch, scan_path):
-    """
-    Discover models under a scan path. Returns list of
-    {"name": str, "docPath": str (relative to scan_path), "reports": [str]}
+def list_md_files(repo, branch, dir_path):
+    """List .md files directly inside dir_path (non-recursive). Returns [filename]."""
+    return sorted(
+        item["name"]
+        for item in list_tree(repo, branch, dir_path)
+        if item.get("type") == "blob" and item["name"].endswith(".md")
+    )
 
-    Strategy: list the scan_path directory. For each subdirectory, recursively
-    find all .md files. A "model" is any subdirectory that contains at least
-    one .md file (directly or nested).
-    """
-    models = []
-    top_items = list_tree(repo, branch, scan_path)
 
-    for item in top_items:
-        if item.get("type") != "tree":
+def discover_subcategories(repo, branch, base_path):
+    """
+    Walk the 4-level layout: base_path / Subcategory / Model / *.md
+    Returns a list of subcategories:
+      [{ "name": str,
+         "models": [{ "name": str,
+                      "docPath": "<sub>/<model>",   # relative to base_path
+                      "reports": [filename, ...] }] }]
+    A Model is any directory under a Subcategory that contains .md files
+    (the 'figures' image dir is skipped).
+    """
+    subcategories = []
+    for sub in list_tree(repo, branch, base_path):
+        if sub.get("type") != "tree":
             continue
-        model_name = item["name"]
-        model_path = item["path"]  # e.g. "docs/models/deepseek-r1"
-
-        # Recursively find all .md files under this model directory
-        md_files = find_md_files_recursive(repo, branch, model_path)
-
-        if md_files:
-            # docPath is relative to scanPath
-            doc_path = model_path[len(scan_path):].lstrip("/")
-            models.append({
-                "name": model_name,
-                "docPath": doc_path,
-                "fullPath": model_path,
-                "reports": md_files,
-            })
-
-    return models
+        sub_name = sub["name"]
+        models = []
+        for model in list_tree(repo, branch, sub["path"]):
+            if model.get("type") != "tree" or model["name"] == "figures":
+                continue
+            reports = list_md_files(repo, branch, model["path"])
+            if reports:
+                models.append({
+                    "name": model["name"],
+                    "docPath": f"{sub_name}/{model['name']}",
+                    "reports": reports,
+                })
+        if models:
+            subcategories.append({"name": sub_name, "models": models})
+    return subcategories
 
 
-def find_md_files_recursive(repo, branch, dir_path, max_depth=5):
-    """
-    Recursively find all .md files under a directory.
-    Returns list of {"file": filename, "dirPath": directory path relative to dir_path's parent}.
-    For simplicity, returns list of dicts with full path info.
-    """
-    if max_depth <= 0:
-        return []
-
-    items = list_tree(repo, branch, dir_path)
-    results = []
-
-    for item in items:
-        if item.get("type") == "blob" and item["name"].endswith(".md"):
-            results.append({
-                "file": item["name"],
-                "fullDir": dir_path,
-            })
-        elif item.get("type") == "tree" and item["name"] != "figures":
-            # Recurse into subdirectories (skip 'figures' dirs)
-            sub_results = find_md_files_recursive(repo, branch, item["path"], max_depth - 1)
-            results.extend(sub_results)
-
-    return results
+def discover_flat_reports(repo, branch, base_path):
+    """Flat category (e.g. cann_features): .md files directly under base_path."""
+    return list_md_files(repo, branch, base_path)
 
 
 def api_fetch_file(repo, branch, file_path):
@@ -149,7 +137,7 @@ def api_fetch_file(repo, branch, file_path):
         f"&ref_replace_web={urllib.parse.quote(branch)}"
     )
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers=BROWSER_HEADERS)
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             if "content" in data:
@@ -163,7 +151,7 @@ def raw_fetch_file(repo, branch, file_path):
     """Fetch file content via raw GitCode URL."""
     url = f"{GITCODE_RAW}/{repo}/raw/{branch}/{file_path}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers=BROWSER_HEADERS)
         with urllib.request.urlopen(req, timeout=30) as resp:
             text = resp.read().decode("utf-8", errors="replace")
             if not text.strip().startswith("<!DOCTYPE") and not text.strip().startswith("<html"):
@@ -188,7 +176,21 @@ def fetch_binary_file_base64(repo, branch, file_path):
                 "gif": "image/gif", "svg": "image/svg+xml", "webp": "image/webp"}
     mime = mime_map.get(ext, "image/png")
 
-    # Method 1: Try GitCode API (returns base64 content)
+    # Method 1: raw.gitcode.com CDN — serves full bytes, no truncation.
+    cdn_url = f"{GITCODE_RAW_CDN}/{repo}/raw/{branch}/{file_path}"
+    try:
+        req = urllib.request.Request(cdn_url, headers=BROWSER_HEADERS)
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = resp.read()
+            if not data[:20].strip().startswith(b"<!DOCTYPE") and not data[:20].strip().startswith(b"<html"):
+                b64 = base64.b64encode(data).decode("ascii")
+                return f"data:{mime};base64,{b64}"
+    except Exception as e:
+        print(f"    [WARN] CDN image fetch failed: {e}")
+
+    # Method 2 (fallback): GitCode files API — NOTE truncates binaries to ~8 KB
+    # (is_limited), so large images come back corrupt. Only used if the CDN host
+    # is unreachable; a truncated image is better than a broken link.
     repo_id = urllib.parse.quote(f"{NS}/{repo}", safe="")
     api_url = (
         f"{GITCODE_API}/projects/{repo_id}/repository/files"
@@ -198,7 +200,7 @@ def fetch_binary_file_base64(repo, branch, file_path):
         f"&ref_replace_web={urllib.parse.quote(branch)}"
     )
     try:
-        req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(api_url, headers=BROWSER_HEADERS)
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             if "content" in data:
@@ -206,18 +208,6 @@ def fetch_binary_file_base64(repo, branch, file_path):
                 return f"data:{mime};base64,{b64}"
     except Exception as e:
         print(f"    [WARN] API image fetch failed: {e}")
-
-    # Method 2: Try raw URL (may not work due to redirects)
-    url = f"{GITCODE_RAW}/{repo}/raw/{branch}/{file_path}"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read()
-            if not data[:20].strip().startswith(b"<!DOCTYPE") and not data[:20].strip().startswith(b"<html"):
-                b64 = base64.b64encode(data).decode("ascii")
-                return f"data:{mime};base64,{b64}"
-    except Exception as e:
-        print(f"    [WARN] Raw image fetch failed: {e}")
     return None
 
 
@@ -231,7 +221,7 @@ def fetch_commit_date(repo, branch, file_path):
         f"&per_page=1"
     )
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers=BROWSER_HEADERS)
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             commits = data if isinstance(data, list) else data.get("content", [])
@@ -270,117 +260,109 @@ def find_relative_images(md_content):
     return images
 
 
+def process_report(repo, branch, safe_category, model_key, doc_dir, report_file, out_dir, idx):
+    """Fetch one report's markdown + images + commit date and save a report JSON.
+      doc_dir     : full repo dir containing the .md (e.g. 'infer/llm/deepseek_r1')
+      model_key   : subdir under the category for the saved JSON (model name, or
+                    the category itself for flat categories)
+    Returns (commit_date, site_relative_json_path) on success, or (None, None).
+    """
+    file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
+    print(f"\n[{idx}] Fetching {file_path} ...")
+    md = fetch_file(repo, branch, file_path)
+    if not md:
+        print("  FAILED to fetch markdown")
+        return None, None
+
+    commit_date = fetch_commit_date(repo, branch, file_path)
+    print(f"  Commit date: {commit_date or 'N/A'}")
+
+    images = {}
+    for img_src in find_relative_images(md):
+        resolved = resolve_path(doc_dir, img_src)
+        data_uri = fetch_binary_file_base64(repo, branch, resolved)
+        if data_uri:
+            images[img_src] = data_uri
+        else:
+            print(f"    [WARN] image FAILED: {img_src}")
+
+    report_out_dir = os.path.join(out_dir, safe_category, model_key)
+    os.makedirs(report_out_dir, exist_ok=True)
+    out_file = os.path.join(report_out_dir, report_file.replace(".md", ".json"))
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump({"markdown": md, "commitDate": commit_date, "images": images}, f, ensure_ascii=False)
+    print(f"  Saved: {out_file} ({len(md)} chars, {len(images)} images)")
+
+    site_path = f"content/reports/{safe_category}/{model_key}/{report_file.replace('.md', '.json')}"
+    return commit_date, site_path
+
+
+def _fetch_reports(repo, branch, safe_category, model_key, doc_dir, report_files, out_dir, counts):
+    """Process a list of report filenames; update counts in place.
+    Returns the list of report filenames that were fetched successfully."""
+    kept = []
+    for report_file in report_files:
+        counts["total"] += 1
+        commit_date, site_path = process_report(
+            repo, branch, safe_category, model_key, doc_dir, report_file, out_dir, counts["total"])
+        if site_path is not None:
+            counts["success"] += 1
+            kept.append(report_file)
+        else:
+            counts["failed"] += 1
+    return kept
+
+
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     out_dir = os.path.join(script_dir, "content", "reports")
     os.makedirs(out_dir, exist_ok=True)
 
-    # manifest: category -> list of models, each with reports
+    # manifest: category -> 4-level tree (or flat), matching content/index.json schema
     manifest = {}
-    total = 0
-    success = 0
-    failed = 0
+    counts = {"total": 0, "success": 0, "failed": 0}
 
     for category, config in REPO_CONFIG.items():
         repo = config["repo"]
         branch = config["branch"]
-        scan_paths = config["scanPaths"]
-
-        print(f"\n=== Discovering models for {category} (repo: {repo}) ===")
-
-        # Discover models from all scan paths
-        all_models = []
-        for scan_path in scan_paths:
-            print(f"  Scanning: {scan_path}")
-            models = discover_models(repo, branch, scan_path)
-            for m in models:
-                print(f"    Found model: {m['name']} ({len(m['reports'])} reports)")
-                for r in m["reports"]:
-                    print(f"      - {r['file']} (in {r['fullDir']})")
-            all_models.extend(models)
-
-        if not all_models:
-            print(f"  No models found for {category}")
-            manifest[category] = {"models": [], "reports": []}
-            continue
-
-        cat_models = []
-        cat_reports = []
+        base_path = config["basePath"]
+        is_flat = config.get("flat", False)
         safe_category = category.replace(" ", "_")
 
-        for model in all_models:
-            model_reports = []
+        print(f"\n=== Discovering {category} (repo: {repo}, base: {base_path}, flat={is_flat}) ===")
 
-            for report_info in model["reports"]:
-                total += 1
-                report_file = report_info["file"]
-                report_dir_full = report_info["fullDir"]
-                file_path = f"{report_dir_full}/{report_file}"
+        cat_entry = {"ns": NS, "repo": repo, "branch": branch, "basePath": base_path}
 
-                print(f"\n[{total}] Fetching {category}/{model['name']}/{report_file} ...")
+        if is_flat:
+            report_files = discover_flat_reports(repo, branch, base_path)
+            print(f"  Found {len(report_files)} flat reports")
+            cat_entry["flat"] = True
+            cat_entry["reports"] = _fetch_reports(
+                repo, branch, safe_category, safe_category, base_path, report_files, out_dir, counts)
+        else:
+            subs = discover_subcategories(repo, branch, base_path)
+            print(f"  Found {len(subs)} subcategories")
+            out_subs = []
+            for sub in subs:
+                out_models = []
+                for model in sub["models"]:
+                    doc_dir = f"{base_path}/{model['docPath']}"
+                    kept = _fetch_reports(
+                        repo, branch, safe_category, model["name"], doc_dir,
+                        model["reports"], out_dir, counts)
+                    if kept:
+                        out_models.append({
+                            "name": model["name"],
+                            "docPath": model["docPath"],
+                            "reports": kept,
+                        })
+                if out_models:
+                    out_subs.append({"name": sub["name"], "models": out_models})
+            cat_entry["subcategories"] = out_subs
 
-                md = fetch_file(repo, branch, file_path)
-                if not md:
-                    print(f"  FAILED to fetch markdown")
-                    failed += 1
-                    continue
+        manifest[category] = cat_entry
 
-                # Fetch commit date
-                commit_date = fetch_commit_date(repo, branch, file_path)
-                print(f"  Commit date: {commit_date or 'N/A'}")
-
-                # Find and fetch images
-                rel_images = find_relative_images(md)
-                images = {}
-                for img_src in rel_images:
-                    resolved = resolve_path(report_dir_full, img_src)
-                    print(f"  Fetching image: {img_src} -> {resolved}")
-                    data_uri = fetch_binary_file_base64(repo, branch, resolved)
-                    if data_uri:
-                        images[img_src] = data_uri
-                        print(f"    OK ({len(data_uri)} chars)")
-                    else:
-                        print(f"    FAILED")
-
-                # Save report JSON
-                safe_model = model["name"]
-                report_out_dir = os.path.join(out_dir, safe_category, safe_model)
-                os.makedirs(report_out_dir, exist_ok=True)
-
-                report_data = {
-                    "markdown": md,
-                    "commitDate": commit_date,
-                    "images": images,
-                }
-
-                out_file = os.path.join(report_out_dir, report_file.replace(".md", ".json"))
-                with open(out_file, "w", encoding="utf-8") as f:
-                    json.dump(report_data, f, ensure_ascii=False)
-
-                print(f"  Saved: {out_file} ({len(md)} chars, {len(images)} images)")
-                success += 1
-
-                report_entry = {
-                    "reportFile": report_file,
-                    "commitDate": commit_date,
-                    "path": f"content/reports/{safe_category}/{safe_model}/{report_file.replace('.md', '.json')}",
-                    "docDir": report_dir_full,
-                }
-                model_reports.append(report_entry)
-                cat_reports.append({**report_entry, "model": model["name"]})
-
-            cat_models.append({
-                "name": model["name"],
-                "docPath": model["docPath"],
-                "reports": [r["reportFile"] for r in model_reports],
-            })
-
-        manifest[category] = {
-            "repo": repo,
-            "branch": branch,
-            "models": cat_models,
-            "reports": cat_reports,
-        }
+    total, success, failed = counts["total"], counts["success"], counts["failed"]
 
     # Write manifest
     manifest_path = os.path.join(script_dir, "content", "index.json")

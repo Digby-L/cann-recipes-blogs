@@ -8,6 +8,15 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script type="module">
+    // Mermaid diagrams. Loaded as an ESM module and exposed on window so
+    // enhanceCodeBlocks() can render ```mermaid``` fences into SVG on demand.
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+    window.mermaid = mermaid;
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script>
@@ -118,6 +127,8 @@
     .code-copy-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
     .code-copy-btn.copied { background: rgba(72, 187, 120, 0.3); color: #48bb78; }
     .report-markdown img { max-width: 100%; border-radius: 0.75rem; margin: 1.25rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: block; }
+    .mermaid-diagram { margin: 1.25rem 0; padding: 1rem; background: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow-x: auto; text-align: center; }
+    .mermaid-diagram svg { max-width: 100%; height: auto; }
     .report-markdown a { color: #E77A1D; }
     .report-markdown a:hover { text-decoration: underline; }
     .report-markdown blockquote { border-left: 4px solid #E77A1D; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(231,122,29,0.05); border-radius: 0 0.5rem 0.5rem 0; }
@@ -152,167 +163,13 @@
       Home
     </a>
 
-    <!-- Categories with expandable models -->
+    <!-- Categories with expandable models.
+         This tree is rendered dynamically by renderSidebar() on load, which
+         replaces this container's innerHTML from repoModels / content/index.json.
+         The placeholder below only shows briefly before JS runs — do NOT
+         hand-maintain a model list here (it drifts from the remote naming). -->
     <div class="mt-4 space-y-1">
-      <!-- Infer -->
-      <details open class="group">
-        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
-          <span class="material-symbols-outlined text-slate-500">memory</span>
-          <span class="text-slate-600 font-medium flex-1">Infer</span>
-          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-        </summary>
-        <div class="ml-8 mt-1 space-y-1">
-          <!-- deepseek-r1 has multiple reports -->
-          <details class="group">
-            <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
-              <span class="material-symbols-outlined text-xs">folder</span>
-              <span>deepseek-r1</span>
-              <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-            </summary>
-            <div class="ml-4 mt-1 space-y-1">
-              <a onclick="showModelReport('Infer', 'deepseek-r1', 'Deepseek R1 Decode Optimization', 'deepseek_r1_decode_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                deepseek_r1_decode_optimization.md
-              </a>
-              <a onclick="showModelReport('Infer', 'deepseek-r1', 'Deepseek R1 Prefill Optimization', 'deepseek_r1_prefill_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                deepseek_r1_prefill_optimization.md
-              </a>
-            </div>
-          </details>
-          <a onclick="showModelReport('Infer', 'deepseek-v3.2-exp', 'Deepseek V3.2 Exp', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            deepseek-v3.2-exp
-          </a>
-          <a onclick="showModelReport('Infer', 'gpt-oss', 'GPT OSS', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            gpt-oss
-          </a>
-          <a onclick="showModelReport('Infer', 'hstu', 'HSTU', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            hstu
-          </a>
-          <a onclick="showModelReport('Infer', 'kimi-k2-thinking', 'Kimi K2 Thinking', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            kimi-k2-thinking
-          </a>
-          <a onclick="showModelReport('Infer', 'longcat-flash', 'Longcat Flash', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            longcat-flash
-          </a>
-          <a onclick="showModelReport('Infer', 'qwen3-moe', 'Qwen3 MoE', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            qwen3-moe
-          </a>
-          <a onclick="showModelReport('Infer', 'qwen3-next', 'Qwen3 Next', '')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            qwen3-next
-          </a>
-          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-infer', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
-            <span class="material-symbols-outlined text-xs">open_in_new</span>
-            Browse Repo
-          </a>
-        </div>
-      </details>
-
-      <!-- Train -->
-      <details class="group">
-        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
-          <span class="material-symbols-outlined text-slate-500">model_training</span>
-          <span class="text-slate-600 font-medium flex-1">Train</span>
-          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-        </summary>
-        <div class="ml-8 mt-1 space-y-1">
-          <!-- llm_pretrain has one report -->
-          <a onclick="showModelReport('Train', 'llm_pretrain', 'LLM PreTrain Optimization', 'deepseekv32_pre_train_optimization.md')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            llm_pretrain
-          </a>
-          <!-- llm_rl has multiple reports -->
-          <details class="group">
-            <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
-              <span class="material-symbols-outlined text-xs">folder</span>
-              <span>llm_rl</span>
-              <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-            </summary>
-            <div class="ml-4 mt-1 space-y-1">
-              <a onclick="showModelReport('Train', 'llm_rl', 'Deepseek RL Train Optimization', 'deepseek_rl_train_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                deepseek_rl_train_optimization.md
-              </a>
-              <a onclick="showModelReport('Train', 'llm_rl', 'Qwen3 235B 32K RL', 'qwen3_235B_32k_longseq_rl_train_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                qwen3_235B_32k_longseq_rl_train_optimization.md
-              </a>
-              <a onclick="showModelReport('Train', 'llm_rl', 'SAM Decoding', 'sam_decoding.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                sam_decoding.md
-              </a>
-            </div>
-          </details>
-          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-train', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
-            <span class="material-symbols-outlined text-xs">open_in_new</span>
-            Browse Repo
-          </a>
-        </div>
-      </details>
-
-      <!-- Embodied Intelligence -->
-      <details class="group">
-        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
-          <span class="material-symbols-outlined text-slate-500">smart_toy</span>
-          <span class="text-slate-600 font-medium flex-1">Embodied Intelligence</span>
-          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-        </summary>
-        <div class="ml-8 mt-1 space-y-1">
-          <a onclick="showModelReport('Embodied Intelligence', 'pi0', 'PI0 Robot VLA', 'README.md')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            manipulation/pi0
-          </a>
-          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-embodied-intelligence', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
-            <span class="material-symbols-outlined text-xs">open_in_new</span>
-            Browse Repo
-          </a>
-        </div>
-      </details>
-
-      <!-- Spatial Intelligence -->
-      <details class="group">
-        <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
-          <span class="material-symbols-outlined text-slate-500">language</span>
-          <span class="text-slate-600 font-medium flex-1">Spatial Intelligence</span>
-          <svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-        </summary>
-        <div class="ml-8 mt-1 space-y-1">
-          <!-- Hunyuan3D has one report -->
-          <a onclick="showModelReport('Spatial Intelligence', 'Hunyuan3D', 'Hunyuan3D Optimization', 'Hunyuan3D_optimization.md')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-            <span class="material-symbols-outlined text-xs">description</span>
-            Hunyuan3D
-          </a>
-          <!-- vggt has multiple reports -->
-          <details class="group">
-            <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
-              <span class="material-symbols-outlined text-xs">folder</span>
-              <span>vggt</span>
-              <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-            </summary>
-            <div class="ml-4 mt-1 space-y-1">
-              <a onclick="showModelReport('Spatial Intelligence', 'vggt', 'VGGT Optimization', 'vggt_optimization.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                vggt_optimization.md
-              </a>
-              <a onclick="showModelReport('Spatial Intelligence', 'vggt', 'VGGT Accuracy Evaluation', 'vggt_accurancy_evaluation.md')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                vggt_accurancy_evaluation.md
-              </a>
-            </div>
-          </details>
-          <a onclick="window.open('https://gitcode.com/cann/cann-recipes-spatial-intelligence', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
-            <span class="material-symbols-outlined text-xs">open_in_new</span>
-            Browse Repo
-          </a>
-        </div>
-      </details>
+      <div class="px-4 py-3 text-sm text-slate-400">Loading…</div>
     </div>
   </nav>
 
@@ -510,23 +367,17 @@
     </aside>
   </main>
 
-  <!-- Category View (hidden by default) -->
+  <!-- Category View (hidden by default) — used for drill-down levels:
+       subcategory grid, model grid, and report list. -->
   <main id="categoryView" class="hidden flex-grow px-10 py-4">
     <div class="max-w-6xl mx-auto">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
-        <a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1">
-          <span class="material-symbols-outlined text-base">home</span>
-          Home
-        </a>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span id="categoryTitle" class="text-slate-900 font-medium">Category</span>
-      </nav>
+      <!-- Dynamic breadcrumb, rendered by renderCrumb() per drill-down level -->
+      <nav id="categoryBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
       <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-8">Tech Reports</h2>
 
-      <div id="categoryReports" class="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-        <!-- Reports will be dynamically loaded here -->
+      <div id="categoryReports" class="flex flex-col gap-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+        <!-- Drill-down cards are dynamically loaded here (one per row) -->
       </div>
     </div>
   </main>
@@ -534,17 +385,8 @@
   <!-- Report View (hidden by default) -->
   <main id="reportView" class="hidden flex-grow px-10 py-4">
     <div class="max-w-4xl mx-auto">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
-        <a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1">
-          <span class="material-symbols-outlined text-base">home</span>
-          Home
-        </a>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span id="breadcrumbCategory" class="text-slate-900 font-medium">Category</span>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span id="breadcrumbModel" class="text-slate-900 font-medium">Model</span>
-      </nav>
+      <!-- Breadcrumb (dynamic, rendered by showReport via renderReportCrumb) -->
+      <nav id="reportBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
       <article class="glass-card rounded-3xl p-8 md:p-12 fade-in">
         <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Category</span>
@@ -611,38 +453,49 @@
     marked.setOptions({ renderer: r, breaks: true, gfm: true });
   })();
 
-  // GitCode Repo Configuration - 4 repos for 4 categories
-  const repoConfig = {
-    "Infer": {
-      repo: "cann-recipes-infer",
-      branch: "master",
-      basePath: "docs/models"
-    },
-    "Train": {
-      repo: "cann-recipes-train",
-      branch: "master",
-      basePath: "docs"
-    },
-    "Spatial Intelligence": {
-      repo: "cann-recipes-spatial-intelligence",
-      branch: "master",
-      basePath: "docs/models"
-    },
-    "Embodied Intelligence": {
-      repo: "cann-recipes-embodied-intelligence",
-      branch: "master",
-      basePath: "docs"
-    }
+  // Repo configuration per category. This is only a FALLBACK — the real config
+  // (ns, repo, branch, basePath, flat) is loaded from content/index.json by
+  // loadModelsFromManifest() so build_content.py stays the single source of
+  // truth. Source: GitCode tian-ccs/cann-recipes-docs (4-level layout:
+  // Category > Subcategory > Model > Report; "CANN Features" is a flat 2-level
+  // exception whose reports sit directly under basePath).
+  let repoConfig = {
+    "Infer":                 { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "infer" },
+    "Train":                 { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "train" },
+    "Embodied Intelligence": { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "embodied" },
+    "CANN Features":         { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "cann_features", flat: true }
   };
+
+  // Content source switch:
+  //   true  = load report bodies live from GitCode remote (local proxy 8081 -> CORS proxies)
+  //   false = load from pre-fetched static files under content/reports (offline)
+  // The sidebar list still comes from content/index.json regardless of this flag.
+  const USE_REMOTE_CONTENT = true;
 
   // Local proxy server URL (optional, for development)
   const proxyBase = 'http://localhost:8081';
-  function localProxyUrl(repo, branch, filePath) {
-    return `${proxyBase}/?repo=${encodeURIComponent(repo)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
+  function localProxyUrl(ns, repo, branch, filePath) {
+    return `${proxyBase}/?ns=${encodeURIComponent(ns)}&repo=${encodeURIComponent(repo)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
   }
-  // Raw GitCode URL
-  function rawGitCodeUrl(repo, branch, filePath) {
-    return `https://gitcode.com/cann/${repo}/raw/${branch}/${filePath}`;
+  // Raw GitCode URL (blob-style; used for building human-facing links)
+  function rawGitCodeUrl(ns, repo, branch, filePath) {
+    return `https://gitcode.com/${ns}/${repo}/raw/${branch}/${filePath}`;
+  }
+
+  // Decide the <img> src chain for a repo-relative image path.
+  //   primary  — raw.gitcode.com serves the full image bytes (image/png etc.)
+  //              with no auth/headers and permissive access for <img> loads.
+  //   onerror  — fall back to the local proxy (8081) if the CDN host is
+  //              unreachable. NOTE: the web-api files endpoint truncates binary
+  //              files to ~8 KB (is_limited), so it is a last resort only.
+  // The plain gitcode.com/.../raw/... URL returns an HTML challenge page for
+  // images, so it is intentionally NOT used here.
+  function imageSrc(ns, repo, branch, filePath) {
+    const primary = `https://raw.gitcode.com/${ns}/${repo}/raw/${branch}/${filePath}`;
+    const raw = primary;
+    const proxy = localProxyUrl(ns, repo, branch, filePath);
+    const onerror = ` onerror="this.onerror=null;this.src='${proxy}'"`;
+    return { primary, raw, proxy, onerror };
   }
 
   // Multiple CORS proxies for reliability
@@ -675,7 +528,7 @@
   }
 
   // Fetch latest commit date for a file from GitCode API (with pre-fetched fallback)
-  async function fetchLatestCommitDate(repo, branch, filePath) {
+  async function fetchLatestCommitDate(ns, repo, branch, filePath) {
     // Try pre-fetched manifest first
     const manifest = await loadManifest();
     if (manifest) {
@@ -691,7 +544,6 @@
       }
     }
 
-    const ns = 'cann';
     const repoId = `${ns}%2F${repo}`;
     const commitsUrl = `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/commits?ref_name=${encodeURIComponent(branch)}&path=${encodeURIComponent(filePath)}&per_page=1`;
     console.log('Fetching commit date:', commitsUrl);
@@ -715,51 +567,105 @@
     return null;
   }
 
-  // Model data - hardcoded fallback, updated from manifest if available
+  // Model data - hardcoded fallback, updated from manifest if available.
+  // Kept in sync with content/index.json (remote uses underscore naming, e.g.
+  // deepseek_r1). Regenerate from the manifest after running build_content.py.
+  // Each model carries a `subcategory` field so the sidebar can regroup them
+  // into the 4-level tree; docPath is relative to the category's basePath.
+  // Flat categories (CANN Features) use one synthetic model (subcategory:null,
+  // docPath:"") holding the reports that sit directly under basePath.
   let repoModels = {
     "Infer": [
-      { name: "deepseek-r1", docPath: "deepseek-r1", reports: ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"] },
-      { name: "deepseek-v3.2-exp", docPath: "deepseek-v3.2-exp", reports: ["deepseek_v3.2_exp_ascendc_operator_guide.md", "deepseek_v3.2_exp_inference_guide.md", "deepseek_v3.2_exp_pypto_operator_guide.md", "deepseek_v3.2_exp_tilelang_operator_guide.md"] },
-      { name: "gpt-oss", docPath: "gpt-oss", reports: ["gpt_oss_optimization.md"] },
-      { name: "hstu", docPath: "hstu", reports: ["hstu_optimization.md"] },
-      { name: "kimi-k2-thinking", docPath: "kimi-k2-thinking", reports: ["kimi_k2_thinking_inference_guide.md"] },
-      { name: "longcat-flash", docPath: "longcat-flash", reports: ["longcat_flash_optimization.md"] },
-      { name: "qwen3-moe", docPath: "qwen3-moe", reports: ["qwen3_moe_optimization.md"] },
-      { name: "qwen3-next", docPath: "qwen3-next", reports: ["qwen3_next_optimization.md"] }
+      {"name": "deepseek_r1", "subcategory": "llm", "docPath": "llm/deepseek_r1", "reports": ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"]},
+      {"name": "deepseek_v4", "subcategory": "llm", "docPath": "llm/deepseek_v4", "reports": ["deepseek_v4_ascendc_operator_guide.md", "deepseek_v4_autofuse_guide.md", "deepseek_v4_inference_guide.md", "deepseek_v4_mHC_guide.md", "deepseek_v4_pypto_operator_guide.md", "deepseek_v4_shmem_guide.md", "deepseek_v4_tilelang_operator_guide.md"]},
+      {"name": "hunyuan_image_3_0", "subcategory": "multimodal", "docPath": "multimodal/hunyuan_image_3_0", "reports": ["hunyuan_image_3_optimization.md"]},
+      {"name": "hstu", "subcategory": "recommendation", "docPath": "recommendation/hstu", "reports": ["hstu_optimization.md"]}
     ],
     "Train": [
-      { name: "llm_pretrain", docPath: "llm_pretrain", reports: ["deepseekv32_pre_train_optimization.md"] },
-      { name: "llm_rl", docPath: "llm_rl", reports: ["deepseek_rl_train_optimization.md", "qwen3_235B_32k_longseq_rl_train_optimization.md", "sam_decoding.md"] }
+      {"name": "deepseek_v3_2", "subcategory": "pretrain", "docPath": "pretrain/deepseek_v3_2", "reports": ["deepseek-v32_pre_train_optimization.md"]},
+      {"name": "qwen3_235b", "subcategory": "rl", "docPath": "rl/qwen3_235b", "reports": ["qwen3_235B_32k_longseq_rl_train_optimization.md"]}
     ],
     "Embodied Intelligence": [
-      { name: "pi0", docPath: "manipulation/pi0/infer_with_torch", reports: ["README.md"] }
+      {"name": "gaussian_splatting", "subcategory": "3d_vision", "docPath": "3d_vision/gaussian_splatting", "reports": ["gaussian_splatting_alpha_blending_optimization.md", "gaussian_splatting_culling_optimization.md", "gaussian_splatting_load_balance_optimization.md", "gaussian_splatting_precise_intersection_optimization.md"]},
+      {"name": "hunyuan3d", "subcategory": "3d_vision", "docPath": "3d_vision/hunyuan3d", "reports": ["Hunyuan3D_optimization.md"]},
+      {"name": "vggt", "subcategory": "3d_vision", "docPath": "3d_vision/vggt", "reports": ["vggt_accurancy_evaluation.md", "vggt_optimization.md"]},
+      {"name": "gr00t_n1_6", "subcategory": "manipulation", "docPath": "manipulation/gr00t_n1_6", "reports": ["gr00t_n1_6_optimization.md"]},
+      {"name": "pi0", "subcategory": "manipulation", "docPath": "manipulation/pi0", "reports": ["pi0_infer_with_om_optimization.md", "pi0_infer_with_torch_optimization.md"]},
+      {"name": "alpamayo_r1", "subcategory": "navigation", "docPath": "navigation/alpamayo_r1", "reports": ["alpamayo_r1_optimization.md"]},
+      {"name": "cosmos", "subcategory": "world_model", "docPath": "world_model/cosmos", "reports": ["cosmos_optimization.md"]}
     ],
-    "Spatial Intelligence": [
-      { name: "Hunyuan3D", docPath: "Hunyuan3D", reports: ["Hunyuan3D_optimization.md"] },
-      { name: "vggt", docPath: "vggt", reports: ["vggt_accurancy_evaluation.md", "vggt_optimization.md"] }
+    "CANN Features": [
+      {"name": "CANN Features", "subcategory": null, "docPath": "", "reports": ["multi_stream_principles.md", "npu_graph_optimization.md", "prefetch_principles.md", "super_kernel.md"]}
     ]
   };
 
-  // Load models from pre-fetched manifest into repoModels (replaces with discovered models)
+  // Load the 4-level manifest (content/index.json) into repoConfig + repoModels.
+  // Manifest shape per category:
+  //   { ns, repo, branch, basePath,
+  //     subcategories: [ { name, models: [ { name, docPath, reports } ] } ] }
+  //   OR flat 2-level: { ns, repo, branch, basePath, flat:true, reports:[...] }
+  // We flatten each category's models into repoModels[category] (each carrying a
+  // `subcategory` field) so downstream lookups by model name stay unchanged; the
+  // sidebar regroups them via getSubcategories().
   async function loadModelsFromManifest() {
     const manifest = await loadManifest();
     if (!manifest || Object.keys(manifest).length === 0) return false;
 
+    const freshConfig = {};
     for (const [category, catData] of Object.entries(manifest)) {
-      const models = catData.models || [];
-      if (models.length > 0) {
-        repoModels[category] = models.map(m => ({
-          name: m.name,
-          docPath: m.docPath,
-          reports: m.reports || []
-        }));
-      }
-      if (catData.repo && !repoConfig[category]) {
-        repoConfig[category] = { repo: catData.repo, branch: catData.branch || 'master' };
+      // Config (ns/repo/branch/basePath/flat) — manifest is the source of truth.
+      freshConfig[category] = {
+        ns: catData.ns || 'tian-ccs',
+        repo: catData.repo,
+        branch: catData.branch || 'main',
+        basePath: catData.basePath || '',
+        flat: !!catData.flat
+      };
+
+      if (catData.flat) {
+        // 2-level: reports sit directly under basePath (one synthetic model).
+        repoModels[category] = [{
+          name: category,
+          subcategory: null,
+          docPath: '',
+          reports: catData.reports || []
+        }];
+      } else {
+        // 4-level: flatten subcategories > models, tagging each with subcategory.
+        const flat = [];
+        for (const sub of (catData.subcategories || [])) {
+          for (const m of (sub.models || [])) {
+            flat.push({
+              name: m.name,
+              subcategory: sub.name,
+              docPath: m.docPath,
+              reports: m.reports || []
+            });
+          }
+        }
+        if (flat.length > 0) repoModels[category] = flat;
       }
     }
-    console.log('Loaded models from manifest:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length} models`));
+    // Replace config wholesale so removed categories don't linger.
+    if (Object.keys(freshConfig).length > 0) repoConfig = freshConfig;
+
+    console.log('Loaded manifest:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length} models`));
     return true;
+  }
+
+  // Group a category's flat model list back into subcategories for the sidebar.
+  // Returns null for flat categories (caller renders reports directly).
+  function getSubcategories(category) {
+    if ((repoConfig[category] || {}).flat) return null;
+    const models = (actualRepoModels[category] || repoModels[category] || []);
+    const order = [];
+    const bySub = {};
+    for (const m of models) {
+      const sub = m.subcategory || 'other';
+      if (!bySub[sub]) { bySub[sub] = []; order.push(sub); }
+      bySub[sub].push(m);
+    }
+    return order.map(name => ({ name, models: bySub[name] }));
   }
 
   // Reference kept for compatibility
@@ -775,12 +681,11 @@
     const docPath = modelData.docPath || '';
     // Handle empty docPath (flat structure)
     const fullPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
-    return `https://gitcode.com/cann/${config.repo}/blob/${config.branch}/${fullPath}`;
+    return `https://gitcode.com/${config.ns}/${config.repo}/blob/${config.branch}/${fullPath}`;
   }
 
   // Build a GitCode API URL for a given repo file path (returns JSON with base64 content)
-  function apiUrl(repo, branch, filePath) {
-    const ns = 'cann';
+  function apiUrl(ns, repo, branch, filePath) {
     const repoId = `${ns}%2F${repo}`;
     return `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/files` +
       `?repoId=${encodeURIComponent(repoId)}` +
@@ -838,38 +743,41 @@
     const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
     console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
 
-    // Method 0: Try pre-fetched static content (works on GitHub Pages without proxy)
-    try {
-      const prefetchPath = getPrefetchedPath(category, model, reportFile);
-      console.log('Trying pre-fetched content:', prefetchPath);
-      const resp = await fetch(prefetchPath);
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.markdown) {
-          console.log('Loaded via pre-fetched content:', data.markdown.length);
-          // Update commit date from pre-fetched data
-          if (data.commitDate) {
-            const dateEl = document.getElementById('reportDate');
-            if (dateEl) dateEl.textContent = data.commitDate;
+    // Method 0: Try pre-fetched static content (works on GitHub Pages without proxy).
+    // Skipped when USE_REMOTE_CONTENT is on, so bodies load live from GitCode.
+    if (!USE_REMOTE_CONTENT) {
+      try {
+        const prefetchPath = getPrefetchedPath(category, model, reportFile);
+        console.log('Trying pre-fetched content:', prefetchPath);
+        const resp = await fetch(prefetchPath);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.markdown) {
+            console.log('Loaded via pre-fetched content:', data.markdown.length);
+            // Update commit date from pre-fetched data
+            if (data.commitDate) {
+              const dateEl = document.getElementById('reportDate');
+              if (dateEl) dateEl.textContent = data.commitDate;
+            }
+            return renderMarkdownWithImages(data.markdown, config.ns, config.repo, config.branch, baseDir, data.images || {});
           }
-          return renderMarkdownWithImages(data.markdown, config.repo, config.branch, baseDir, data.images || {});
         }
-      }
-    } catch (e) { console.log('Pre-fetched content not available:', e.message); }
+      } catch (e) { console.log('Pre-fetched content not available:', e.message); }
+    }
 
     // Method 1: Try local proxy (optional, for development)
     try {
-      const localUrl = localProxyUrl(config.repo, config.branch, filePath);
+      const localUrl = localProxyUrl(config.ns, config.repo, config.branch, filePath);
       const response = await fetch(localUrl);
       if (response.ok) {
         const content = await response.text();
         console.log('Loaded via local proxy:', content.length);
-        return renderMarkdown(content, config.repo, config.branch, baseDir);
+        return renderMarkdown(content, config.ns, config.repo, config.branch, baseDir);
       }
     } catch (e) { /* local proxy not running, continue */ }
 
     // Method 2: Try GitCode API (returns JSON with base64 content)
-    const api = apiUrl(config.repo, config.branch, filePath);
+    const api = apiUrl(config.ns, config.repo, config.branch, filePath);
     console.log('Trying GitCode API:', api);
     const apiResp = await fetchWithCorsProxy(api);
     if (apiResp) {
@@ -878,7 +786,7 @@
         if (json.content) {
           const content = atob(json.content);
           console.log('Loaded via GitCode API:', content.length);
-          return renderMarkdown(content, config.repo, config.branch, baseDir);
+          return renderMarkdown(content, config.ns, config.repo, config.branch, baseDir);
         }
       } catch (e) {
         console.warn('API parse error:', e);
@@ -886,7 +794,7 @@
     }
 
     // Method 3: Try raw GitCode URL
-    const rawUrl = rawGitCodeUrl(config.repo, config.branch, filePath);
+    const rawUrl = rawGitCodeUrl(config.ns, config.repo, config.branch, filePath);
     console.log('Trying raw GitCode URL:', rawUrl);
     const rawResp = await fetchWithCorsProxy(rawUrl);
     if (rawResp) {
@@ -894,7 +802,7 @@
       // Check if we got actual markdown (not an HTML page)
       if (text && !text.trimStart().startsWith('<!DOCTYPE') && !text.trimStart().startsWith('<html')) {
         console.log('Loaded via raw URL:', text.length);
-        return renderMarkdown(text, config.repo, config.branch, baseDir);
+        return renderMarkdown(text, config.ns, config.repo, config.branch, baseDir);
       }
     }
 
@@ -904,8 +812,8 @@
 
 
   // Render markdown using marked.js; resolve relative images through the proxy
-  function renderMarkdown(md, repo = '', branch = 'master', baseDir = '') {
-    console.log('renderMarkdown', { repo, branch, baseDir, mdLength: md.length });
+  function renderMarkdown(md, ns = 'tian-ccs', repo = '', branch = 'main', baseDir = '') {
+    console.log('renderMarkdown', { ns, repo, branch, baseDir, mdLength: md.length });
     // Strip YAML front matter if present
     md = md.replace(/^---[\s\S]*?---\n/, '');
 
@@ -917,15 +825,33 @@
     md = md.replace(/<style\b[\s\S]*?<\/style>/gi, '');
     md = md.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
 
-    // Rewrite HTML <img> tags with relative src to raw GitCode URLs
+    // Extract LaTeX math BEFORE markdown parsing so marked doesn't mangle
+    // backslashes / underscores / ampersands inside formulas. Each match is
+    // replaced with an inert token and restored (rendered via KaTeX) after parse.
+    const mathStore = [];
+    const stashMath = (tex, display) => {
+      const token = `@@MATH${mathStore.length}@@`;
+      mathStore.push({ tex: tex.trim(), display });
+      return token;
+    };
+    // Block math first ($$...$$ and \[...\]), then inline ($...$ and \(...\)).
+    md = md.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) => stashMath(tex, true));
+    md = md.replace(/\\\[([\s\S]+?)\\\]/g, (m, tex) => stashMath(tex, true));
+    md = md.replace(/\\\(([\s\S]+?)\\\)/g, (m, tex) => stashMath(tex, false));
+    // Inline $...$: not preceded/followed by $, no newline inside (avoids $5 currency spans).
+    md = md.replace(/(?<!\$)\$(?!\$)((?:\\.|[^$\n])+?)\$(?!\$)/g, (m, tex) => stashMath(tex, false));
+
+    // Rewrite HTML <img> tags with relative src. Primary src goes through the
+    // local proxy (8081), which serves the image bytes with correct CORS/type;
+    // direct raw GitCode URLs return an HTML page for images, so they only work
+    // as an onerror fallback. See imageSrc() for the full chain.
     if (repo && baseDir) {
-      md = md.replace(/<img\b([^>]*)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
+      md = md.replace(/<img\b([^>]*?)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*?)\/?>/gi, (match, before, src, after) => {
         try {
           const resolved = resolvePath(baseDir, src);
-          const rawUrl = rawGitCodeUrl(repo, branch, resolved);
-          const proxyFallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
-          console.log('HTML img rewrite:', { src, resolved, rawUrl });
-          return `<img${before}src="${rawUrl}"${after} loading="lazy" onerror="this.onerror=null;this.src='${proxyFallback}'">`;
+          const { primary, onerror } = imageSrc(ns, repo, branch, resolved);
+          console.log('HTML img rewrite:', { src, resolved, primary });
+          return `<img${before}src="${primary}"${after} loading="lazy"${onerror}>`;
         } catch (e) {
           console.warn('HTML img rewrite failed:', e.message, { src, baseDir });
           return match;
@@ -937,15 +863,14 @@
     // Note: we no longer strip <img> since we want to preserve rewritten img tags
     md = md.replace(/<\/?(div|span|p|br|hr|section|article|nav|header|footer|aside|main|figure|figcaption)[^>]*>/gi, '');
 
-    // Re-write relative image src to raw GitCode URLs with CORS proxy fallback
+    // Re-write relative markdown image src through the local proxy (see imageSrc)
     if (repo && baseDir) {
       md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/|data:)([^)]+)\)/g, (match, alt, src) => {
         try {
           const resolved = resolvePath(baseDir, src);
-          const rawUrl = rawGitCodeUrl(repo, branch, resolved);
-          const proxyFallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
-          console.log('Image rewrite:', { alt, src, resolved, rawUrl });
-          return `<img src="${rawUrl}" alt="${alt}" loading="lazy" onerror="this.onerror=null;this.src='${proxyFallback}'">`;
+          const { primary, onerror } = imageSrc(ns, repo, branch, resolved);
+          console.log('Image rewrite:', { alt, src, resolved, primary });
+          return `<img src="${primary}" alt="${alt}" loading="lazy"${onerror}>`;
         } catch (e) {
           console.warn('Image rewrite failed:', e.message, { src, baseDir });
           return match;
@@ -958,7 +883,7 @@
       md = md.replace(/\[([^\]]*)\]\((?!https?:\/\/|#)([^)]+\.md)\)/g, (match, text, href) => {
         try {
           const resolved = resolvePath(baseDir, href);
-          const blobUrl = `https://gitcode.com/cann/${repo}/blob/${branch}/${resolved}`;
+          const blobUrl = `https://gitcode.com/${ns}/${repo}/blob/${branch}/${resolved}`;
           console.log('Link rewrite:', { text, href, resolved, blobUrl });
           return `[${text}](${blobUrl})`;
         } catch (e) {
@@ -1002,15 +927,20 @@
       renderer.image = (href, title, text) => {
         let imgSrc = href;
         let onerror = '';
-        // For gitcode raw URLs, add CORS proxy fallback
-        if (href.includes('gitcode.com')) {
-          const proxyFallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(href)}`;
-          onerror = ` onerror="this.onerror=null;this.src='${proxyFallback}'"`;
+        // Absolute gitcode raw URLs (plain host) return an HTML page, not image
+        // bytes, so route them through the CDN/proxy chain. Matches both
+        // gitcode.com and raw.gitcode.com with any namespace.
+        const m = href.match(/^https?:\/\/(?:raw\.)?gitcode\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)$/);
+        if (m) {
+          const [, mns, r, b, p] = m;
+          const chain = imageSrc(mns, r, b, p);
+          imgSrc = chain.primary;
+          onerror = chain.onerror;
         }
         return `<img src="${imgSrc}" alt="${text}"${title ? ` title="${title}"` : ''}${onerror} loading="lazy">`;
       };
 
-      const parsed = marked.parse(md, {
+      let parsed = marked.parse(md, {
         renderer,
         breaks: true,
         gfm: true,
@@ -1019,6 +949,28 @@
         headerIds: false, // We handle IDs ourselves in the heading renderer
         headerPrefix: ''
       });
+
+      // Restore stashed math, rendering each via KaTeX. Tokens may have been
+      // wrapped in <p> by marked; unwrap block math from its paragraph.
+      if (mathStore.length) {
+        parsed = parsed.replace(/@@MATH(\d+)@@/g, (m, i) => {
+          const item = mathStore[Number(i)];
+          if (!item) return m;
+          try {
+            return katex.renderToString(item.tex, {
+              displayMode: item.display,
+              throwOnError: false,
+              output: 'html',
+            });
+          } catch (e) {
+            console.warn('KaTeX render failed:', e.message);
+            return `<code>${item.display ? '$$' : '$'}${item.tex}${item.display ? '$$' : '$'}</code>`;
+          }
+        });
+        // A block formula alone in a paragraph: <p><span class="katex-display">…</span></p>
+        parsed = parsed.replace(/<p>(\s*<span class="katex-display">[\s\S]*?<\/span>\s*)<\/p>/g, '$1');
+      }
+
       return `<div class="report-markdown">${parsed}</div>`;
     } catch (error) {
       console.error('Marked parsing error:', error);
@@ -1027,25 +979,25 @@
   }
 
   // Render markdown with pre-fetched base64 images (no CORS needed)
-  function renderMarkdownWithImages(md, repo, branch, baseDir, images) {
+  function renderMarkdownWithImages(md, ns, repo, branch, baseDir, images) {
     // First: render markdown to HTML normally (images become <img src="relative"> or <img src="rawUrl">)
-    const html = renderMarkdown(md, repo, branch, baseDir);
+    const html = renderMarkdown(md, ns, repo, branch, baseDir);
 
     // Then: post-process the rendered HTML to replace image src with pre-fetched base64 data URIs
     if (!images || Object.keys(images).length === 0) return html;
 
-    // Build a lookup: resolve all possible src variations to data URIs
+    // Build a lookup: resolve all possible src variations to data URIs so the
+    // rendered <img> src (now the local-proxy URL) maps back to inline base64.
     const srcMap = {};
     for (const [relPath, dataUri] of Object.entries(images)) {
       srcMap[relPath] = dataUri;
-      // Also map the resolved raw GitCode URL back to the data URI
       if (repo && baseDir) {
         try {
           const resolved = resolvePath(baseDir, relPath);
-          const rawUrl = rawGitCodeUrl(repo, branch, resolved);
-          srcMap[rawUrl] = dataUri;
-          // Also map the allorigins proxy fallback URL
-          srcMap[`https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`] = dataUri;
+          const chain = imageSrc(ns, repo, branch, resolved);
+          // Map every variant imageSrc() can emit: CDN (primary) and proxy fallback.
+          srcMap[chain.primary] = dataUri;
+          srcMap[chain.proxy] = dataUri;
         } catch (e) {}
       }
     }
@@ -1064,7 +1016,8 @@
 
   // Get repo URL for a category
   function getRepoUrl(category) {
-    return `https://gitcode.com/cann/${repoConfig[category].repo}`;
+    const c = repoConfig[category];
+    return `https://gitcode.com/${c.ns}/${c.repo}`;
   }
 
   // Count total reports per category (matches what showCategory displays)
@@ -1111,13 +1064,36 @@
   }
 
   // Re-render the sidebar <nav> from the current repoModels data
+  // Slugify a report filename into a display title.
+  function reportTitle(report) {
+    return report.replace('.md','').replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
   function renderSidebar() {
     const icons = {
       "Infer": "memory",
       "Train": "model_training",
       "Embodied Intelligence": "smart_toy",
       "Spatial Intelligence": "language",
+      "CANN Features": "tune",
     };
+    const chevron = '<svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>';
+
+    // Render one model as an always-expandable folder so the 4-level hierarchy
+    // (Category > Subcategory > Model > Report) stays visible even when a model
+    // has a single report — the report name still shows as its own leaf.
+    function renderModel(category, model) {
+      const sub = 'flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer';
+      const reportLink = (r) =>
+        `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(r)}')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(r))}</a>`;
+      const body = model.reports.length
+        ? model.reports.map(reportLink).join('')
+        : `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(model.name)}','')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(model.name)}</a>`;
+      const jumpModel = model.subcategory
+        ? ` onclick="showModel('${escJs(category)}','${escJs(model.subcategory)}','${escJs(model.name)}')"`
+        : '';
+      return `<details class="group"><summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600"><span class="material-symbols-outlined text-xs">deployed_code</span><span${jumpModel} class="flex-1">${escHtml(model.name)}</span>${chevron}</summary><div class="ml-4 mt-1 space-y-1">${body}</div></details>`;
+    }
 
     let html = `
       <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
@@ -1127,69 +1103,33 @@
       <div class="mt-4 space-y-1">
     `;
 
+    const bigChevron = '<svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>';
+    let first = true;
     for (const [category, models] of Object.entries(repoModels)) {
       const icon    = icons[category] || 'folder';
       const repoUrl = getRepoUrl(category);
-      const open    = category === 'Infer' ? ' open' : '';
+      const open    = first ? ' open' : ''; first = false;
 
-      html += `
-        <details${open} class="group">
-          <summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none">
-            <span class="material-symbols-outlined text-slate-500">${icon}</span>
-            <span class="text-slate-600 font-medium flex-1">${escHtml(category)}</span>
-            <svg class="chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-          </summary>
-          <div class="ml-8 mt-1 space-y-1">
-      `;
+      // Clicking the label navigates to the drill-down view; the <summary>
+      // still toggles expansion (onclick doesn't preventDefault).
+      html += `<details${open} class="group"><summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none"><span class="material-symbols-outlined text-slate-500">${icon}</span><span onclick="showCategory('${escJs(category)}')" class="text-slate-600 font-medium flex-1">${escHtml(category)}</span>${bigChevron}</summary><div class="ml-8 mt-1 space-y-1">`;
 
-      for (const model of models) {
-        if (model.reports.length > 1) {
-          html += `
-            <details class="group">
-              <summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600">
-                <span class="material-symbols-outlined text-xs">folder</span>
-                <span>${escHtml(model.name)}</span>
-                <svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-              </summary>
-              <div class="ml-4 mt-1 space-y-1">
-          `;
-          for (const report of model.reports) {
-            const rTitle = report.replace('.md','').replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
-            html += `
-              <a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(rTitle)}','${escJs(report)}')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer">
-                <span class="material-symbols-outlined text-xs">article</span>
-                ${escHtml(report)}
-              </a>
-            `;
-          }
+      const subs = getSubcategories(category);
+      if (subs === null) {
+        // Flat category: reports sit directly under the category (no sub/model).
+        for (const model of models) for (const report of model.reports) {
+          html += `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(report))}','${escJs(report)}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(report))}</a>`;
+        }
+      } else {
+        // 4-level: Subcategory <details> wrapping Model <details>/links.
+        for (const scat of subs) {
+          html += `<details class="group"><summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm font-medium text-slate-600"><span class="material-symbols-outlined text-xs">category</span><span onclick="showSubcategory('${escJs(category)}','${escJs(scat.name)}')" class="flex-1">${escHtml(scat.name)}</span>${chevron}</summary><div class="ml-4 mt-1 space-y-1">`;
+          for (const model of scat.models) html += renderModel(category, model);
           html += `</div></details>`;
-        } else if (model.reports.length === 1) {
-          const report = model.reports[0];
-          const rTitle = report.replace('.md','').replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
-          html += `
-            <a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(rTitle)}','${escJs(report)}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-              <span class="material-symbols-outlined text-xs">description</span>
-              ${escHtml(model.name)}
-            </a>
-          `;
-        } else {
-          html += `
-            <a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(model.name)}','')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer">
-              <span class="material-symbols-outlined text-xs">description</span>
-              ${escHtml(model.name)}
-            </a>
-          `;
         }
       }
 
-      html += `
-            <a onclick="window.open('${escHtml(repoUrl)}', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer">
-              <span class="material-symbols-outlined text-xs">open_in_new</span>
-              Browse Repo
-            </a>
-          </div>
-        </details>
-      `;
+      html += `<a onclick="window.open('${escHtml(repoUrl)}', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer"><span class="material-symbols-outlined text-xs">open_in_new</span>Browse Repo</a></div></details>`;
     }
 
     html += `</div>`;
@@ -1337,88 +1277,123 @@
     }
   }
 
-  function showCategory(category) {
+  // ---- Directory drill-down (Phase 3) --------------------------------------
+  // categoryView is reused for three levels: subcategory grid, model grid, and
+  // report list. Each level renders a dynamic breadcrumb + a card grid.
+
+  // Switch the main area to the (reused) categoryView container.
+  function openCategoryView() {
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
+    if (sidebarVisible) toggleSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-    // Update category title and header
-    document.getElementById('categoryTitle').textContent = category;
-    const headerEl = document.getElementById('categoryHeader');
-    if (headerEl) headerEl.textContent = category + ' Tech Reports';
+  // Render a breadcrumb into `targetId` from an array of {label, onclick?}
+  // crumbs. A crumb without onclick is the current (non-clickable) level.
+  function renderCrumbInto(targetId, crumbs) {
+    const sep = '<span class="material-symbols-outlined text-xs">chevron_right</span>';
+    const home = `<a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1"><span class="material-symbols-outlined text-base">home</span>Home</a>`;
+    const parts = crumbs.map(c => c.onclick
+      ? `<a onclick="${c.onclick}" class="hover:text-tech-accent transition-colors cursor-pointer">${escHtml(c.label)}</a>`
+      : `<span class="text-slate-900 font-medium">${escHtml(c.label)}</span>`);
+    document.getElementById(targetId).innerHTML = [home, ...parts].join(sep);
+  }
+  const renderCrumb = (crumbs) => renderCrumbInto('categoryBreadcrumb', crumbs);
+  const renderReportCrumb = (crumbs) => renderCrumbInto('reportBreadcrumb', crumbs);
 
-    // Render ALL models for this category (including those without dedicated reports)
-    const reportsContainer = document.getElementById('categoryReports');
-    // Use actualRepoModels if available, otherwise fallback to hardcoded repoModels
-    const modelsSource = actualRepoModels[category] || repoModels[category] || [];
-    const models = modelsSource;
-    let html = '';
+  // A generic clickable drill-down card. `meta` is the small uppercase tag line.
+  function drillCard(onclick, icon, title, meta, desc) {
+    return `
+      <article onclick="${onclick}" class="glass-card rounded-2xl p-5 flex items-start gap-4 group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+        <div class="w-12 h-12 shrink-0 rounded-xl bg-tech-accent/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-tech-accent">${icon}</span>
+        </div>
+        <div class="min-w-0">
+          ${meta ? `<div class="text-[10px] font-bold uppercase tracking-wider text-tech-accent mb-1">${escHtml(meta)}</div>` : ''}
+          <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(title)}</h3>
+          <p class="text-slate-500 text-xs leading-relaxed line-clamp-2">${escHtml(desc)}</p>
+        </div>
+      </article>`;
+  }
 
-    const thumbs = [
-      'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
-    ];
-    let thumbIdx = 0;
+  // Level 1: category -> subcategory grid (or report list for flat categories).
+  function showCategory(category) {
+    openCategoryView();
+    document.getElementById('categoryHeader').textContent = category;
 
-    for (const model of models) {
-      if (model.reports.length > 0) {
-        // Model has dedicated report files — show one card per report
-        for (const report of model.reports) {
-          const reportTitle = report.replace('.md', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          const thumb = thumbs[thumbIdx++ % thumbs.length];
-          html += `
-            <article onclick="showReport('${category}', '${model.name}', '${reportTitle}', '${report}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-              <div class="w-48 h-32 shrink-0 overflow-hidden">
-                <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${thumb}"/>
-              </div>
-              <div class="p-4 flex flex-col justify-center">
-                <div class="flex gap-2 mb-2">
-                  <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${category}</span>
-                </div>
-                <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${reportTitle}</h3>
-                <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${model.name} in ${category}.</p>
-                <span class="text-xs text-slate-400">${model.name}</span>
-              </div>
-            </article>
-          `;
-        }
-      } else {
-        // Model exists but has no specific report file — show card linking to repo
-        const repoUrl = getRepoUrl(category);
-        html += `
-          <article onclick="window.open('${repoUrl}', '_blank')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-            <div class="w-48 h-32 shrink-0 bg-slate-100 flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-slate-300">folder_open</span>
-            </div>
-            <div class="p-4 flex flex-col justify-center">
-              <div class="flex gap-2 mb-2">
-                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${category}</span>
-              </div>
-              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${model.name}</h3>
-              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">No dedicated tech report yet. View available files in repository.</p>
-              <span class="text-xs text-tech-accent flex items-center gap-1">
-                <span class="material-symbols-outlined" style="font-size:13px">open_in_new</span>Browse GitCode Repo
-              </span>
-            </div>
-          </article>
-        `;
-      }
+    const cfg = repoConfig[category] || {};
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    const grid = document.getElementById('categoryReports');
+
+    // Flat category (e.g. CANN Features): no sub/model layer — list reports.
+    if (cfg.flat) {
+      renderCrumb([{ label: category }]);
+      const model = models[0];
+      const reports = model ? model.reports : [];
+      grid.innerHTML = reports.length
+        ? reports.map(r => drillCard(
+            `showReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(r)}')`,
+            'article', reportTitle(r), category, `Technical report in ${category}.`)).join('')
+        : '<p class="text-slate-500">No reports available yet.</p>';
+      return;
     }
 
-    if (html === '') {
-      html = '<p class="text-slate-500">No reports available for this category yet.</p>';
-    }
+    renderCrumb([{ label: category }]);
+    const subs = getSubcategories(category) || [];
+    grid.innerHTML = subs.length
+      ? subs.map(s => {
+          const n = s.models.length;
+          return drillCard(
+            `showSubcategory('${escJs(category)}','${escJs(s.name)}')`,
+            'category', s.name, category, `${n} model${n === 1 ? '' : 's'}`);
+        }).join('')
+      : '<p class="text-slate-500">No subcategories available yet.</p>';
+  }
 
-    reportsContainer.innerHTML = html;
+  // Level 2: subcategory -> model grid.
+  function showSubcategory(category, subName) {
+    openCategoryView();
+    document.getElementById('categoryHeader').textContent = subName;
+    renderCrumb([
+      { label: category, onclick: `showCategory('${escJs(category)}')` },
+      { label: subName },
+    ]);
 
-    // Hide sidebar when viewing category
-    if (sidebarVisible) {
-      toggleSidebar();
-    }
+    const subs = getSubcategories(category) || [];
+    const sub = subs.find(s => s.name === subName);
+    const models = sub ? sub.models : [];
+    const grid = document.getElementById('categoryReports');
+    grid.innerHTML = models.length
+      ? models.map(m => {
+          const n = m.reports.length;
+          return drillCard(
+            `showModel('${escJs(category)}','${escJs(subName)}','${escJs(m.name)}')`,
+            'deployed_code', m.name, subName, `${n} report${n === 1 ? '' : 's'}`);
+        }).join('')
+      : '<p class="text-slate-500">No models available yet.</p>';
+  }
 
-    window.scrollTo({top: 0, behavior: 'smooth'});
+  // Level 3: model -> report list.
+  function showModel(category, subName, modelName) {
+    openCategoryView();
+    document.getElementById('categoryHeader').textContent = modelName;
+    renderCrumb([
+      { label: category, onclick: `showCategory('${escJs(category)}')` },
+      { label: subName, onclick: `showSubcategory('${escJs(category)}','${escJs(subName)}')` },
+      { label: modelName },
+    ]);
+
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    const model = models.find(m => m.name === modelName && (m.subcategory || '') === subName);
+    const reports = model ? model.reports : [];
+    const grid = document.getElementById('categoryReports');
+    grid.innerHTML = reports.length
+      ? reports.map(r => drillCard(
+          `showReport('${escJs(category)}','${escJs(modelName)}','${escJs(reportTitle(r))}','${escJs(r)}')`,
+          'article', reportTitle(r), modelName, `Technical report for ${modelName}.`)).join('')
+      : '<p class="text-slate-500">No reports available yet.</p>';
   }
 
   // Show report directly from model name in sidebar
@@ -1437,9 +1412,18 @@
       toggleSidebar();
     }
 
-    // Update breadcrumb
-    document.getElementById('breadcrumbCategory').innerHTML = '<a onclick="showCategory(\'' + escJs(category) + '\')" class="hover:text-tech-accent transition-colors cursor-pointer">' + escHtml(category) + '</a>';
-    document.getElementById('breadcrumbModel').textContent = model;
+    // Update breadcrumb: Home > Category > [Subcategory > Model >] Report.
+    // Intermediate crumbs are clickable to drill back up; flat categories skip
+    // the subcategory/model levels.
+    const cfg0 = repoConfig[category] || {};
+    const mdata = (actualRepoModels[category] || repoModels[category] || []).find(m => m.name === model);
+    const crumbs = [{ label: category, onclick: `showCategory('${escJs(category)}')` }];
+    if (!cfg0.flat && mdata && mdata.subcategory) {
+      crumbs.push({ label: mdata.subcategory, onclick: `showSubcategory('${escJs(category)}','${escJs(mdata.subcategory)}')` });
+      crumbs.push({ label: model, onclick: `showModel('${escJs(category)}','${escJs(mdata.subcategory)}','${escJs(model)}')` });
+    }
+    crumbs.push({ label: title });
+    renderReportCrumb(crumbs);
     document.getElementById('reportCategory').textContent = category;
     document.getElementById('reportTitle').textContent = title;
 
@@ -1454,7 +1438,7 @@
       if (config && modelData) {
         const docPath = modelData.docPath || '';
         const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
-        fetchLatestCommitDate(config.repo, config.branch, filePath).then(date => {
+        fetchLatestCommitDate(config.ns, config.repo, config.branch, filePath).then(date => {
           document.getElementById('reportDate').textContent = date || 'N/A';
         });
       }
@@ -1559,7 +1543,7 @@
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
 
-    document.getElementById('categoryTitle').textContent = 'Search Results';
+    renderCrumb([{ label: 'Search Results' }]);
     const headerEl = document.getElementById('categoryHeader');
     if (headerEl) headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for "${searchTerm}"`;
 
@@ -1615,10 +1599,38 @@
   }
 
   // Apply syntax highlighting and add copy buttons to all code blocks in a container
+  // Render any ```mermaid``` code blocks in the container into SVG diagrams.
+  // Runs before highlight.js so mermaid fences are consumed first.
+  let mermaidSeq = 0;
+  async function renderMermaidBlocks(container) {
+    if (!window.mermaid) return;
+    // marked emits fenced code as <pre><code class="language-mermaid">.
+    const blocks = container.querySelectorAll('code.language-mermaid, code.lang-mermaid');
+    for (const code of blocks) {
+      const pre = code.closest('pre');
+      const source = code.textContent;
+      const holder = document.createElement('div');
+      holder.className = 'mermaid-diagram';
+      try {
+        const { svg } = await window.mermaid.render(`mermaid-svg-${++mermaidSeq}`, source);
+        holder.innerHTML = svg;
+        (pre || code).replaceWith(holder);
+      } catch (e) {
+        console.warn('Mermaid render failed:', e.message);
+        // Leave the original code block in place so the source stays visible.
+      }
+    }
+  }
+
   function enhanceCodeBlocks(container) {
+    // Mermaid first — turns ```mermaid``` fences into diagrams and removes their <pre>.
+    renderMermaidBlocks(container);
+
     const preBlocks = container.querySelectorAll('pre');
     preBlocks.forEach(pre => {
       const code = pre.querySelector('code');
+      // Skip mermaid blocks — renderMermaidBlocks handles (and removes) them.
+      if (code && /\b(language|lang)-mermaid\b/.test(code.className)) return;
       if (code) {
         hljs.highlightElement(code);
       }
