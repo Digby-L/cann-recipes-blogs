@@ -466,11 +466,15 @@
     "CANN Features":         { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "cann_features", flat: true }
   };
 
-  // Content source switch:
-  //   true  = load report bodies live from GitCode remote (local proxy 8081 -> CORS proxies)
-  //   false = load from pre-fetched static files under content/reports (offline)
-  // The sidebar list still comes from content/index.json regardless of this flag.
-  const USE_REMOTE_CONTENT = true;
+  // Content source switch — auto-detected by environment:
+  //   localhost/127.0.0.1  -> true  = live from GitCode remote via local proxy 8081.
+  //   any other host (e.g. GitHub Pages) -> false = pre-fetched content/reports/*.json.
+  // Rationale: GitHub Pages can't run the 8081 proxy, and the browser-side
+  // remote fallbacks fail there (GitCode web-api returns 418 via WAF, public
+  // CORS proxies are unreliable), so Pages must use the static content the
+  // deploy workflow pre-fetches with build_content.py. The sidebar list always
+  // comes from content/index.json regardless of this flag.
+  const USE_REMOTE_CONTENT = ['localhost', '127.0.0.1'].includes(location.hostname);
 
   // Local proxy server URL (optional, for development)
   const proxyBase = 'http://localhost:8081';
@@ -722,10 +726,13 @@
     return prefetchedManifest;
   }
 
-  // Get pre-fetched content path for a report
+  // Get pre-fetched content path for a report. Spaces are underscored in BOTH
+  // segments to match build_content.py, which saves flat categories under the
+  // underscored safe_category as the model key (e.g. "CANN Features" ->
+  // content/reports/CANN_Features/CANN_Features/...).
   function getPrefetchedPath(category, model, reportFile) {
     const safeCategory = category.replace(/ /g, '_');
-    const safeModel = model;
+    const safeModel = model.replace(/ /g, '_');
     return `content/reports/${safeCategory}/${safeModel}/${reportFile.replace('.md', '.json')}`;
   }
 
