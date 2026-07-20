@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 """
-Pre-fetch all markdown reports and commit dates from GitCode repos.
+Build a lightweight report metadata manifest from GitCode repositories.
 Dynamically discovers models and reports via the GitCode repository tree API.
 
-Outputs static JSON files under content/ for GitHub Pages to serve directly.
+Report bodies and images are never fetched or persisted locally. Display titles
+are derived in the browser by removing the .md suffix from each filename.
 
-Structure:
-  content/reports/<category>/<model>/<report>.json  — {markdown, commitDate, images: {relPath: base64}}
-  content/index.json                                — manifest with discovered models + reports
+Output:
+  content/index.json — manifest with discovered models and report filenames
 """
 
 import json
 import os
 import re
 import sys
-import base64
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -260,75 +259,15 @@ def find_relative_images(md_content):
     return images
 
 
-def process_report(repo, branch, safe_category, model_key, doc_dir, report_file, out_dir, idx):
-    """Fetch one report's markdown + images + commit date and save a report JSON.
-      doc_dir     : full repo dir containing the .md (e.g. 'infer/llm/deepseek_r1')
-      model_key   : subdir under the category for the saved JSON (model name, or
-                    the category itself for flat categories)
-    Returns (commit_date, site_relative_json_path) on success, or (None, None).
-    """
-    file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
-    print(f"\n[{idx}] Fetching {file_path} ...")
-    md = fetch_file(repo, branch, file_path)
-    if not md:
-        print("  FAILED to fetch markdown")
-        return None, None
-
-    commit_date = fetch_commit_date(repo, branch, file_path)
-    print(f"  Commit date: {commit_date or 'N/A'}")
-
-    images = {}
-    for img_src in find_relative_images(md):
-        resolved = resolve_path(doc_dir, img_src)
-        data_uri = fetch_binary_file_base64(repo, branch, resolved)
-        if data_uri:
-            images[img_src] = data_uri
-        else:
-            print(f"    [WARN] image FAILED: {img_src}")
-
-    report_out_dir = os.path.join(out_dir, safe_category, model_key)
-    os.makedirs(report_out_dir, exist_ok=True)
-    out_file = os.path.join(report_out_dir, report_file.replace(".md", ".json"))
-    with open(out_file, "w", encoding="utf-8") as f:
-        json.dump({"markdown": md, "commitDate": commit_date, "images": images}, f, ensure_ascii=False)
-    print(f"  Saved: {out_file} ({len(md)} chars, {len(images)} images)")
-
-    site_path = f"content/reports/{safe_category}/{model_key}/{report_file.replace('.md', '.json')}"
-    return commit_date, site_path
-
-
-def _fetch_reports(repo, branch, safe_category, model_key, doc_dir, report_files, out_dir, counts):
-    """Process a list of report filenames; update counts in place.
-    Returns the list of report filenames that were fetched successfully."""
-    kept = []
-    for report_file in report_files:
-        counts["total"] += 1
-        commit_date, site_path = process_report(
-            repo, branch, safe_category, model_key, doc_dir, report_file, out_dir, counts["total"])
-        if site_path is not None:
-            counts["success"] += 1
-            kept.append(report_file)
-        else:
-            counts["failed"] += 1
-    return kept
-
-
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    out_dir = os.path.join(script_dir, "content", "reports")
-    os.makedirs(out_dir, exist_ok=True)
-
     # manifest: category -> 4-level tree (or flat), matching content/index.json schema
     manifest = {}
-    counts = {"total": 0, "success": 0, "failed": 0}
-
     for category, config in REPO_CONFIG.items():
         repo = config["repo"]
         branch = config["branch"]
         base_path = config["basePath"]
         is_flat = config.get("flat", False)
-        safe_category = category.replace(" ", "_")
-
         print(f"\n=== Discovering {category} (repo: {repo}, base: {base_path}, flat={is_flat}) ===")
 
         cat_entry = {"ns": NS, "repo": repo, "branch": branch, "basePath": base_path}
@@ -337,8 +276,7 @@ def main():
             report_files = discover_flat_reports(repo, branch, base_path)
             print(f"  Found {len(report_files)} flat reports")
             cat_entry["flat"] = True
-            cat_entry["reports"] = _fetch_reports(
-                repo, branch, safe_category, safe_category, base_path, report_files, out_dir, counts)
+            cat_entry["reports"] = report_files
         else:
             subs = discover_subcategories(repo, branch, base_path)
             print(f"  Found {len(subs)} subcategories")
@@ -346,15 +284,11 @@ def main():
             for sub in subs:
                 out_models = []
                 for model in sub["models"]:
-                    doc_dir = f"{base_path}/{model['docPath']}"
-                    kept = _fetch_reports(
-                        repo, branch, safe_category, model["name"], doc_dir,
-                        model["reports"], out_dir, counts)
-                    if kept:
+                    if model["reports"]:
                         out_models.append({
                             "name": model["name"],
                             "docPath": model["docPath"],
-                            "reports": kept,
+                            "reports": model["reports"],
                         })
                 if out_models:
                     out_subs.append({"name": sub["name"], "models": out_models})
@@ -362,18 +296,13 @@ def main():
 
         manifest[category] = cat_entry
 
-    total, success, failed = counts["total"], counts["success"], counts["failed"]
-
     # Write manifest
     manifest_path = os.path.join(script_dir, "content", "index.json")
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
-    print(f"\nDone! {success}/{total} reports fetched ({failed} failed)")
+    print("\nDone! Report metadata manifest generated")
     print(f"Manifest: {manifest_path}")
-
-    if failed > 0:
-        print(f"WARNING: {failed} reports failed to fetch", file=sys.stderr)
 
 
 if __name__ == "__main__":

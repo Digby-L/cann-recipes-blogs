@@ -1,92 +1,187 @@
 {
   "Infer": {
-    "repo": "cann-recipes-docs",
     "ns": "tian-ccs",
+    "repo": "cann-recipes-docs",
     "branch": "main",
     "basePath": "infer",
     "subcategories": [
       {
         "name": "llm",
         "models": [
-          { "name": "deepseek_r1", "docPath": "llm/deepseek_r1", "reports": ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"] },
-          { "name": "deepseek_v4", "docPath": "llm/deepseek_v4", "reports": ["deepseek_v4_ascendc_operator_guide.md", "deepseek_v4_autofuse_guide.md", "deepseek_v4_inference_guide.md", "deepseek_v4_mHC_guide.md", "deepseek_v4_pypto_operator_guide.md", "deepseek_v4_shmem_guide.md", "deepseek_v4_tilelang_operator_guide.md"] }
+          {
+            "name": "deepseek_r1",
+            "docPath": "llm/deepseek_r1",
+            "reports": [
+              "deepseek_r1_decode_optimization.md",
+              "deepseek_r1_prefill_optimization.md"
+            ]
+          },
+          {
+            "name": "deepseek_v4",
+            "docPath": "llm/deepseek_v4",
+            "reports": [
+              "deepseek_v4_ascendc_operator_guide.md",
+              "deepseek_v4_autofuse_guide.md",
+              "deepseek_v4_inference_guide.md",
+              "deepseek_v4_mHC_guide.md",
+              "deepseek_v4_pypto_operator_guide.md",
+              "deepseek_v4_shmem_guide.md",
+              "deepseek_v4_tilelang_operator_guide.md"
+            ]
+          }
         ]
       },
       {
         "name": "multimodal",
         "models": [
-          { "name": "hunyuan_image_3_0", "docPath": "multimodal/hunyuan_image_3_0", "reports": ["hunyuan_image_3_optimization.md"] }
+          {
+            "name": "hunyuan_image_3_0",
+            "docPath": "multimodal/hunyuan_image_3_0",
+            "reports": [
+              "hunyuan_image_3_optimization.md"
+            ]
+          }
         ]
       },
       {
         "name": "recommendation",
         "models": [
-          { "name": "hstu", "docPath": "recommendation/hstu", "reports": ["hstu_optimization.md"] }
+          {
+            "name": "hstu",
+            "docPath": "recommendation/hstu",
+            "reports": [
+              "hstu_optimization.md"
+            ]
+          }
         ]
       }
     ]
   },
   "Train": {
-    "repo": "cann-recipes-docs",
     "ns": "tian-ccs",
+    "repo": "cann-recipes-docs",
     "branch": "main",
     "basePath": "train",
     "subcategories": [
       {
         "name": "pretrain",
         "models": [
-          { "name": "deepseek_v3_2", "docPath": "pretrain/deepseek_v3_2", "reports": ["deepseek-v32_pre_train_optimization.md"] }
+          {
+            "name": "deepseek_v3_2",
+            "docPath": "pretrain/deepseek_v3_2",
+            "reports": [
+              "deepseek-v32_pre_train_optimization.md"
+            ]
+          }
         ]
       },
       {
         "name": "rl",
         "models": [
-          { "name": "qwen3_235b", "docPath": "rl/qwen3_235b", "reports": ["qwen3_235B_32k_longseq_rl_train_optimization.md"] }
+          {
+            "name": "qwen3_235b",
+            "docPath": "rl/qwen3_235b",
+            "reports": [
+              "qwen3_235B_32k_longseq_rl_train_optimization.md"
+            ]
+          }
         ]
       }
     ]
   },
   "Embodied Intelligence": {
-    "repo": "cann-recipes-docs",
     "ns": "tian-ccs",
+    "repo": "cann-recipes-docs",
     "branch": "main",
     "basePath": "embodied",
     "subcategories": [
       {
         "name": "3d_vision",
         "models": [
-          { "name": "gaussian_splatting", "docPath": "3d_vision/gaussian_splatting", "reports": ["gaussian_splatting_alpha_blending_optimization.md", "gaussian_splatting_culling_optimization.md", "gaussian_splatting_load_balance_optimization.md", "gaussian_splatting_precise_intersection_optimization.md"] },
-          { "name": "hunyuan3d", "docPath": "3d_vision/hunyuan3d", "reports": ["Hunyuan3D_optimization.md"] },
-          { "name": "vggt", "docPath": "3d_vision/vggt", "reports": ["vggt_accurancy_evaluation.md", "vggt_optimization.md"] }
+          {
+            "name": "gaussian_splatting",
+            "docPath": "3d_vision/gaussian_splatting",
+            "reports": [
+              "gaussian_splatting_alpha_blending_optimization.md",
+              "gaussian_splatting_culling_optimization.md",
+              "gaussian_splatting_load_balance_optimization.md",
+              "gaussian_splatting_precise_intersection_optimization.md"
+            ]
+          },
+          {
+            "name": "hunyuan3d",
+            "docPath": "3d_vision/hunyuan3d",
+            "reports": [
+              "Hunyuan3D_optimization.md"
+            ]
+          },
+          {
+            "name": "vggt",
+            "docPath": "3d_vision/vggt",
+            "reports": [
+              "vggt_accurancy_evaluation.md",
+              "vggt_optimization.md"
+            ]
+          }
         ]
       },
       {
         "name": "manipulation",
         "models": [
-          { "name": "gr00t_n1_6", "docPath": "manipulation/gr00t_n1_6", "reports": ["gr00t_n1_6_optimization.md"] },
-          { "name": "pi0", "docPath": "manipulation/pi0", "reports": ["pi0_infer_with_om_optimization.md", "pi0_infer_with_torch_optimization.md"] }
+          {
+            "name": "gr00t_n1_6",
+            "docPath": "manipulation/gr00t_n1_6",
+            "reports": [
+              "gr00t_n1_6_optimization.md"
+            ]
+          },
+          {
+            "name": "pi0",
+            "docPath": "manipulation/pi0",
+            "reports": [
+              "pi0_infer_with_om_optimization.md",
+              "pi0_infer_with_torch_optimization.md"
+            ]
+          }
         ]
       },
       {
         "name": "navigation",
         "models": [
-          { "name": "alpamayo_r1", "docPath": "navigation/alpamayo_r1", "reports": ["alpamayo_r1_optimization.md"] }
+          {
+            "name": "alpamayo_r1",
+            "docPath": "navigation/alpamayo_r1",
+            "reports": [
+              "alpamayo_r1_optimization.md"
+            ]
+          }
         ]
       },
       {
         "name": "world_model",
         "models": [
-          { "name": "cosmos", "docPath": "world_model/cosmos", "reports": ["cosmos_optimization.md"] }
+          {
+            "name": "cosmos",
+            "docPath": "world_model/cosmos",
+            "reports": [
+              "cosmos_optimization.md"
+            ]
+          }
         ]
       }
     ]
   },
   "CANN Features": {
-    "repo": "cann-recipes-docs",
     "ns": "tian-ccs",
+    "repo": "cann-recipes-docs",
     "branch": "main",
     "basePath": "cann_features",
     "flat": true,
-    "reports": ["multi_stream_principles.md", "npu_graph_optimization.md", "prefetch_principles.md", "super_kernel.md"]
+    "reports": [
+      "multi_stream_principles.md",
+      "npu_graph_optimization.md",
+      "prefetch_principles.md",
+      "super_kernel.md"
+    ]
   }
 }

@@ -90,6 +90,35 @@
       margin-left: auto;
       margin-right: auto;
     }
+    #categoryView.search-results-view > div { max-width: 80rem; }
+    .search-result-cover {
+      width: 16rem;
+      aspect-ratio: 4 / 3;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.45);
+    }
+    .search-result-cover img { object-fit: contain; }
+    .search-result-title {
+      display: block;
+      overflow: visible;
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+    }
+    .search-result-description {
+      display: block;
+      overflow: visible;
+    }
+    .popular-report-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.45;
+    }
+    @media (max-width: 640px) {
+      #categoryView.search-results-view { padding-left: 1rem; padding-right: 1rem; }
+      .search-result-card { flex-direction: column; }
+      .search-result-cover { width: 100%; }
+    }
     #sidebar {
       transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
     }
@@ -146,10 +175,23 @@
     .report-markdown strong { color: #1e293b; font-weight: 600; }
     .report-markdown em { font-style: italic; }
 
+    /* ============ Reading progress bar ============ */
+    #readingProgress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: #E77A1D; z-index: 60; transition: width .1s linear; }
+
     /* ============ Table of Contents (report TOC) ============ */
     /* Flex layout: centered article column + TOC column side by side. */
     .report-layout { display: flex; justify-content: center; gap: 2.5rem; align-items: flex-start; }
     .report-main { flex: 1 1 auto; max-width: 56rem; min-width: 0; }
+    #reportTitle {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    #reportBreadcrumb > * {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     .toc-inner { overflow-y: auto; padding: 1rem 1rem 1rem 0.75rem; border-left: 2px solid rgba(231,122,29,0.15); }
     .toc-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #3E2723; margin-bottom: 0.75rem; }
     .toc-list { display: flex; flex-direction: column; gap: 0.1rem; }
@@ -246,12 +288,15 @@
 </head>
 <body class="bg-beige-light text-slate-900 font-sans min-h-screen flex">
 
+<!-- Reading progress bar (visible only in report view; updated on scroll) -->
+<div id="readingProgress" class="hidden"></div>
+
 <!-- Sidebar -->
 <aside id="sidebar" class="relative w-72 glass-sidebar h-screen sticky top-0 flex-shrink-0 z-50 flex flex-col p-6 transition-all duration-300">
-  <div class="mb-10 px-2 flex items-center">
-    <h1 class="text-2xl font-bold tracking-tight flex items-center gap-2">
-      <span class="w-12 h-12 rounded-xl logo-gradient flex items-center justify-center text-white text-[10px] font-black shrink-0">CANN</span>
-      <span class="text-coffee-brown leading-tight text-lg">CANN RECIPES<br/>BLOGS</span>
+  <div class="mb-8 px-2 flex items-center">
+    <h1 class="font-bold tracking-tight flex items-center gap-2">
+      <span class="w-10 h-10 rounded-xl logo-gradient flex items-center justify-center text-white text-[10px] font-black shrink-0">CANN</span>
+      <span class="text-coffee-brown text-sm font-bold whitespace-nowrap">CANN RECIPES BLOGS</span>
     </h1>
   </div>
 
@@ -297,14 +342,14 @@
 <!-- Main Content -->
 <div id="mainContent" class="flex-grow flex flex-col min-w-0 transition-all duration-300">
   <!-- Top Bar -->
-  <header class="h-20 flex items-center justify-between px-10 bg-transparent">
-    <div class="relative w-full max-w-2xl">
+  <header class="h-20 flex items-center gap-6 px-10 bg-transparent">
+    <div class="relative flex-1 max-w-2xl">
       <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
         <span class="material-symbols-outlined">search</span>
       </span>
-      <input id="searchInput" oninput="filterContent()" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
+      <input id="searchInput" oninput="filterContent()" onkeydown="if(event.key==='Enter'){event.preventDefault();filterContent(true);}" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
     </div>
-    <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="ml-4 shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
+    <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="ml-auto shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
       <span id="themeIcon" class="material-symbols-outlined"></span>
     </button>
   </header>
@@ -519,6 +564,8 @@
           <!-- Dynamic content loaded here -->
         </div>
       </article>
+      <!-- Prev / Next navigation within the same category (rendered by renderReportNav) -->
+      <nav id="reportNav" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"></nav>
       </div>
       <!-- TOC column (sticky on wide screens; slide-in drawer on narrow) -->
       <aside id="tocPanel" class="hidden">
@@ -574,14 +621,8 @@
   };
 
   // Content source switch — auto-detected by environment:
-  //   localhost/127.0.0.1  -> true  = live from GitCode remote via local proxy 8081.
-  //   any other host (e.g. GitHub Pages) -> false = pre-fetched content/reports/*.json.
-  // Rationale: GitHub Pages can't run the 8081 proxy, and the browser-side
-  // remote fallbacks fail there (GitCode web-api returns 418 via WAF, public
-  // CORS proxies are unreliable), so Pages must use the static content the
-  // deploy workflow pre-fetches with build_content.py. The sidebar list always
-  // comes from content/index.json regardless of this flag.
-  const USE_REMOTE_CONTENT = ['localhost', '127.0.0.1'].includes(location.hostname);
+  // Report bodies are always loaded on demand from GitCode. Only lightweight
+  // report metadata (paths and titles) lives in content/index.json.
 
   // Local proxy server URL (optional, for development)
   const proxyBase = 'http://localhost:8081';
@@ -647,7 +688,8 @@
         const reports = catData.reports || catData;
         if (!Array.isArray(reports)) continue;
         for (const r of reports) {
-          if (r.commitDate && filePath.endsWith(r.reportFile)) {
+          const rf = reportFile(r);
+          if (r.commitDate && filePath.endsWith(rf)) {
             console.log('Using pre-fetched commit date:', r.commitDate);
             return r.commitDate;
           }
@@ -825,7 +867,7 @@
       const resp = await fetch('content/index.json');
       if (resp.ok) {
         prefetchedManifest = await resp.json();
-        console.log('Loaded pre-fetched manifest');
+        console.log('Loaded report metadata manifest');
         return prefetchedManifest;
       }
     } catch (e) { /* not available */ }
@@ -834,15 +876,6 @@
   }
 
   // Get pre-fetched content path for a report. Spaces are underscored in BOTH
-  // segments to match build_content.py, which saves flat categories under the
-  // underscored safe_category as the model key (e.g. "CANN Features" ->
-  // content/reports/CANN_Features/CANN_Features/...).
-  function getPrefetchedPath(category, model, reportFile) {
-    const safeCategory = category.replace(/ /g, '_');
-    const safeModel = model.replace(/ /g, '_');
-    return `content/reports/${safeCategory}/${safeModel}/${reportFile.replace('.md', '.json')}`;
-  }
-
   // Fetch file content - tries multiple methods for reliability
   async function fetchReportContent(category, model, reportFile) {
     console.log('fetchReportContent', { category, model, reportFile });
@@ -857,29 +890,8 @@
     const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
     console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
 
-    // Method 0: Try pre-fetched static content (works on GitHub Pages without proxy).
-    // Skipped when USE_REMOTE_CONTENT is on, so bodies load live from GitCode.
-    if (!USE_REMOTE_CONTENT) {
-      try {
-        const prefetchPath = getPrefetchedPath(category, model, reportFile);
-        console.log('Trying pre-fetched content:', prefetchPath);
-        const resp = await fetch(prefetchPath);
-        if (resp.ok) {
-          const data = await resp.json();
-          if (data.markdown) {
-            console.log('Loaded via pre-fetched content:', data.markdown.length);
-            // Update commit date from pre-fetched data
-            if (data.commitDate) {
-              const dateEl = document.getElementById('reportDate');
-              if (dateEl) dateEl.textContent = data.commitDate;
-            }
-            return renderMarkdownWithImages(data.markdown, config.ns, config.repo, config.branch, baseDir, data.images || {});
-          }
-        }
-      } catch (e) { console.log('Pre-fetched content not available:', e.message); }
-    }
-
-    // Method 1: Try local proxy (optional, for development)
+    // Method 1: Try local proxy (optional, for development). It streams the
+    // remote response and does not persist report content.
     try {
       const localUrl = localProxyUrl(config.ns, config.repo, config.branch, filePath);
       const response = await fetch(localUrl);
@@ -1178,9 +1190,20 @@
   }
 
   // Re-render the sidebar <nav> from the current repoModels data
-  // Slugify a report filename into a display title.
+  // Use the report filename without its .md suffix as the display title.
   function reportTitle(report) {
-    return report.replace('.md','').replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase());
+    const filename = typeof report === 'string' ? report : (report && report.file ? report.file : '');
+    return filename.replace(/\.md$/i, '');
+  }
+
+  // Get the filename string. Object support keeps older manifests compatible.
+  function reportFile(r) {
+    return typeof r === 'string' ? r : (r && r.file ? r.file : '');
+  }
+
+  // Format a model name (underscore-separated) into a readable label.
+  function formatModelName(name) {
+    return name.replace(/[_-]/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g, l => l.toUpperCase());
   }
 
   function renderSidebar() {
@@ -1199,7 +1222,7 @@
     function renderModel(category, model) {
       const sub = 'flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer';
       const reportLink = (r) =>
-        `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(r)}')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(r))}</a>`;
+        `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(r))}</a>`;
       const body = model.reports.length
         ? model.reports.map(reportLink).join('')
         : `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(model.name)}','')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(model.name)}</a>`;
@@ -1232,7 +1255,7 @@
       if (subs === null) {
         // Flat category: reports sit directly under the category (no sub/model).
         for (const model of models) for (const report of model.reports) {
-          html += `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(report))}','${escJs(report)}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(report))}</a>`;
+          html += `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(report))}','${escJs(reportFile(report))}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(report))}</a>`;
         }
       } else {
         // 4-level: Subcategory <details> wrapping Model <details>/links.
@@ -1263,13 +1286,14 @@
       console.log(`Category ${category}: ${models.length} models`);
       for (const model of models) {
         console.log(`  Model ${model.name}: ${model.reports.length} reports, docPath: ${model.docPath}`);
-        for (const reportFile of model.reports) {
-          const reportTitle = reportFile.replace('.md', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        for (const r of model.reports) {
+          const rf = reportFile(r);
+          const rt = reportTitle(r);
           allReports.push({
             category,
             model: model.name,
-            reportFile,
-            reportTitle,
+            reportFile: rf,
+            reportTitle: rt,
             docPath: model.docPath
           });
         }
@@ -1324,9 +1348,9 @@
 
       popularToShow.forEach((report, index) => {
         html += `
-          <div onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
-            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">${index + 1}</span>
-            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">${report.reportTitle}</span>
+          <div onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="flex items-start gap-3 p-3 min-w-0 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
+            <span class="w-6 h-6 aspect-square shrink-0 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">${index + 1}</span>
+            <span class="popular-report-title flex-1 text-sm font-medium text-coffee-brown hover:text-tech-accent">${report.reportTitle}</span>
           </div>
         `;
       });
@@ -1441,6 +1465,75 @@
     if (list) list.innerHTML = '';
   }
 
+  // ---- Prev / Next report navigation (req 3.1.5) ---------------------------
+  // Flatten a category's reports into one ordered sequence (model order as in
+  // repoModels, reports in listed order), find the current one, and render
+  // prev/next buttons at the report bottom. Boundaries hide the missing side.
+  function renderReportNav(category, model, reportFileParam) {
+    const nav = document.getElementById('reportNav');
+    if (!nav) return;
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    // Build flat list of {model, report, title} — normalise via helpers.
+    const seq = [];
+    for (const m of models) {
+      for (const r of (m.reports || [])) seq.push({ model: m.name, reportFile: reportFile(r), reportTitle: reportTitle(r) });
+    }
+    const idx = seq.findIndex(x => x.model === model && x.reportFile === reportFileParam);
+    if (idx === -1 || seq.length < 2) { nav.classList.add('hidden'); nav.innerHTML = ''; return; }
+
+    const prev = idx > 0 ? seq[idx - 1] : null;
+    const next = idx < seq.length - 1 ? seq[idx + 1] : null;
+
+    const card = (item, dir) => {
+      if (!item) return '<span></span>'; // keep grid column so next stays right-aligned
+      const t = item.reportTitle;
+      const isPrev = dir === 'prev';
+      return `
+        <a onclick="showReport('${escJs(category)}','${escJs(item.model)}','${escJs(t)}','${escJs(item.reportFile)}')"
+           class="glass-card rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5 group ${isPrev ? '' : 'sm:text-right sm:flex-row-reverse'}">
+          <span class="material-symbols-outlined text-tech-accent shrink-0">${isPrev ? 'arrow_back' : 'arrow_forward'}</span>
+          <span class="min-w-0">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">${isPrev ? '上一篇' : '下一篇'}</span>
+            <span class="block text-sm font-semibold text-coffee-brown group-hover:text-tech-accent transition-colors line-clamp-1">${escHtml(t)}</span>
+          </span>
+        </a>`;
+    };
+
+    nav.innerHTML = card(prev, 'prev') + card(next, 'next');
+    nav.classList.remove('hidden');
+  }
+
+  // ---- Reading progress bar (req 3.1.6) ------------------------------------
+  let progressHandler = null; // window scroll listener (for cleanup)
+
+  function updateReadingProgress() {
+    const bar = document.getElementById('readingProgress');
+    if (!bar) return;
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    const pct = scrollable > 0 ? Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100)) : 0;
+    bar.style.width = pct + '%';
+  }
+
+  // Show the progress bar and start tracking scroll (called when a report opens).
+  function showReadingProgress() {
+    const bar = document.getElementById('readingProgress');
+    if (!bar) return;
+    bar.classList.remove('hidden');
+    if (!progressHandler) {
+      progressHandler = () => requestAnimationFrame(updateReadingProgress);
+      window.addEventListener('scroll', progressHandler, { passive: true });
+    }
+    updateReadingProgress();
+  }
+
+  // Hide the progress bar and stop tracking (called when leaving report view).
+  function hideReadingProgress() {
+    const bar = document.getElementById('readingProgress');
+    if (bar) { bar.classList.add('hidden'); bar.style.width = '0'; }
+    if (progressHandler) { window.removeEventListener('scroll', progressHandler); progressHandler = null; }
+  }
+
   // Toggle light/dark theme. Persists to localStorage; the early <head> script
   // re-applies it on load. Styling is driven by html.dark CSS overrides.
   function toggleTheme() {
@@ -1473,10 +1566,12 @@
   }
 
   function showHome() {
+    document.getElementById('categoryView').classList.remove('search-results-view');
     document.getElementById('homeView').classList.remove('hidden');
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.add('hidden');
     clearTOC();
+    hideReadingProgress();
     // Sidebar visibility is user-controlled via the toggle button only.
   }
 
@@ -1490,6 +1585,7 @@
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
     clearTOC();
+    hideReadingProgress();
     // Sidebar visibility is user-controlled via the toggle button only —
     // navigation must not collapse/expand it.
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1525,6 +1621,7 @@
 
   // Level 1: category -> subcategory grid (or report list for flat categories).
   function showCategory(category) {
+    document.getElementById('categoryView').classList.remove('search-results-view');
     openCategoryView();
     document.getElementById('categoryHeader').textContent = category;
 
@@ -1539,7 +1636,7 @@
       const reports = model ? model.reports : [];
       grid.innerHTML = reports.length
         ? reports.map(r => drillCard(
-            `showReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(r)}')`,
+            `showReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
             'article', reportTitle(r), category, `Technical report in ${category}.`)).join('')
         : '<p class="text-slate-500">No reports available yet.</p>';
       return;
@@ -1559,6 +1656,7 @@
 
   // Level 2: subcategory -> model grid.
   function showSubcategory(category, subName) {
+    document.getElementById('categoryView').classList.remove('search-results-view');
     openCategoryView();
     document.getElementById('categoryHeader').textContent = subName;
     renderCrumb([
@@ -1582,6 +1680,7 @@
 
   // Level 3: model -> report list.
   function showModel(category, subName, modelName) {
+    document.getElementById('categoryView').classList.remove('search-results-view');
     openCategoryView();
     document.getElementById('categoryHeader').textContent = modelName;
     renderCrumb([
@@ -1596,7 +1695,7 @@
     const grid = document.getElementById('categoryReports');
     grid.innerHTML = reports.length
       ? reports.map(r => drillCard(
-          `showReport('${escJs(category)}','${escJs(modelName)}','${escJs(reportTitle(r))}','${escJs(r)}')`,
+          `showReport('${escJs(category)}','${escJs(modelName)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
           'article', reportTitle(r), modelName, `Technical report for ${modelName}.`)).join('')
       : '<p class="text-slate-500">No reports available yet.</p>';
   }
@@ -1658,6 +1757,10 @@
         <span class="ml-3 text-slate-500">Loading content...</span>
       </div>
     `;
+    // Reset prev/next nav + progress bar; both re-show only on successful load.
+    const reportNav = document.getElementById('reportNav');
+    if (reportNav) { reportNav.classList.add('hidden'); reportNav.innerHTML = ''; }
+    hideReadingProgress();
 
     if (reportFile) {
       const url = getReportUrl(category, model, reportFile);
@@ -1667,13 +1770,15 @@
           reportContent.innerHTML = content;
           enhanceCodeBlocks(reportContent);
           buildTOC();
+          renderReportNav(category, model, reportFile);
+          showReadingProgress();
         } else {
           // Fallback to link if fetch failed
           reportContent.innerHTML = `
             <div class="text-center py-12 glass-card rounded-2xl">
               <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
               <p class="text-slate-500 mb-2">Could not load content directly.</p>
-              <p class="text-slate-400 text-sm mb-4">Start the proxy first: <code class="bg-slate-100 px-2 py-1 rounded text-xs">python proxy.py</code></p>
+              <p class="text-slate-400 text-sm mb-4">GitCode is temporarily unavailable. You can open the source document directly.</p>
               <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-tech-accent text-white rounded-xl hover:bg-tech-accent/90 transition-colors">
                 <span>Open in GitCode</span>
                 <span class="material-symbols-outlined text-sm">open_in_new</span>
@@ -1705,12 +1810,22 @@
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
-  function filterContent() {
+  // Track last search term to allow re-triggering the same search
+  let lastSearchTerm = '';
+
+  function filterContent(forceRefresh = false) {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     if (!searchTerm) {
+      lastSearchTerm = '';
       showHome();
       return;
     }
+
+    // When called from oninput without a value change (e.g. focus), skip
+    // redundant work. When called explicitly (Enter key), always proceed so
+    // the user can re-trigger a search while reading a document.
+    if (!forceRefresh && searchTerm === lastSearchTerm) return;
+    lastSearchTerm = searchTerm;
 
     // Collect all matching reports across all categories
     const results = [];
@@ -1727,21 +1842,31 @@
         const modelMatch = model.name.toLowerCase().includes(searchTerm);
         if (model.reports.length > 0) {
           for (const report of model.reports) {
-            const reportTitle = report.replace('.md', '').replace(/_/g, ' ');
-            if (modelMatch || reportTitle.toLowerCase().includes(searchTerm) || category.toLowerCase().includes(searchTerm)) {
-              results.push({ category, model: model.name, report, reportTitle: reportTitle.replace(/\b\w/g, l => l.toUpperCase()) });
+            const reportTitleStr = reportTitle(report);
+            if (modelMatch || reportTitleStr.toLowerCase().includes(searchTerm) || category.toLowerCase().includes(searchTerm)) {
+              results.push({
+                category,
+                model: model.name,
+                subcategory: model.subcategory || '',
+                report,
+                reportTitle: reportTitleStr
+              });
             }
           }
         } else if (modelMatch || category.toLowerCase().includes(searchTerm)) {
-          results.push({ category, model: model.name, report: null, reportTitle: model.name });
+          results.push({ category, model: model.name, subcategory: model.subcategory || '', report: null, reportTitle: formatModelName(model.name) });
         }
       }
     }
 
-    // Switch to categoryView to display results
+    // Switch to categoryView to display results (clear report-only UI in case
+    // the search was triggered from within a report view).
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.remove('hidden');
+    document.getElementById('categoryView').classList.add('search-results-view');
     document.getElementById('reportView').classList.add('hidden');
+    clearTOC();
+    hideReadingProgress();
 
     renderCrumb([{ label: 'Search Results' }]);
     const headerEl = document.getElementById('categoryHeader');
@@ -1753,35 +1878,44 @@
 
     for (const r of results) {
       const thumb = thumbs[thumbIdx++ % thumbs.length];
+      // Build a hierarchical path for context:  Category > Subcategory > Model
+      const pathParts = [r.category];
+      if (r.subcategory) pathParts.push(formatModelName(r.subcategory));
+      pathParts.push(formatModelName(r.model));
+      const hierarchyPath = pathParts.join('  ›  ');
+
       if (r.report) {
         html += `
-          <article onclick="showReport('${r.category}', '${r.model}', '${r.reportTitle}', '${r.report}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-            <div class="w-48 h-32 shrink-0 overflow-hidden">
-              <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${thumb}"/>
+          <article onclick="showReport('${escJs(r.category)}', '${escJs(r.model)}', '${escJs(r.reportTitle)}', '${escJs(reportFile(r.report))}')" class="search-result-card glass-card rounded-2xl overflow-hidden flex w-full items-stretch group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="search-result-cover overflow-hidden flex items-center justify-center">
+              <img alt="${escHtml(r.reportTitle)}" class="w-full h-full transition-transform duration-500 group-hover:scale-105" src="${thumb}" loading="lazy"/>
             </div>
-            <div class="p-4 flex flex-col justify-center">
-              <div class="flex gap-2 mb-2">
-                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${r.category}</span>
+            <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
+              <div class="flex gap-2 mb-2 flex-wrap">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${escHtml(r.category)}</span>
+                ${r.subcategory ? `<span class="px-2 py-0.5 text-slate-500 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.subcategory))}</span>` : ''}
+                <span class="px-2 py-0.5 text-coffee-brown/60 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.model))}</span>
               </div>
-              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${r.reportTitle}</h3>
-              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${r.model} in ${r.category}.</p>
-              <span class="text-xs text-slate-400">${r.model}</span>
+              <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
+              <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
+              <p class="search-result-description text-slate-500 text-sm leading-relaxed">Technical report in the ${escHtml(formatModelName(r.model))} series.</p>
             </div>
           </article>
         `;
       } else {
         const repoUrl = getRepoUrl(r.category);
         html += `
-          <article onclick="window.open('${repoUrl}', '_blank')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-            <div class="w-48 h-32 shrink-0 bg-slate-100 flex items-center justify-center">
+          <article onclick="window.open('${escHtml(repoUrl)}', '_blank')" class="search-result-card glass-card rounded-2xl overflow-hidden flex w-full items-stretch group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="search-result-cover bg-slate-100 dark:bg-white/5 flex items-center justify-center">
               <span class="material-symbols-outlined text-5xl text-slate-300">folder_open</span>
             </div>
-            <div class="p-4 flex flex-col justify-center">
+            <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
               <div class="flex gap-2 mb-2">
-                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${r.category}</span>
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${escHtml(r.category)}</span>
               </div>
-              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${r.model}</h3>
-              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">No dedicated tech report yet. View available files in repository.</p>
+              <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
+              <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
+              <p class="search-result-description text-slate-500 text-sm leading-relaxed mb-2">No dedicated tech report yet. View available files in repository.</p>
               <span class="text-xs text-tech-accent flex items-center gap-1">
                 <span class="material-symbols-outlined" style="font-size:13px">open_in_new</span>Browse GitCode Repo
               </span>
