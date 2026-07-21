@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opening report...</title>
+</head>
+<body>
+  <script>
+    const project = location.hostname.endsWith('.github.io')
+      ? location.pathname.split('/').filter(Boolean)[0]
+      : '';
+    const basePath = project ? `/${project}/` : '/';
+    sessionStorage.setItem('spaRedirectRoute', location.pathname + location.search + location.hash);
+    location.replace(basePath);
+  </script>
+</body>
+</html>

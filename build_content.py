@@ -5,7 +5,7 @@ Dynamically discovers models and reports via the GitCode repository tree API.
 
 Report bodies and images are cached only when PREFETCH_REPORTS=1 (the Pages
 build); normal local builds keep using remote GitCode content. Display titles
-are derived in the browser by removing the .md suffix from each filename.
+come from each document's first level-one heading.
 
 Output:
   content/index.json — manifest with discovered models and report filenames
@@ -123,12 +123,28 @@ def extract_first_image(markdown_content):
     return min(matches, default=(None, None), key=lambda item: item[0])[1]
 
 
+def extract_document_title(markdown_content, fallback_filename):
+    """Return the first Markdown H1, falling back to the report filename."""
+    content = re.sub(r'^---\s*\n[\s\S]*?\n---\s*\n?', '', markdown_content, count=1)
+    heading = re.search(r'^\s{0,3}#\s+(.+?)\s*#*\s*$', content, re.MULTILINE)
+    if heading:
+        title = heading.group(1).strip()
+        title = re.sub(r'!\[([^\]]*)\]\([^)]+\)', r'\1', title)
+        title = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', title)
+        title = re.sub(r'<[^>]+>', '', title)
+        title = re.sub(r'[*_`~]+', '', title).strip()
+        if title:
+            return title
+    return re.sub(r'\.md$', '', fallback_filename, flags=re.IGNORECASE)
+
+
 def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     """Build tags and a remote cover URL without persisting report content."""
     normalized = report_file.lower()
     tags = [tag for tag, needles in TAG_RULES if any(needle in normalized for needle in needles)]
     file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
     markdown = fetch_file(repo, branch, file_path)
+    title = extract_document_title(markdown or "", report_file)
     images = {}
     if PREFETCH_REPORTS:
         if not markdown:
@@ -154,6 +170,7 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     source_repo, source_repo_url = SOURCE_REPOS[category]
     return {
         "file": report_file,
+        "title": title,
         "tags": tags,
         "coverImage": cover_image,
         "sourceRepo": source_repo,

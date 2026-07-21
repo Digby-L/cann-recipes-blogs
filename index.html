@@ -4,6 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CANN RECIPES BLOGS</title>
+  <script>
+    // Keep relative content/assets stable when the visible URL is a deep route.
+    const githubProject = location.hostname.endsWith('.github.io')
+      ? location.pathname.split('/').filter(Boolean)[0]
+      : '';
+    window.SITE_BASE_PATH = githubProject ? `/${githubProject}/` : '/';
+    const redirectedRoute = sessionStorage.getItem('spaRedirectRoute');
+    if (redirectedRoute) {
+      sessionStorage.removeItem('spaRedirectRoute');
+      if (redirectedRoute.startsWith(window.SITE_BASE_PATH)) {
+        history.replaceState({}, '', redirectedRoute);
+      }
+    }
+    const siteBase = document.createElement('base');
+    siteBase.href = window.SITE_BASE_PATH;
+    document.head.appendChild(siteBase);
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
     // Apply the saved theme BEFORE render to avoid a light-mode flash.
@@ -629,6 +646,43 @@
 
       <div id="categoryReports" class="flex flex-col gap-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
         <!-- Drill-down cards are dynamically loaded here (one per row) -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Route Not Found View -->
+  <main id="notFoundView" class="hidden flex-grow px-6 sm:px-10 py-8 sm:py-16">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+          <span class="material-symbols-outlined text-5xl">draft</span>
+        </div>
+        <div class="min-w-0 pt-1">
+          <p class="text-sm font-bold tracking-[0.22em] text-slate-500">404</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold text-coffee-brown leading-tight">Page not found</h1>
+          <p class="mt-5 text-lg text-slate-500 leading-relaxed">
+            <code id="notFoundPath" class="inline-block max-w-full break-all rounded-md bg-slate-100 px-2 py-1 text-base text-slate-600"></code>
+            does not match any document or category.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <button onclick="showHome()" class="group min-h-44 text-left border border-slate-200 bg-white/40 p-7 rounded-lg hover:border-tech-accent/50 hover:bg-white/70 transition-colors">
+          <span class="flex items-center gap-3 text-xl font-bold text-coffee-brown group-hover:text-tech-accent transition-colors">
+            <span class="material-symbols-outlined text-tech-accent">home</span>
+            Return home
+          </span>
+          <span class="block mt-4 text-base text-slate-500 leading-relaxed">Go back to the report index and browse all available categories.</span>
+        </button>
+        <a id="notFoundFeedback" href="https://gitcode.com/tian-ccs/cann-recipes-docs/issues/new" target="_blank" rel="noopener" class="group min-h-44 border border-slate-200 bg-white/40 p-7 rounded-lg hover:border-tech-accent/50 hover:bg-white/70 transition-colors">
+          <span class="flex items-center gap-3 text-xl font-bold text-coffee-brown group-hover:text-tech-accent transition-colors">
+            <span class="material-symbols-outlined text-tech-accent">rate_review</span>
+            Report a problem
+            <span class="material-symbols-outlined text-base ml-auto text-slate-400">open_in_new</span>
+          </span>
+          <span class="block mt-4 text-base text-slate-500 leading-relaxed">Open a pre-filled Issue in the Docs repository so maintainers can investigate the missing route.</span>
+        </a>
       </div>
     </div>
   </main>
@@ -1342,9 +1396,10 @@
     return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   }
 
-  // Re-render the sidebar <nav> from the current repoModels data
-  // Use the report filename without its .md suffix as the display title.
+  // Re-render the sidebar <nav> from the current repoModels data.
+  // Prefer the document's H1 title; retain the filename as a legacy fallback.
   function reportTitle(report) {
+    if (report && typeof report === 'object' && report.title) return report.title;
     const filename = typeof report === 'string' ? report : (report && report.file ? report.file : '');
     return filename.replace(/\.md$/i, '');
   }
@@ -1562,6 +1617,7 @@
     renderSidebar();
     updateHomePage();
     updateTagFilterUI();
+    await restoreViewFromPath();
 
     document.addEventListener('click', (event) => {
       const panel = document.getElementById('tagFilterPanel');
@@ -1591,6 +1647,8 @@
         }
       }
     });
+
+    window.addEventListener('popstate', () => restoreViewFromPath());
   });
 
   // ---- Report Table of Contents (TOC) --------------------------------------
@@ -1774,13 +1832,102 @@
     }
   }
 
-  function showHome() {
+  function routePath(parts = []) {
+    const suffix = parts.map(part => encodeURIComponent(part)).join('/');
+    return window.SITE_BASE_PATH + suffix;
+  }
+
+  function updateRoute(parts, replace = false) {
+    const target = routePath(parts);
+    if (location.pathname === target) return;
+    history[replace ? 'replaceState' : 'pushState']({}, '', target);
+  }
+
+  function reportSlug(file) {
+    return file.replace(/\.md$/i, '');
+  }
+
+  async function restoreViewFromPath() {
+    const relative = location.pathname.startsWith(window.SITE_BASE_PATH)
+      ? location.pathname.slice(window.SITE_BASE_PATH.length)
+      : '';
+    const parts = relative.split('/').filter(Boolean).map(part => {
+      try { return decodeURIComponent(part); } catch (e) { return part; }
+    });
+    if (!parts.length) { showHome(false); return; }
+
+    const category = Object.keys(repoConfig).find(name => name === parts[0]);
+    if (!category) { showNotFound(); return; }
+    const config = repoConfig[category] || {};
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    if (config.flat) {
+      if (parts.length === 1) { showCategory(category, false); return; }
+      const model = models[0];
+      const report = model?.reports?.find(item => reportSlug(reportFile(item)) === parts[1]);
+      if (report) {
+        await showReport(category, model.name, reportTitle(report), reportFile(report), false);
+        return;
+      }
+    } else {
+      const subcategory = parts[1];
+      const modelName = parts[2];
+      if (parts.length === 1) { showCategory(category, false); return; }
+      if (parts.length === 2 && getSubcategories(category)?.some(item => item.name === subcategory)) {
+        showSubcategory(category, subcategory, false); return;
+      }
+      const model = models.find(item => item.name === modelName && item.subcategory === subcategory);
+      if (model && parts.length === 3) { showModel(category, subcategory, modelName, false); return; }
+      const report = model?.reports?.find(item => reportSlug(reportFile(item)) === parts[3]);
+      if (report && parts.length === 4) {
+        await showReport(category, modelName, reportTitle(report), reportFile(report), false);
+        return;
+      }
+    }
+    showNotFound();
+  }
+
+  function showNotFound() {
+    closeFeedbackModal();
+    currentFeedbackReport = null;
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.remove('hidden');
+    clearTOC();
+    hideReadingProgress();
+
+    const requestedPath = location.pathname + location.search + location.hash;
+    document.getElementById('notFoundPath').textContent = requestedPath;
+    const title = `[Docs site] Page not found: ${location.pathname}`;
+    const body = [
+      '## Missing page',
+      '',
+      `- Path: ${requestedPath}`,
+      `- Full URL: ${location.href}`,
+      `- Browser: ${navigator.userAgent}`,
+      '',
+      '## Expected result',
+      '',
+      '<!-- Describe which document or category you expected to open. -->',
+    ].join('\n');
+    const params = new URLSearchParams();
+    params.set('title', title);
+    params.set('body', body);
+    params.set('issue[title]', title);
+    params.set('issue[description]', body);
+    document.getElementById('notFoundFeedback').href =
+      `https://gitcode.com/tian-ccs/cann-recipes-docs/issues/new?${params.toString()}`;
+  }
+
+  function showHome(updateHistory = true) {
+    if (updateHistory) updateRoute([]);
     closeFeedbackModal();
     currentFeedbackReport = null;
     document.getElementById('categoryView').classList.remove('search-results-view');
     document.getElementById('homeView').classList.remove('hidden');
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
     clearTOC();
     hideReadingProgress();
     const filterBar = document.getElementById('activeFilterBar');
@@ -1799,6 +1946,7 @@
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
     clearTOC();
     hideReadingProgress();
     // Sidebar visibility is user-controlled via the toggle button only —
@@ -1836,7 +1984,8 @@
   }
 
   // Level 1: category -> subcategory grid (or report list for flat categories).
-  function showCategory(category) {
+  function showCategory(category, updateHistory = true) {
+    if (updateHistory) updateRoute([category]);
     document.getElementById('categoryView').classList.remove('search-results-view');
     openCategoryView();
     document.getElementById('categoryHeader').textContent = category;
@@ -1872,7 +2021,8 @@
   }
 
   // Level 2: subcategory -> model grid.
-  function showSubcategory(category, subName) {
+  function showSubcategory(category, subName, updateHistory = true) {
+    if (updateHistory) updateRoute([category, subName]);
     document.getElementById('categoryView').classList.remove('search-results-view');
     openCategoryView();
     document.getElementById('categoryHeader').textContent = subName;
@@ -1896,7 +2046,8 @@
   }
 
   // Level 3: model -> report list.
-  function showModel(category, subName, modelName) {
+  function showModel(category, subName, modelName, updateHistory = true) {
+    if (updateHistory) updateRoute([category, subName, modelName]);
     document.getElementById('categoryView').classList.remove('search-results-view');
     openCategoryView();
     document.getElementById('categoryHeader').textContent = modelName;
@@ -1995,11 +2146,19 @@
     if (issueWindow) issueWindow.opener = null;
   }
 
-  async function showReport(category, model, title, reportFile = '') {
+  async function showReport(category, model, title, reportFile = '', updateHistory = true) {
     console.log('showReport', { category, model, title, reportFile });
+    if (updateHistory && reportFile) {
+      const modelData = (actualRepoModels[category] || repoModels[category] || []).find(item => item.name === model);
+      const parts = (repoConfig[category] || {}).flat
+        ? [category, reportSlug(reportFile)]
+        : [category, modelData?.subcategory || '', model, reportSlug(reportFile)];
+      updateRoute(parts.filter(Boolean));
+    }
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.remove('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
 
     // Sidebar visibility is user-controlled via the toggle button only.
 
@@ -2219,6 +2378,7 @@
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('categoryView').classList.add('search-results-view');
     document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
     clearTOC();
     hideReadingProgress();
 
