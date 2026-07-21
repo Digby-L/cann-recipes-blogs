@@ -36,7 +36,17 @@ jobs:
         env:
           PREFETCH_REPORTS: "1"
         run: |
-          python build_content.py
+          for attempt in 1 2 3 4; do
+            if python build_content.py; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              echo "GitCode content build failed after $attempt attempts"
+              exit 1
+            fi
+            echo "GitCode content build attempt $attempt failed; retrying in 15 seconds"
+            sleep 15
+          done
 
       - name: Validate static report cache
         run: |
