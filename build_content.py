@@ -3,9 +3,9 @@
 Build a lightweight report metadata manifest from GitCode repositories.
 Dynamically discovers models and reports via the GitCode repository tree API.
 
-Report bodies and images are never persisted locally. Markdown is read
-transiently to discover the first cover image; display titles are derived in
-the browser by removing the .md suffix from each filename.
+Report bodies and images are cached only when PREFETCH_REPORTS=1 (the Pages
+build); normal local builds keep using remote GitCode content. Display titles
+are derived in the browser by removing the .md suffix from each filename.
 
 Output:
   content/index.json — manifest with discovered models and report filenames
@@ -16,6 +16,7 @@ import os
 import re
 import sys
 import base64
+import hashlib
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -30,6 +31,7 @@ GITCODE_RAW = f"https://gitcode.com/{NS}"
 GITCODE_RAW_CDN = f"https://raw.gitcode.com/{NS}"
 PREFETCH_REPORTS = os.environ.get("PREFETCH_REPORTS") == "1"
 REPORT_CACHE_DIR = None
+ASSET_CACHE_DIR = None
 
 # Full browser-like headers. GitCode's CloudWAF returns HTTP 418 (a challenge
 # page) for requests with a bare "Mozilla/5.0" UA, so we mirror what proxy.py
@@ -60,6 +62,26 @@ SOURCE_REPOS = {
     "Train": ("cann-recipes-train", "https://gitcode.com/cann/cann-recipes-train"),
     "Embodied Intelligence": ("cann-recipes-embodied-ai", "https://gitcode.com/cann/cann-recipes-embodied-ai"),
     "CANN Features": ("cann-recipes-docs", "https://gitcode.com/tian-ccs/cann-recipes-docs"),
+}
+
+# Some aggregated Markdown files were copied without their adjacent figure
+# directory. Keep an explicit link to the canonical upstream image directory.
+IMAGE_SOURCE_FALLBACKS = {
+    "infer/multimodal/hunyuan_image_3_0/figures/": (
+        "cann", "cann-recipes-infer", "master", "docs/models/hunyuan-image-3.0/figures/"
+    ),
+    "train/pretrain/deepseek_v3_2/figures/": (
+        "cann", "cann-recipes-train", "master", "docs/llm_pretrain/figures/"
+    ),
+    "train/rl/qwen3_235b/figures/": (
+        "cann", "cann-recipes-train", "master", "docs/llm_rl/figures/"
+    ),
+    "embodied/": (
+        "cann", "cann-recipes-embodied-ai", "master", "docs/"
+    ),
+    "models/longcat-flash/figures/": (
+        "cann", "cann-recipes-infer", "master", "docs/models/longcat_flash/figures/"
+    ),
 }
 
 TAG_RULES = [
@@ -106,6 +128,7 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     tags = [tag for tag, needles in TAG_RULES if any(needle in normalized for needle in needles)]
     file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
     markdown = fetch_file(repo, branch, file_path)
+    images = {}
     if PREFETCH_REPORTS:
         if not markdown:
             raise RuntimeError(f"Failed to prefetch required report: {file_path}")
@@ -114,12 +137,15 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
         report_dir = os.path.join(REPORT_CACHE_DIR, safe_category, safe_model)
         os.makedirs(report_dir, exist_ok=True)
         report_path = os.path.join(report_dir, report_file.replace(".md", ".json"))
+        images = cache_report_images(markdown, repo, branch, doc_dir)
         with open(report_path, "w", encoding="utf-8") as report_output:
-            json.dump({"markdown": markdown}, report_output, ensure_ascii=False)
+            json.dump({"markdown": markdown, "images": images}, report_output, ensure_ascii=False)
     image_src = extract_first_image(markdown) if markdown else None
     cover_image = None
     if image_src:
-        if image_src.startswith(("http://", "https://", "data:")):
+        if image_src in images:
+            cover_image = images[image_src]
+        elif image_src.startswith(("http://", "https://", "data:")):
             cover_image = image_src
         else:
             resolved = resolve_path(doc_dir, urllib.parse.unquote(image_src.split("?", 1)[0]))
@@ -342,10 +368,100 @@ def find_relative_images(md_content):
     return images
 
 
+def find_image_sources(markdown):
+    """Return image sources from Markdown and HTML, preserving source spelling."""
+    sources = set()
+    markdown_pattern = r'!\[[^\]]*\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+["\'][^"\']*["\'])?\s*\)'
+    for match in re.finditer(markdown_pattern, markdown):
+        sources.add(match.group(1) or match.group(2))
+    html_pattern = r'<img\b[^>]*\bsrc\s*=\s*(["\'])(.*?)\1'
+    for match in re.finditer(html_pattern, markdown, re.IGNORECASE):
+        sources.add(match.group(2))
+    return sorted(src for src in sources if src and not src.startswith(("data:", "#")))
+
+
+def fetch_binary_url(url):
+    """Download complete image bytes, rejecting HTML error/challenge pages."""
+    req = urllib.request.Request(url, headers=BROWSER_HEADERS)
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = resp.read()
+        content_type = resp.headers.get_content_type()
+    prefix = data[:256].lstrip().lower()
+    if not data or prefix.startswith((b"<!doctype", b"<html")):
+        raise RuntimeError("response is empty or HTML")
+    if not content_type.startswith("image/") and not url.lower().split("?", 1)[0].endswith(
+            (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".bmp")):
+        raise RuntimeError(f"unexpected content type: {content_type}")
+    return data
+
+
+def cache_report_images(markdown, repo, branch, doc_dir):
+    """Cache every report image in the Pages artifact and return its src map."""
+    images = {}
+    for src in find_image_sources(markdown):
+        decoded_src = urllib.parse.unquote(src)
+        parsed = urllib.parse.urlparse(decoded_src)
+        if parsed.scheme in ("http", "https"):
+            source_url = decoded_src
+            clean_path = parsed.path
+            raw_match = re.match(
+                r'^/(?:[^/]+)/([^/]+)/raw/([^/]+)/(.*)$', clean_path
+            ) if parsed.netloc in ("gitcode.com", "raw.gitcode.com") else None
+            if raw_match:
+                source_repo, source_branch, source_path = raw_match.groups()
+                source_url = f"{GITCODE_RAW_CDN}/{source_repo}/raw/{source_branch}/{source_path}"
+                asset_rel = f"{source_repo}/{source_path}"
+            else:
+                ext = os.path.splitext(clean_path)[1].lower()
+                if not re.fullmatch(r'\.[a-z0-9]{1,5}', ext):
+                    ext = ".img"
+                digest = hashlib.sha256(decoded_src.encode("utf-8")).hexdigest()
+                asset_rel = f"external/{digest}{ext}"
+        elif parsed.scheme:
+            continue
+        else:
+            source_path = resolve_path(doc_dir, parsed.path)
+            source_url = f"{GITCODE_RAW_CDN}/{repo}/raw/{branch}/{urllib.parse.quote(source_path, safe='/')}"
+            asset_rel = f"{repo}/{source_path}"
+
+        asset_rel = asset_rel.replace("\\", "/").lstrip("/")
+        destination = os.path.abspath(os.path.join(ASSET_CACHE_DIR, *asset_rel.split("/")))
+        if os.path.commonpath((ASSET_CACHE_DIR, destination)) != ASSET_CACHE_DIR:
+            raise RuntimeError(f"Unsafe image path: {src}")
+        try:
+            if not os.path.isfile(destination) or os.path.getsize(destination) == 0:
+                try:
+                    data = fetch_binary_url(source_url)
+                except urllib.error.HTTPError as primary_error:
+                    fallback = next(
+                        ((prefix, value) for prefix, value in IMAGE_SOURCE_FALLBACKS.items()
+                         if source_path.startswith(prefix)),
+                        None,
+                    )
+                    if not fallback or primary_error.code != 404:
+                        raise
+                    source_prefix, fallback_config = fallback
+                    fallback_ns, fallback_repo, fallback_branch, fallback_dir = fallback_config
+                    fallback_path = fallback_dir + source_path[len(source_prefix):]
+                    fallback_url = (
+                        f"https://raw.gitcode.com/{fallback_ns}/{fallback_repo}/raw/"
+                        f"{fallback_branch}/{urllib.parse.quote(fallback_path, safe='/')}"
+                    )
+                    data = fetch_binary_url(fallback_url)
+                os.makedirs(os.path.dirname(destination), exist_ok=True)
+                with open(destination, "wb") as image_output:
+                    image_output.write(data)
+            images[src] = "content/assets/" + urllib.parse.quote(asset_rel, safe="/")
+        except Exception as error:
+            raise RuntimeError(f"Failed to cache image {src} from {source_url}: {error}") from error
+    return images
+
+
 def main():
-    global REPORT_CACHE_DIR
+    global REPORT_CACHE_DIR, ASSET_CACHE_DIR
     script_dir = os.path.dirname(os.path.abspath(__file__))
     REPORT_CACHE_DIR = os.path.join(script_dir, "content", "reports")
+    ASSET_CACHE_DIR = os.path.join(script_dir, "content", "assets")
     # manifest: category -> 4-level tree (or flat), matching content/index.json schema
     manifest = {}
     for category, config in REPO_CONFIG.items():

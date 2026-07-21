@@ -59,6 +59,21 @@ jobs:
           if expected == 0 or generated != expected:
               raise SystemExit(f"Invalid report cache: expected {expected}, generated {generated}")
           print(f"Validated {generated} cached reports")
+
+          reports = list(Path("content/reports").rglob("*.json"))
+          referenced_assets = set()
+          for report in reports:
+              data = json.loads(report.read_text(encoding="utf-8"))
+              referenced_assets.update(data.get("images", {}).values())
+          missing = [path for path in referenced_assets if not Path(path).is_file() or Path(path).stat().st_size == 0]
+          if missing:
+              raise SystemExit(f"Missing or empty cached images: {missing[:10]}")
+          generated_assets = [path for path in Path("content/assets").rglob("*") if path.is_file()]
+          if len(generated_assets) != len(referenced_assets):
+              raise SystemExit(
+                  f"Invalid image cache: {len(referenced_assets)} referenced, {len(generated_assets)} generated"
+              )
+          print(f"Validated {len(generated_assets)} cached images")
           PY
 
       - name: Setup Pages

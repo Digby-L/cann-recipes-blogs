@@ -1051,7 +1051,9 @@
           const cachedReport = await cachedResponse.json();
           if (cachedReport.markdown) {
             console.log('Loaded from static report cache:', cacheUrl);
-            return renderMarkdown(cachedReport.markdown, config.ns, config.repo, config.branch, baseDir);
+            return renderMarkdown(
+              cachedReport.markdown, config.ns, config.repo, config.branch, baseDir, cachedReport.images || {}
+            );
           }
         }
       } catch (error) {
@@ -1107,7 +1109,7 @@
 
 
   // Render markdown using marked.js; resolve relative images through the proxy
-  function renderMarkdown(md, ns = 'tian-ccs', repo = '', branch = 'main', baseDir = '') {
+  function renderMarkdown(md, ns = 'tian-ccs', repo = '', branch = 'main', baseDir = '', images = {}) {
     console.log('renderMarkdown', { ns, repo, branch, baseDir, mdLength: md.length });
     // Strip YAML front matter if present
     md = md.replace(/^---[\s\S]*?---\n/, '');
@@ -1119,6 +1121,16 @@
     md = md.replace(/<script\b[\s\S]*?<\/script>/gi, '');
     md = md.replace(/<style\b[\s\S]*?<\/style>/gi, '');
     md = md.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
+
+    // Some source reports indent standalone images by four spaces. Markdown
+    // treats those lines as code blocks, so normalize image-only lines first.
+    md = md.replace(/^[ \t]{4,}(<img\b[^>]*>)[ \t]*$/gim, '$1');
+    md = md.replace(/^[ \t]{4,}(!\[[^\]]*\]\([^\n]+\))[ \t]*$/gm, '$1');
+
+    const cachedImageUrl = (src) => {
+      if (!src) return null;
+      return images[src] || images[decodeURIComponentSafe(src)] || null;
+    };
 
     // Extract LaTeX math BEFORE markdown parsing so marked doesn't mangle
     // backslashes / underscores / ampersands inside formulas. Each match is
@@ -1141,8 +1153,11 @@
     // direct raw GitCode URLs return an HTML page for images, so they only work
     // as an onerror fallback. See imageSrc() for the full chain.
     if (repo && baseDir) {
-      md = md.replace(/<img\b([^>]*?)\bsrc\s*=\s*"(?!https?:\/\/|data:)([^"]+)"([^>]*?)\/?>/gi, (match, before, src, after) => {
+      md = md.replace(/<img\b([^>]*?)\bsrc\s*=\s*(["'])(.*?)\2([^>]*?)\/?>/gi, (match, before, quote, src, after) => {
         try {
+          const cached = cachedImageUrl(src);
+          if (cached) return `<img${before}src="${cached}"${after} loading="lazy">`;
+          if (/^(?:https?:\/\/|data:)/i.test(src)) return match;
           const resolved = resolvePath(baseDir, src);
           const { primary, onerror } = imageSrc(ns, repo, branch, resolved);
           console.log('HTML img rewrite:', { src, resolved, primary });
@@ -1160,8 +1175,12 @@
 
     // Re-write relative markdown image src through the local proxy (see imageSrc)
     if (repo && baseDir) {
-      md = md.replace(/!\[([^\]]*)\]\((?!https?:\/\/|data:)([^)]+)\)/g, (match, alt, src) => {
+      md = md.replace(/!\[([^\]]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+["'][^"']*["'])?\s*\)/g, (match, alt, angleSrc, plainSrc) => {
         try {
+          const src = angleSrc || plainSrc;
+          const cached = cachedImageUrl(src);
+          if (cached) return `<img src="${cached}" alt="${alt}" loading="lazy">`;
+          if (/^(?:https?:\/\/|data:)/i.test(src)) return match;
           const resolved = resolvePath(baseDir, src);
           const { primary, onerror } = imageSrc(ns, repo, branch, resolved);
           console.log('Image rewrite:', { alt, src, resolved, primary });
@@ -1220,13 +1239,13 @@
         return `<a href="${href}"${title ? ` title="${title}"` : ''}${target}>${text}</a>`;
       };
       renderer.image = (href, title, text) => {
-        let imgSrc = href;
+        let imgSrc = cachedImageUrl(href) || href;
         let onerror = '';
         // Absolute gitcode raw URLs (plain host) return an HTML page, not image
         // bytes, so route them through the CDN/proxy chain. Matches both
         // gitcode.com and raw.gitcode.com with any namespace.
         const m = href.match(/^https?:\/\/(?:raw\.)?gitcode\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)$/);
-        if (m) {
+        if (!cachedImageUrl(href) && m) {
           const [, mns, r, b, p] = m;
           const chain = imageSrc(mns, r, b, p);
           imgSrc = chain.primary;
@@ -1333,6 +1352,10 @@
   // Get the filename string. Object support keeps older manifests compatible.
   function reportFile(r) {
     return typeof r === 'string' ? r : (r && r.file ? r.file : '');
+  }
+
+  function decodeURIComponentSafe(value) {
+    try { return decodeURIComponent(value); } catch (e) { return value; }
   }
 
   const tagRules = [
