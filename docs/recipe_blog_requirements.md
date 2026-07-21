@@ -75,7 +75,7 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 | **内容展示** | 分类浏览（四大类 → 模型 → 报告） | ✅ 已完成 |
 | | 报告 Markdown 渲染 | ✅ 已完成 |
 | | 侧边栏层级导航 | ✅ 已完成 |
-| | 首页推荐（最新 + 热门） | ✅ 已完成 |
+| | 首页推荐（最新报告 + 仓库入口） | ✅ 已完成 |
 | | 代码高亮 + 复制 | ✅ 已完成 |
 | | 图片 Base64 嵌入 | 🔲 TODO |
 | | 报告目录导航 (TOC) | ✅ 已完成 |
@@ -83,22 +83,22 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 | | 阅读进度条 | ✅ 已完成 |
 | **搜索发现** | 关键词搜索（标题/模型名） | ✅ 已完成 |
 | | 全文检索（报告正文） | 🔲 TODO |
-| | 标签筛选 | 🔲 TODO |
+| | 标签筛选 | ✅ 已完成 |
 | **构建部署** | GitHub Pages 自动部署 | ✅ 已完成 |
 | | GitCode Pages 部署 | 🔲 TODO |
 | | 定时刷新（每日 cron） | ✅ 已完成 |
 | | 内容预拉取（build_content.py） | ✅ 已完成 |
 | **视觉设计** | 配色方案（玻璃拟态 + 橙色主题）**[待讨论]** | ✅ 已完成 |
 | | 关键图标选型（Material Icons） | ✅ 已完成 |
-| | **[技术文章封面图选择与生成 — 待讨论](#discuss-cover-image)** | 🔲 TODO |
+| | [技术文章封面图](#discuss-cover-image) | ✅ 已完成 |
 | | 暗色模式 | 🔲 TODO |
 | | 移动端适配 | 🔲 TODO |
 | | 打印友好样式 | 🔲 TODO |
 | **国际化** | 中英文 UI 切换 | 🔲 TODO |
 | **订阅通知** | ~~邮件列表订阅~~ — [已取消](#discuss-subscribe) | ❌ 已取消 |
 | | RSS 订阅源（优先级低） | 🔲 TODO |
-| **反馈互动** | **[Issue 讨论区引流与模板设计 — 待讨论](#discuss-issue-feedback)** | 🔲 TODO |
-| **数据驱动** | 访问统计（驱动热门排序） | 🔲 TODO |
+| **反馈互动** | [Issue 讨论区引流与模板设计](#discuss-issue-feedback) | ✅ 已完成 |
+| **数据驱动** | ~~访问统计（驱动热门排序）~~ — [已取消](#cancel-popular-reports) | ❌ 已取消 |
 | **路由与子页面** | **[子页面路径支持（如 `/infer/`、`/train/`）— 待讨论](#discuss-routing)** | ✅ 已完成 |
 | **内容质量** | 技术文章润色与查虫（Agent 任务） | 🔲 TODO |
 | | 文章规范制定（格式、命名、结构标准） | 🔲 TODO |
@@ -139,13 +139,18 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 - highlight.js 提供代码语法高亮（Atom One Dark 主题）
 - 代码块增加"复制"按钮
 - Heading 生成 anchor ID（`slugify()` 支持中英文），为 TOC 预留
+- 所有表格渲染后由 `enhanceReportTables()` 包装进横向滚动容器；宽表格保持可读列宽，不撑破正文布局
+- 表格滚动容器支持鼠标滚动条、键盘聚焦和移动端触摸横滑
 
 **Markdown 渲染流水线：**
 ```
 报告 JSON → renderMarkdownWithImages(替换图片路径为 base64)
           → renderMarkdown(marked.js 自定义 renderer)
           → enhanceCodeBlocks(语法高亮 + 复制按钮)
+          → enhanceReportTables(宽表格横向滚动)
 ```
+
+**表格验证：** 打开 `qwen3_235B_32k_longseq_rl_train_optimization`，确认宽表格限制在报告栏内，并可通过底部滚动条横向查看全部列。
 
 ---
 
@@ -238,12 +243,14 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 
 #### 3.1.7 首页（已完成）
 
-**需求：** 首页展示最新报告和热门报告，引导用户进入阅读。
+**需求：** 首页展示最新报告和仓库入口，引导用户进入阅读或访问源码仓库。
 
 **方案设计：**
 - "Recent Reports" 区：按 commitDate 排序取最新 6 篇，以卡片形式展示
-- "Popular Reports" 区：展示推荐报告（当前为手动配置，未来接入真实访问数据）
+- 右侧 "Repositories" 区：提供 Infer、Train、Embodied Intelligence、Docs 仓库跳转入口
 - 卡片包含：缩略图、分类标签、标题、模型名
+
+首页不展示 "Popular Reports" 排行，原因见[访问统计取消说明](#cancel-popular-reports)。
 
 ---
 
@@ -290,22 +297,26 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 
 ---
 
-#### 3.2.3 标签筛选（TODO）
+#### 3.2.3 标签筛选（已完成）
 
 **需求：** 为报告打标签（如 "Prefill"、"Decode"、"RL"），支持按标签过滤。
 
-**方案设计：**
-- `build_content.py` 从报告文件名或首行标题中提取关键词作为 tag
-- 写入 manifest 的 reports 条目中
-- 前端在卡片上渲染 tag 标签，点击即可按该 tag 过滤
+**实现方案：**
+- `build_content.py` 仅从报告文件名提取关键词作为 tag，不读取报告正文
+- manifest 的报告条目使用 `{ "file": "...md", "tags": [...] }`，标题仍由文件名移除 `.md` 得到
+- 顶部搜索框旁提供 Tags 快捷入口，面板展示全部标签及对应报告数量
+- 标签支持单独筛选，也支持与搜索关键词组合筛选
+- Category 报告卡片和搜索结果卡片展示可点击 tag
+- 结果页展示当前活动标签，并提供一键清除入口
 
 **修改文件：** `build_content.py`（提取 tags）、`index.html`（tag 展示 + 过滤逻辑）
 
 **验证方法：**
-1. 运行 `python build_content.py`，检查 `content/index.json` 中报告条目是否包含 `tags` 字段
+1. 运行 `python build_content.py`，检查 `content/index.json` 中报告条目包含 `file` 和 `tags` 字段且不包含独立 `title`
 2. 打开 Category 视图，确认卡片上显示彩色 tag 标签
 3. 点击某个 tag，确认列表过滤为只含该 tag 的报告
-4. 清除 tag 过滤，确认恢复全部显示
+4. 输入关键词后选择 tag，确认结果同时满足两个条件
+5. 清除 tag 过滤，确认保留关键词搜索；关键词也为空时返回首页
 
 ---
 
@@ -460,45 +471,43 @@ build_content.py
 
 <a id="discuss-cover-image"></a>
 
-#### 3.4.6 技术文章封面图（TODO）
+#### 3.4.6 技术文章封面图（已完成）
 
 **需求：** 每篇报告卡片有一张有辨识度的封面图，提升浏览体验。
 
 **讨论结论：** 使用技术报告中的图片作为封面，不使用 AI 生成图片。确认采用方案 A。
 
-**方案设计：**
-- 从报告 Markdown 中提取第一张图片作为封面（`coverImage` 字段）
-- `build_content.py` 构建时解析每篇报告的 Markdown，匹配第一个 `![...](...)` 图片引用
-- 将该图片的 base64 数据写入 manifest 的 `coverImage` 字段
-- 前端卡片优先使用 `coverImage`，若报告无图片则使用分类默认占位图（按分类区分颜色/图标）
+**实现方案：**
+- 从报告 Markdown 或 HTML `<img>` 中提取第一张图片作为封面（`coverImage` 字段）
+- `build_content.py` 构建时只临时读取 Markdown 并解析首图路径，不保存报告正文或图片文件
+- manifest 仅写入 GitCode 远程图片 URL，避免 Base64 造成 `index.json` 体积膨胀
+- Recent Reports、Category 报告列表和搜索结果卡片统一优先使用 `coverImage`
+- 报告无图片或远程图片加载失败时，使用按分类区分颜色和图标的 CSS 占位封面
+- 封面使用 `object-fit: contain` 完整显示图片，不裁切技术图表
 
 **提取逻辑（build_content.py）：**
 ```python
 import re
 
-def extract_cover_image(markdown_content, images_dict):
-    """从 Markdown 中提取第一张图片作为封面"""
-    match = re.search(r'!\[.*?\]\((.*?)\)', markdown_content)
-    if match:
-        img_path = match.group(1)
-        # 在 images_dict 中查找对应的 base64 数据
-        for key, base64_data in images_dict.items():
-            if img_path.endswith(key) or key.endswith(img_path):
-                return base64_data
-    return None
+def extract_first_image(markdown_content):
+    """按文档顺序提取第一个 Markdown 或 HTML 图片地址"""
+    markdown_image = re.search(r'!\[[^\]]*\]\(([^)]+)\)', markdown_content)
+    html_image = re.search(r'<img\b[^>]*\bsrc=["\']([^"\']+)["\']', markdown_content)
+    # 实际实现比较匹配位置，返回文档中最先出现的图片
 ```
 
 **Fallback 策略：**
-- 有图片 → 使用报告中第一张图片
-- 无图片 → 使用分类默认占位图（带分类图标 + 模型名文字的纯色块）
+- 有图片 → 使用报告中第一张远程图片
+- 无图片或加载失败 → 使用分类默认占位图（带分类图标 + 模型名文字的纯色块）
 
 **修改文件：** `build_content.py`（提取封面图逻辑）、`index.html`（卡片图片展示逻辑）
 
 **验证方法：**
-1. 运行 `python build_content.py`，检查 manifest 中报告是否有 `coverImage` 字段
+1. 运行 `python build_content.py`，检查 manifest 中每篇报告都有 `coverImage` 字段（无首图时为 `null`）
 2. 打开 Category 视图，确认含图片的报告卡片使用了报告中的真实图片
 3. 确认无图片的报告使用分类占位图（而非空白）
 4. 检查不同分类的封面图是否有视觉区分度
+5. 确认 `content/` 下没有新增 Markdown、Base64 图片或报告缓存文件
 
 ---
 
@@ -564,9 +573,9 @@ def extract_cover_image(markdown_content, images_dict):
 
 <a id="discuss-issue-feedback"></a>
 
-### 3.7 反馈互动模块（TODO）
+### 3.7 反馈互动模块（已完成）
 
-#### 3.7.1 Issue 讨论区引流与模板设计
+#### 3.7.1 Issue 讨论区引流与模板设计（已完成）
 
 **需求：** 用户在浏览报告时可方便地提交反馈或发起讨论，Issue 自动路由回对应的 GitCode 源仓库 Issue 区。
 
@@ -594,8 +603,7 @@ def extract_cover_image(markdown_content, images_dict):
 ```python
 # 每篇报告的 manifest 条目中自动添加 sourceRepo
 report_entry = {
-    "title": report_title,
-    "model": model_name,
+    "file": report_file,
     "sourceRepo": repo_name,      # e.g. "cann-recipes-infer"
     "sourceRepoUrl": repo_url,    # e.g. "https://gitcode.com/cann/cann-recipes-infer"
     "sourcePath": file_path,      # e.g. "docs/models/deepseek-r1/prefill_optimization.md"
@@ -615,7 +623,6 @@ report_entry = {
 |----------|------|----------|
 | 报告详情页底部 | "反馈建议 / Report Issue" 按钮 | 自动携带报告标题和 sourceRepo，跳转到对应仓库 Issue 页 |
 | 报告详情页右侧浮动栏 | 图标按钮（tooltip: "反馈"） | 同上 |
-| 页面 Footer | "提交反馈" 链接 | 通用入口，用户手动选择目标仓库 |
 
 **仓库路由逻辑（基于 sourceRepo 标签）：**
 
@@ -623,13 +630,13 @@ report_entry = {
 |------|----------|
 | `cann-recipes-infer` | `https://gitcode.com/cann/cann-recipes-infer/issues/new` |
 | `cann-recipes-train` | `https://gitcode.com/cann/cann-recipes-train/issues/new` |
-| `cann-recipes-spatial-intelligence` | `https://gitcode.com/cann/cann-recipes-spatial-intelligence/issues/new` |
-| `cann-recipes-embodied-intelligence` | `https://gitcode.com/cann/cann-recipes-embodied-intelligence/issues/new` |
+| `cann-recipes-embodied-ai` | `https://gitcode.com/cann/cann-recipes-embodied-ai/issues/new` |
+| `cann-recipes-docs` | `https://gitcode.com/tian-ccs/cann-recipes-docs/issues/new` |
 
 **跳转 URL 参数拼接：**
 
 ```
-https://gitcode.com/cann/{sourceRepo}/issues/new?title={预填标题}&body={预填正文}
+{sourceRepoUrl}/issues/new?title={预填标题}&body={预填正文}
 ```
 
 前端拼接逻辑（`index.html` 中）：
@@ -647,7 +654,7 @@ function openIssue(report, issueType) {
 
 ---
 
-#### 3.7.2 Issue 模板设计
+#### 3.7.2 Issue 模板设计（已完成）
 
 用户点击反馈按钮时，弹出选择框让用户选择 Issue 类型，然后预填对应模板。
 
@@ -741,7 +748,7 @@ function openIssue(report, issueType) {
 
 ---
 
-#### 3.7.3 交互流程
+#### 3.7.3 交互流程（已完成）
 
 ```
 用户阅读报告
@@ -756,9 +763,7 @@ function openIssue(report, issueType) {
 - ✅ Issue 按文档分类引流回各自的 GitCode 仓库（不设统一仓）
 - ✅ 通过 `sourceRepo` 标签自动路由，无需用户手动选择仓库
 
-**待确认事项：**
-1. GitCode Issue 是否支持 URL 参数预填 `title` 和 `body`（需确认具体参数格式，GitLab 用 `issue[title]` 和 `issue[description]`）？
-2. 模板类型最终保留几种？（4 种 vs 精简为 2 种）
+**兼容策略：** 跳转 URL 同时携带 GitCode 常用的 `title` / `body` 和 GitLab 兼容的 `issue[title]` / `issue[description]` 参数，适配不同 GitCode 部署版本。
 
 **修改文件：** `index.html`（`showReport()` 末尾添加反馈按钮 + 类型选择弹窗 + `openIssue()` 跳转逻辑）
 
@@ -769,7 +774,7 @@ function openIssue(report, issueType) {
 4. 确认 Issue 标题预填了 `[内容纠错] {报告标题}` 格式
 5. 确认 Issue 正文预填了报告路径、阅读地址、提示占位符
 6. 分别测试 4 个分类的报告，确认跳转到各自对应的仓库
-7. 在 Footer 点击"提交反馈"，确认可手动选择目标仓库
+7. 按 Esc 或点击遮罩，确认反馈弹窗关闭
 
 ---
 
@@ -1008,27 +1013,19 @@ cann-recipes-{domain}/
 
 ---
 
-### 3.10 数据驱动模块（TODO）
+<a id="cancel-popular-reports"></a>
 
-#### 3.10.1 访问统计
+### 3.10 数据驱动模块（已取消）
 
-**需求：** 统计各报告访问量，用真实数据驱动首页"热门报告"排序。
+#### 3.10.1 访问统计与热门排行（已取消）
 
-**方案设计：**
-- 接入轻量级、隐私友好的统计服务（无 cookie）
-- 候选方案：Umami（自托管）/ Plausible / Cloudflare Web Analytics（免费）
-- 统计数据通过 API 拉取，写入 manifest 或单独 JSON，前端读取排序
-- 首页 "Popular Reports" 改为按真实 PV 排序（当前为手动配置）
+**原需求：** 统计各报告访问量，用真实数据驱动首页"热门报告"排序。
 
-**约束：** 静态站无后端，统计服务必须是外部托管或 CDN 级别的分析。
+**取消原因：** 当前项目是纯静态站点，没有服务端数据库。可靠的热门排行需要按报告持久化 PV、处理重复访问，并提供聚合查询接口；仅在前端截取清单前几项并不是真实统计。引入该能力需要额外部署数据库和后端服务，明显超出当前静态站点的架构范围，因此取消访问统计及 "Popular Reports" 排行功能。
 
-**修改文件：** `index.html`（嵌入统计脚本 + Popular 排序逻辑）
+**替代方案：** 首页原排行位置改为 "Repositories" 模块，直接提供各仓库跳转入口。
 
-**验证方法：**
-1. 部署后打开网站，在统计服务后台确认有访问数据上报
-2. 访问不同报告若干次，确认后台按报告粒度记录 PV
-3. 确认首页 "Popular Reports" 排序与真实 PV 数据一致
-4. 打开浏览器 DevTools → Application → Cookies，确认无 cookie 写入
+**实现结论：** 不嵌入统计脚本，不记录用户访问数据，不提供伪排行。
 
 ---
 
@@ -1107,7 +1104,7 @@ cann-recipes-{domain}/
 | 11 | 关键词搜索 | 按模型名、标题、分类名过滤 |
 | 12 | 搜索结果网格 | 卡片展示，带匹配数量提示 |
 | 13 | 首页最新报告 | 按 commitDate 排序的卡片 |
-| 14 | 首页热门报告 | 推荐位展示 |
+| 14 | 仓库快捷入口 | 首页右侧展示 Infer、Train、Embodied Intelligence、Docs 仓库链接 |
 
 ### 4.3 UI/UX
 
@@ -1235,12 +1232,13 @@ cann-recipes-{domain}/
 
 ---
 
-#### TODO-08: 报告标签 / Tags
+#### TODO-08: 报告标签 / Tags（已完成）
 
 | 项目 | 内容 |
 |------|------|
 | **目标** | 为报告卡片添加分类标签（如 "Prefill", "Decode", "RL"） |
-| **验收标准** | ① 标签显示在卡片上方 ② 点击标签可按该标签过滤 ③ 标签来源：从报告文件名或首行标题提取 |
+| **验收标准** | ① 标签显示在报告卡片上 ② 点击标签可过滤 ③ 顶部有快捷筛选入口 ④ 支持与关键词组合筛选 |
+| **实现要点** | 标签仅从文件名提取并写入 manifest，不读取远程正文；标题不单独存储 |
 | **实现要点** | `build_content.py` 提取关键词 → 写入 manifest → 前端读取渲染 |
 | **修改文件** | `build_content.py`（提取 tags）、`index.html`（tag 展示 + 过滤逻辑） |
 
@@ -1279,14 +1277,14 @@ cann-recipes-{domain}/
 
 ---
 
-#### TODO-12: 访问统计
+#### TODO-12: 访问统计（已取消）
 
 | 项目 | 内容 |
 |------|------|
-| **目标** | 统计报告访问量，驱动"热门报告"排序 |
-| **验收标准** | ① 接入轻量统计（Umami / Plausible / 自建） ② 无 cookie ③ 首页"Popular"基于真实数据排序 |
-| **实现要点** | 静态站限制下需第三方统计服务或 Cloudflare Analytics |
-| **修改文件** | `index.html`（嵌入统计脚本）、首页 Popular 逻辑 |
+| **目标** | ~~统计报告访问量，驱动"热门报告"排序~~ |
+| **取消原因** | 真实排行需要数据库持久化 PV 和后端聚合接口，纯静态站点无法可靠实现 |
+| **替代方案** | 删除 Popular Reports，将 Repositories 模块放到原排行位置 |
+| **修改文件** | `index.html`、`docs/recipe_blog_requirements.md` |
 
 ---
 

@@ -12,21 +12,102 @@
             "name": "deepseek_r1",
             "docPath": "llm/deepseek_r1",
             "reports": [
-              "deepseek_r1_decode_optimization.md",
-              "deepseek_r1_prefill_optimization.md"
+              {
+                "file": "deepseek_r1_decode_optimization.md",
+                "tags": [
+                  "Decode"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_r1/deepseek_r1_decode_optimization.md"
+              },
+              {
+                "file": "deepseek_r1_prefill_optimization.md",
+                "tags": [
+                  "Prefill"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_r1/figures/image_attention_dp.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_r1/deepseek_r1_prefill_optimization.md"
+              }
             ]
           },
           {
             "name": "deepseek_v4",
             "docPath": "llm/deepseek_v4",
             "reports": [
-              "deepseek_v4_ascendc_operator_guide.md",
-              "deepseek_v4_autofuse_guide.md",
-              "deepseek_v4_inference_guide.md",
-              "deepseek_v4_mHC_guide.md",
-              "deepseek_v4_pypto_operator_guide.md",
-              "deepseek_v4_shmem_guide.md",
-              "deepseek_v4_tilelang_operator_guide.md"
+              {
+                "file": "deepseek_v4_ascendc_operator_guide.md",
+                "tags": [
+                  "Operator"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/aicore.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_ascendc_operator_guide.md"
+              },
+              {
+                "file": "deepseek_v4_autofuse_guide.md",
+                "tags": [
+                  "Operator"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/image.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_autofuse_guide.md"
+              },
+              {
+                "file": "deepseek_v4_inference_guide.md",
+                "tags": [
+                  "Inference"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/model_architecture.jpg",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md"
+              },
+              {
+                "file": "deepseek_v4_mHC_guide.md",
+                "tags": [
+                  "Operator"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/mHC-fuseops.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_mHC_guide.md"
+              },
+              {
+                "file": "deepseek_v4_pypto_operator_guide.md",
+                "tags": [
+                  "Operator"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/hc_pre_swimlane.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_pypto_operator_guide.md"
+              },
+              {
+                "file": "deepseek_v4_shmem_guide.md",
+                "tags": [
+                  "Communication"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/shmem-interface.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_shmem_guide.md"
+              },
+              {
+                "file": "deepseek_v4_tilelang_operator_guide.md",
+                "tags": [
+                  "Operator"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/llm/deepseek_v4/figures/tl_autosync.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_tilelang_operator_guide.md"
+              }
             ]
           }
         ]
@@ -38,7 +119,16 @@
             "name": "hunyuan_image_3_0",
             "docPath": "multimodal/hunyuan_image_3_0",
             "reports": [
-              "hunyuan_image_3_optimization.md"
+              {
+                "file": "hunyuan_image_3_optimization.md",
+                "tags": [
+                  "Image Generation"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/multimodal/hunyuan_image_3_0/figures/attention_tp.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/multimodal/hunyuan_image_3_0/hunyuan_image_3_optimization.md"
+              }
             ]
           }
         ]
@@ -50,7 +140,16 @@
             "name": "hstu",
             "docPath": "recommendation/hstu",
             "reports": [
-              "hstu_optimization.md"
+              {
+                "file": "hstu_optimization.md",
+                "tags": [
+                  "Recommendation"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/infer/recommendation/hstu/figures/embedding_tp.png",
+                "sourceRepo": "cann-recipes-infer",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
+                "sourcePath": "infer/recommendation/hstu/hstu_optimization.md"
+              }
             ]
           }
         ]
@@ -70,7 +169,16 @@
             "name": "deepseek_v3_2",
             "docPath": "pretrain/deepseek_v3_2",
             "reports": [
-              "deepseek-v32_pre_train_optimization.md"
+              {
+                "file": "deepseek-v32_pre_train_optimization.md",
+                "tags": [
+                  "Pretrain"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/train/pretrain/deepseek_v3_2/figures/deepseek_v32/EP_optimize_before.png",
+                "sourceRepo": "cann-recipes-train",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-train",
+                "sourcePath": "train/pretrain/deepseek_v3_2/deepseek-v32_pre_train_optimization.md"
+              }
             ]
           }
         ]
@@ -82,7 +190,16 @@
             "name": "qwen3_235b",
             "docPath": "rl/qwen3_235b",
             "reports": [
-              "qwen3_235B_32k_longseq_rl_train_optimization.md"
+              {
+                "file": "qwen3_235B_32k_longseq_rl_train_optimization.md",
+                "tags": [
+                  "RL"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/train/rl/qwen3_235b/figures/qwen3_figures/image1.png",
+                "sourceRepo": "cann-recipes-train",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-train",
+                "sourcePath": "train/rl/qwen3_235b/qwen3_235B_32k_longseq_rl_train_optimization.md"
+              }
             ]
           }
         ]
@@ -102,25 +219,91 @@
             "name": "gaussian_splatting",
             "docPath": "3d_vision/gaussian_splatting",
             "reports": [
-              "gaussian_splatting_alpha_blending_optimization.md",
-              "gaussian_splatting_culling_optimization.md",
-              "gaussian_splatting_load_balance_optimization.md",
-              "gaussian_splatting_precise_intersection_optimization.md"
+              {
+                "file": "gaussian_splatting_alpha_blending_optimization.md",
+                "tags": [
+                  "3D Vision"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/embodied/3d_vision/gaussian_splatting/figure/pipeline.jpeg",
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_alpha_blending_optimization.md"
+              },
+              {
+                "file": "gaussian_splatting_culling_optimization.md",
+                "tags": [
+                  "3D Vision",
+                  "Culling"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/embodied/3d_vision/gaussian_splatting/figure/gaussian_filter_tiling.png",
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_culling_optimization.md"
+              },
+              {
+                "file": "gaussian_splatting_load_balance_optimization.md",
+                "tags": [
+                  "3D Vision",
+                  "Load Balance"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/embodied/3d_vision/gaussian_splatting/figure/gaussian_tile_origin.png",
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_load_balance_optimization.md"
+              },
+              {
+                "file": "gaussian_splatting_precise_intersection_optimization.md",
+                "tags": [
+                  "3D Vision"
+                ],
+                "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/embodied/3d_vision/gaussian_splatting/figure/gs_algorithm.png",
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_precise_intersection_optimization.md"
+              }
             ]
           },
           {
             "name": "hunyuan3d",
             "docPath": "3d_vision/hunyuan3d",
             "reports": [
-              "Hunyuan3D_optimization.md"
+              {
+                "file": "Hunyuan3D_optimization.md",
+                "tags": [
+                  "3D Vision"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/hunyuan3d/Hunyuan3D_optimization.md"
+              }
             ]
           },
           {
             "name": "vggt",
             "docPath": "3d_vision/vggt",
             "reports": [
-              "vggt_accurancy_evaluation.md",
-              "vggt_optimization.md"
+              {
+                "file": "vggt_accurancy_evaluation.md",
+                "tags": [
+                  "Evaluation",
+                  "3D Vision"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/vggt/vggt_accurancy_evaluation.md"
+              },
+              {
+                "file": "vggt_optimization.md",
+                "tags": [
+                  "3D Vision"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/3d_vision/vggt/vggt_optimization.md"
+              }
             ]
           }
         ]
@@ -132,15 +315,44 @@
             "name": "gr00t_n1_6",
             "docPath": "manipulation/gr00t_n1_6",
             "reports": [
-              "gr00t_n1_6_optimization.md"
+              {
+                "file": "gr00t_n1_6_optimization.md",
+                "tags": [
+                  "Manipulation"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/manipulation/gr00t_n1_6/gr00t_n1_6_optimization.md"
+              }
             ]
           },
           {
             "name": "pi0",
             "docPath": "manipulation/pi0",
             "reports": [
-              "pi0_infer_with_om_optimization.md",
-              "pi0_infer_with_torch_optimization.md"
+              {
+                "file": "pi0_infer_with_om_optimization.md",
+                "tags": [
+                  "Inference",
+                  "Manipulation"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/manipulation/pi0/pi0_infer_with_om_optimization.md"
+              },
+              {
+                "file": "pi0_infer_with_torch_optimization.md",
+                "tags": [
+                  "Inference",
+                  "Manipulation"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/manipulation/pi0/pi0_infer_with_torch_optimization.md"
+              }
             ]
           }
         ]
@@ -152,7 +364,16 @@
             "name": "alpamayo_r1",
             "docPath": "navigation/alpamayo_r1",
             "reports": [
-              "alpamayo_r1_optimization.md"
+              {
+                "file": "alpamayo_r1_optimization.md",
+                "tags": [
+                  "Navigation"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/navigation/alpamayo_r1/alpamayo_r1_optimization.md"
+              }
             ]
           }
         ]
@@ -164,7 +385,16 @@
             "name": "cosmos",
             "docPath": "world_model/cosmos",
             "reports": [
-              "cosmos_optimization.md"
+              {
+                "file": "cosmos_optimization.md",
+                "tags": [
+                  "World Model"
+                ],
+                "coverImage": null,
+                "sourceRepo": "cann-recipes-embodied-ai",
+                "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
+                "sourcePath": "embodied/world_model/cosmos/cosmos_optimization.md"
+              }
             ]
           }
         ]
@@ -178,10 +408,46 @@
     "basePath": "cann_features",
     "flat": true,
     "reports": [
-      "multi_stream_principles.md",
-      "npu_graph_optimization.md",
-      "prefetch_principles.md",
-      "super_kernel.md"
+      {
+        "file": "multi_stream_principles.md",
+        "tags": [
+          "Multi Stream"
+        ],
+        "coverImage": null,
+        "sourceRepo": "cann-recipes-docs",
+        "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
+        "sourcePath": "cann_features/multi_stream_principles.md"
+      },
+      {
+        "file": "npu_graph_optimization.md",
+        "tags": [
+          "Graph"
+        ],
+        "coverImage": null,
+        "sourceRepo": "cann-recipes-docs",
+        "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
+        "sourcePath": "cann_features/npu_graph_optimization.md"
+      },
+      {
+        "file": "prefetch_principles.md",
+        "tags": [
+          "Prefetch"
+        ],
+        "coverImage": null,
+        "sourceRepo": "cann-recipes-docs",
+        "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
+        "sourcePath": "cann_features/prefetch_principles.md"
+      },
+      {
+        "file": "super_kernel.md",
+        "tags": [
+          "Super Kernel"
+        ],
+        "coverImage": "https://raw.gitcode.com/tian-ccs/cann-recipes-docs/raw/main/models/longcat-flash/figures/superkernel.png",
+        "sourceRepo": "cann-recipes-docs",
+        "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
+        "sourcePath": "cann_features/super_kernel.md"
+      }
     ]
   }
 }

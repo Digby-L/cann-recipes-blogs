@@ -98,6 +98,23 @@
       background: rgba(255, 255, 255, 0.45);
     }
     .search-result-cover img { object-fit: contain; }
+    .report-cover-image { object-fit: contain; background: rgba(255,255,255,0.5); }
+    .cover-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.75rem;
+      text-align: center;
+      color: #3E2723;
+      background: #FFF3E8;
+    }
+    .cover-placeholder.cover-train { color: #245B48; background: #E9F5EF; }
+    .cover-placeholder.cover-embodied { color: #315C78; background: #EAF3F8; }
+    .cover-placeholder.cover-features { color: #655225; background: #F6F1DE; }
     .search-result-title {
       display: block;
       overflow: visible;
@@ -108,12 +125,62 @@
       display: block;
       overflow: visible;
     }
-    .popular-report-title {
-      min-width: 0;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      line-height: 1.45;
+    .repository-link {
+      border: 1px solid transparent;
     }
+    .repository-link:hover {
+      border-color: rgba(231, 122, 29, 0.16);
+      background: rgba(231, 122, 29, 0.06);
+    }
+    .repository-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      color: #E77A1D;
+      background: rgba(231, 122, 29, 0.1);
+    }
+    .tag-filter-panel {
+      width: min(22rem, calc(100vw - 2rem));
+      max-height: min(28rem, calc(100vh - 7rem));
+      overflow-y: auto;
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: 999px;
+      padding: 0.28rem 0.65rem;
+      font-size: 0.72rem;
+      line-height: 1;
+      font-weight: 600;
+      color: #C85D00;
+      background: rgba(231, 122, 29, 0.1);
+      border: 1px solid rgba(231, 122, 29, 0.14);
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .tag-chip:hover, .tag-chip.active {
+      color: #fff;
+      background: #E77A1D;
+      border-color: #E77A1D;
+    }
+    html.dark .tag-filter-panel { background: rgba(42,33,30,0.98); }
+    html.dark .tag-chip { color: #FFB46E; background: rgba(231,122,29,0.14); }
+    .feedback-option {
+      border: 1px solid rgba(62,39,35,0.08);
+      background: rgba(255,255,255,0.55);
+      transition: border-color .15s, background .15s, transform .15s;
+    }
+    .feedback-option:hover {
+      border-color: rgba(231,122,29,0.32);
+      background: rgba(231,122,29,0.06);
+      transform: translateY(-1px);
+    }
+    html.dark .feedback-option { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+    html.dark .feedback-option:hover { background: rgba(231,122,29,0.12); border-color: rgba(231,122,29,0.35); }
     @media (max-width: 640px) {
       #categoryView.search-results-view { padding-left: 1rem; padding-right: 1rem; }
       .search-result-card { flex-direction: column; }
@@ -169,6 +236,26 @@
     .report-markdown blockquote { border-left: 4px solid #E77A1D; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(231,122,29,0.05); border-radius: 0 0.5rem 0.5rem 0; }
     .report-markdown hr { border-color: #e2e8f0; margin: 1.75rem 0; }
     .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+    .table-scroll-wrapper {
+      width: 100%;
+      max-width: 100%;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-inline: contain;
+      border-radius: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-scroll-wrapper table {
+      width: max-content;
+      min-width: 100%;
+      max-width: none;
+      margin: 0;
+    }
+    .table-scroll-wrapper::-webkit-scrollbar { height: 8px; }
+    .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(62,39,35,0.06); border-radius: 999px; }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(231,122,29,0.42); border-radius: 999px; }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(231,122,29,0.7); }
     .report-markdown th { background: #f1f5f9; font-weight: 600; color: #3E2723; padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #e2e8f0; }
     .report-markdown td { padding: 0.75rem 1rem; color: #475569; border-bottom: 1px solid #e2e8f0; }
     .report-markdown tr:hover td { background: #f8fafc; }
@@ -321,8 +408,13 @@
     </div>
   </nav>
 
-  <div class="mt-auto pt-6 border-t border-black/5">
-    <div class="flex items-center gap-3 p-2">
+  <div class="mt-auto pt-4">
+    <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-tech-accent/10 text-tech-accent font-semibold hover:bg-tech-accent/20 transition-colors">
+      <span class="material-symbols-outlined">description</span>
+      <span class="flex-1 text-sm">Browse Docs Repo</span>
+      <span class="material-symbols-outlined text-sm">open_in_new</span>
+    </a>
+    <div class="flex items-center gap-3 p-2 mt-4 pt-4 border-t border-black/5">
       <div class="w-10 h-10 rounded-full bg-tech-accent/20 flex items-center justify-center">
         <span class="material-symbols-outlined text-tech-accent">person</span>
       </div>
@@ -343,11 +435,30 @@
 <div id="mainContent" class="flex-grow flex flex-col min-w-0 transition-all duration-300">
   <!-- Top Bar -->
   <header class="h-20 flex items-center gap-6 px-10 bg-transparent">
-    <div class="relative flex-1 max-w-2xl">
-      <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-        <span class="material-symbols-outlined">search</span>
-      </span>
-      <input id="searchInput" oninput="filterContent()" onkeydown="if(event.key==='Enter'){event.preventDefault();filterContent(true);}" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
+    <div class="flex flex-1 max-w-3xl items-center gap-2 min-w-0">
+      <div class="relative flex-1 min-w-0">
+        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+          <span class="material-symbols-outlined">search</span>
+        </span>
+        <input id="searchInput" oninput="filterContent()" onkeydown="if(event.key==='Enter'){event.preventDefault();filterContent(true);}" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
+      </div>
+      <div class="relative shrink-0">
+        <button id="tagFilterButton" onclick="toggleTagFilter(event)" title="Filter by tag" aria-label="Filter reports by tag" aria-expanded="false" class="h-10 px-3 glass-card rounded-xl flex items-center gap-2 text-sm font-semibold text-coffee-brown hover:text-tech-accent transition-colors">
+          <span class="material-symbols-outlined text-lg">label</span>
+          <span class="hidden sm:inline">Tags</span>
+          <span id="tagFilterBadge" class="hidden min-w-5 h-5 px-1 rounded-full bg-tech-accent text-white text-[10px] items-center justify-center">1</span>
+        </button>
+        <div id="tagFilterPanel" class="tag-filter-panel hidden absolute right-0 top-full mt-2 z-[70] glass-card rounded-2xl p-4 shadow-xl border border-white/50">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <p class="text-sm font-bold text-coffee-brown">Filter by tag</p>
+              <p class="text-xs text-slate-400 mt-0.5">Combine with keywords</p>
+            </div>
+            <button onclick="clearTagFilter(event)" class="text-xs font-semibold text-tech-accent hover:underline">Clear</button>
+          </div>
+          <div id="tagFilterOptions" class="grid grid-cols-2 gap-2"></div>
+        </div>
+      </div>
     </div>
     <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="ml-auto shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
       <span id="themeIcon" class="material-symbols-outlined"></span>
@@ -470,36 +581,29 @@
 
     <!-- Sidebar Widgets -->
     <aside class="w-56 flex-shrink-0 space-y-6">
-      <!-- Popular Reports -->
       <div class="glass-card rounded-3xl p-6">
-        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Popular Reports</h4>
-        <div class="space-y-3">
-          <div onclick="showReport('Infer', 'Model-A', 'Optimization Techniques')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
-            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">1</span>
-            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Optimization Techniques</span>
-          </div>
-          <div onclick="showReport('Train', 'TrainModel-X', 'Training Guide')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
-            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">2</span>
-            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Training Guide</span>
-          </div>
-          <div onclick="showReport('Embodied Intelligence', 'Robot-Alpha', 'Robot Systems')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
-            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">3</span>
-            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Robot Systems</span>
-          </div>
-          <div onclick="showReport('Spatial Intelligence', 'SpatialNet', 'Spatial Mapping')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
-            <span class="w-6 h-6 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">4</span>
-            <span class="text-sm font-medium text-coffee-brown hover:text-tech-accent">Spatial Mapping</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-3xl p-6">
-        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Categories</h4>
-        <div id="categoryList" class="space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-slate-600">Loading...</span>
-            <span class="text-xs bg-tech-accent/10 text-tech-accent px-2 py-1 rounded-full">-</span>
-          </div>
+        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Repositories</h4>
+        <div class="space-y-2">
+          <a href="https://gitcode.com/cann/cann-recipes-infer" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">memory</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold text-tech-accent">Infer</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+          <a href="https://gitcode.com/cann/cann-recipes-train" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">model_training</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold text-tech-accent">Train</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+          <a href="https://gitcode.com/cann/cann-recipes-embodied-ai" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">smart_toy</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold leading-snug text-tech-accent">Embodied Intelligence</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+          <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">description</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold text-tech-accent">Docs</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
         </div>
       </div>
     </aside>
@@ -512,7 +616,16 @@
       <!-- Dynamic breadcrumb, rendered by renderCrumb() per drill-down level -->
       <nav id="categoryBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
-      <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-8">Tech Reports</h2>
+      <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-4">Tech Reports</h2>
+
+      <div id="activeFilterBar" class="hidden mb-5 items-center justify-between gap-4 rounded-xl border border-tech-accent/15 bg-tech-accent/5 px-4 py-3">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="material-symbols-outlined text-tech-accent text-lg">filter_alt</span>
+          <span class="text-sm text-slate-600">Active tag:</span>
+          <span id="activeFilterTag" class="tag-chip active"></span>
+        </div>
+        <button onclick="clearTagFilter(event)" class="shrink-0 text-xs font-semibold text-tech-accent hover:underline">Clear filter</button>
+      </div>
 
       <div id="categoryReports" class="flex flex-col gap-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
         <!-- Drill-down cards are dynamically loaded here (one per row) -->
@@ -525,6 +638,9 @@
     <!-- Narrow-screen floating toggle for the TOC drawer -->
     <button id="tocToggle" onclick="toggleTocPanel()" title="目录" aria-label="Toggle table of contents" class="hidden fixed right-4 bottom-6 z-40 w-12 h-12 rounded-full glass-card flex items-center justify-center text-tech-accent shadow-lg">
       <span class="material-symbols-outlined">toc</span>
+    </button>
+    <button id="feedbackFloatingButton" onclick="openFeedbackModal()" title="Feedback" aria-label="Send feedback about this report" class="fixed right-24 bottom-8 z-40 w-12 h-12 rounded-full glass-card flex items-center justify-center text-tech-accent shadow-lg hover:bg-tech-accent hover:text-white transition-colors">
+      <span class="material-symbols-outlined">feedback</span>
     </button>
     <!-- Flex layout: centered article column + sticky TOC column (no overlap) -->
     <div class="report-layout">
@@ -564,6 +680,16 @@
           <!-- Dynamic content loaded here -->
         </div>
       </article>
+      <section id="reportFeedback" class="mt-6 border-t border-tech-accent/15 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="min-w-0">
+          <h2 class="text-base font-bold text-coffee-brown">Questions or feedback?</h2>
+          <p class="text-sm text-slate-500 mt-1">Open a pre-filled Issue in the source repository.</p>
+        </div>
+        <button onclick="openFeedbackModal()" class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-tech-accent text-white text-sm font-semibold hover:bg-tech-accent/90 transition-colors">
+          <span class="material-symbols-outlined text-lg">rate_review</span>
+          Feedback
+        </button>
+      </section>
       <!-- Prev / Next navigation within the same category (rendered by renderReportNav) -->
       <nav id="reportNav" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"></nav>
       </div>
@@ -576,6 +702,26 @@
       </aside>
     </div>
   </main>
+
+  <div id="feedbackModal" class="hidden fixed inset-0 z-[100] items-center justify-center bg-black/35 p-4" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle" onclick="if(event.target===this) closeFeedbackModal()">
+    <div class="glass-card w-full max-w-2xl rounded-2xl p-6 shadow-2xl">
+      <div class="flex items-start justify-between gap-4 mb-5">
+        <div>
+          <h2 id="feedbackModalTitle" class="text-xl font-bold text-coffee-brown">Send feedback</h2>
+          <p id="feedbackRepoLabel" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <button onclick="closeFeedbackModal()" title="Close" aria-label="Close feedback dialog" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:bg-black/5 hover:text-coffee-brown transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="openIssue('correction')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">edit_note</span><span><span class="block text-sm font-bold text-coffee-brown">Content correction</span><span class="block text-xs text-slate-500 mt-1">Typos, incorrect data, or code errors</span></span></button>
+        <button onclick="openIssue('bug')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">bug_report</span><span><span class="block text-sm font-bold text-coffee-brown">Bug report</span><span class="block text-xs text-slate-500 mt-1">Rendering, image, or broken-link issues</span></span></button>
+        <button onclick="openIssue('suggestion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">lightbulb</span><span><span class="block text-sm font-bold text-coffee-brown">Feature suggestion</span><span class="block text-xs text-slate-500 mt-1">Ideas to improve the content or experience</span></span></button>
+        <button onclick="openIssue('discussion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">forum</span><span><span class="block text-sm font-bold text-coffee-brown">Technical discussion</span><span class="block text-xs text-slate-500 mt-1">Questions about the report's approach</span></span></button>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="px-10 py-8 border-t border-black/5 mt-12 flex justify-between items-center text-slate-400 text-xs">
@@ -864,7 +1010,7 @@
   async function loadManifest() {
     if (prefetchedManifest !== null) return prefetchedManifest;
     try {
-      const resp = await fetch('content/index.json');
+      const resp = await fetch('content/index.json', { cache: 'no-store' });
       if (resp.ok) {
         prefetchedManifest = await resp.json();
         console.log('Loaded report metadata manifest');
@@ -1146,41 +1292,6 @@
     return `https://gitcode.com/${c.ns}/${c.repo}`;
   }
 
-  // Count total reports per category (matches what showCategory displays)
-  function getCategoryCounts() {
-    const counts = {};
-    const source = Object.keys(actualRepoModels).length > 0 ? actualRepoModels : repoModels;
-    for (const [category, models] of Object.entries(source)) {
-      let total = 0;
-      for (const m of models) {
-        // Each model with reports shows one card per report file
-        // Models without reports still show one card (linking to repo)
-        total += Math.max(m.reports.length, 1);
-      }
-      counts[category] = total;
-    }
-    return counts;
-  }
-
-  // Render categories with counts
-  function renderCategories() {
-    const categoryList = document.getElementById('categoryList');
-    const counts = getCategoryCounts();
-
-    let html = '';
-    for (const [category, count] of Object.entries(counts)) {
-      html += `
-        <div class="flex items-center justify-between cursor-pointer hover:bg-white/30 p-2 -mx-2 rounded-lg transition-colors" onclick="showCategory('${category}')">
-          <span class="text-slate-600">${category}</span>
-          <span class="text-xs bg-tech-accent/10 text-tech-accent px-2 py-1 rounded-full">${count}</span>
-        </div>
-      `;
-    }
-    categoryList.innerHTML = html;
-  }
-
-
-
   // Minimal HTML / JS string escaping for dynamic sidebar generation
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1199,6 +1310,71 @@
   // Get the filename string. Object support keeps older manifests compatible.
   function reportFile(r) {
     return typeof r === 'string' ? r : (r && r.file ? r.file : '');
+  }
+
+  const tagRules = [
+    ['Prefill', ['prefill']], ['Decode', ['decode']], ['RL', ['_rl_', 'rl_train']],
+    ['Pretrain', ['pre_train', 'pretrain']], ['Inference', ['inference', '_infer_']],
+    ['Operator', ['operator', 'ascendc', 'pypto', 'tilelang', 'autofuse', '_mhc_']],
+    ['Communication', ['shmem', 'communication']], ['Evaluation', ['evaluation', 'accurancy', 'accuracy']],
+    ['3D Vision', ['gaussian', 'hunyuan3d', 'vggt', '3d']], ['Image Generation', ['hunyuan_image']],
+    ['Recommendation', ['hstu']], ['Manipulation', ['gr00t', 'pi0']],
+    ['Navigation', ['alpamayo']], ['World Model', ['cosmos']], ['Load Balance', ['load_balance']],
+    ['Culling', ['culling']], ['Graph', ['graph']], ['Prefetch', ['prefetch']],
+    ['Multi Stream', ['multi_stream']], ['Super Kernel', ['super_kernel']],
+  ];
+
+  function reportTags(report) {
+    if (report && typeof report === 'object' && Array.isArray(report.tags)) return report.tags;
+    const filename = reportFile(report).toLowerCase();
+    return tagRules.filter(([, needles]) => needles.some(needle => filename.includes(needle))).map(([tag]) => tag);
+  }
+
+  function reportCover(report) {
+    return report && typeof report === 'object' ? (report.coverImage || '') : '';
+  }
+
+  function coverMeta(category) {
+    if (category === 'Train') return { css: 'cover-train', icon: 'model_training' };
+    if (category === 'Embodied Intelligence') return { css: 'cover-embodied', icon: 'smart_toy' };
+    if (category === 'CANN Features') return { css: 'cover-features', icon: 'tune' };
+    return { css: 'cover-infer', icon: 'memory' };
+  }
+
+  function coverImageSource(cover) {
+    return cover;
+  }
+
+  function handleCoverImageError(image) {
+    if (image.dataset.retried !== 'true') {
+      image.dataset.retried = 'true';
+      const separator = image.dataset.original.includes('?') ? '&' : '?';
+      image.src = `${image.dataset.original}${separator}cover_retry=${Date.now()}`;
+      return;
+    }
+    image.classList.add('hidden');
+    image.nextElementSibling?.classList.remove('hidden');
+  }
+
+  function renderReportCover(report, category, model, wrapperClass) {
+    const cover = reportCover(report);
+    const coverSrc = cover ? coverImageSource(cover) : '';
+    const meta = coverMeta(category);
+    const fallback = `<div class="cover-placeholder ${meta.css} ${cover ? 'hidden' : ''}">
+      <span class="material-symbols-outlined text-2xl">${meta.icon}</span>
+      <span class="text-[10px] font-bold leading-tight break-words">${escHtml(formatModelName(model))}</span>
+    </div>`;
+    return `<div class="${wrapperClass} overflow-hidden flex items-center justify-center">
+      ${cover ? `<img src="${escHtml(coverSrc)}" data-original="${escHtml(coverSrc)}" alt="${escHtml(reportTitle(report))}" loading="lazy" referrerpolicy="no-referrer" class="report-cover-image w-full h-full transition-transform duration-500 group-hover:scale-105" onerror="handleCoverImageError(this)">` : ''}
+      ${fallback}
+    </div>`;
+  }
+
+  function renderTagChips(tags, compact = false) {
+    return tags.map(tag => `
+      <button type="button" onclick="event.stopPropagation(); selectTag('${escJs(tag)}')"
+        class="tag-chip ${activeTag === tag ? 'active' : ''} ${compact ? 'text-[10px]' : ''}">${escHtml(tag)}</button>
+    `).join('');
   }
 
   // Format a model name (underscore-separated) into a readable label.
@@ -1244,7 +1420,6 @@
     let first = true;
     for (const [category, models] of Object.entries(repoModels)) {
       const icon    = icons[category] || 'folder';
-      const repoUrl = getRepoUrl(category);
       const open    = first ? ' open' : ''; first = false;
 
       // Clicking the label navigates to the drill-down view; the <summary>
@@ -1266,7 +1441,7 @@
         }
       }
 
-      html += `<a onclick="window.open('${escHtml(repoUrl)}', '_blank')" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-tech-accent/10 text-tech-accent hover:bg-tech-accent/20 transition-all text-sm font-medium cursor-pointer"><span class="material-symbols-outlined text-xs">open_in_new</span>Browse Repo</a></div></details>`;
+      html += `</div></details>`;
     }
 
     html += `</div>`;
@@ -1294,6 +1469,7 @@
             model: model.name,
             reportFile: rf,
             reportTitle: rt,
+            report: r,
             docPath: model.docPath
           });
         }
@@ -1305,26 +1481,14 @@
     // Update Recent Reports section (show first 6 reports)
     const recentReportsContainer = document.querySelector('#homeView .space-y-4');
     if (recentReportsContainer && allReports.length > 0) {
-      const thumbs = [
-        'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop'
-      ];
-
       let html = '';
       const reportsToShow = allReports.slice(0, 6); // Show first 6 reports
 
       reportsToShow.forEach((report, index) => {
-        const thumb = thumbs[index % thumbs.length];
         const shortCategory = report.category.split(' ')[0]; // Get first word for badge
         html += `
           <article onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-            <div class="w-48 h-32 shrink-0 overflow-hidden">
-              <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="${thumb}"/>
-            </div>
+            ${renderReportCover(report.report, report.category, report.model, 'w-48 h-32 shrink-0')}
             <div class="p-4 flex flex-col justify-center">
               <div class="flex gap-2 mb-2">
                 <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${shortCategory}</span>
@@ -1340,23 +1504,6 @@
       recentReportsContainer.innerHTML = html;
     }
 
-    // Update Popular Reports section (show first 4 reports)
-    const popularReportsContainer = document.querySelector('#homeView aside .space-y-3');
-    if (popularReportsContainer && allReports.length > 0) {
-      let html = '';
-      const popularToShow = allReports.slice(0, 4); // Show first 4 reports as popular
-
-      popularToShow.forEach((report, index) => {
-        html += `
-          <div onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="flex items-start gap-3 p-3 min-w-0 rounded-xl hover:bg-white/50 cursor-pointer transition-colors">
-            <span class="w-6 h-6 aspect-square shrink-0 rounded-full bg-tech-accent text-white flex items-center justify-center text-xs font-bold">${index + 1}</span>
-            <span class="popular-report-title flex-1 text-sm font-medium text-coffee-brown hover:text-tech-accent">${report.reportTitle}</span>
-          </div>
-        `;
-      });
-
-      popularReportsContainer.innerHTML = html;
-    }
   }
 
 
@@ -1367,8 +1514,24 @@
     console.log('Manifest loaded:', loaded, 'models:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length}`));
 
     renderSidebar();
-    renderCategories();
     updateHomePage();
+    updateTagFilterUI();
+
+    document.addEventListener('click', (event) => {
+      const panel = document.getElementById('tagFilterPanel');
+      const button = document.getElementById('tagFilterButton');
+      if (panel && !panel.contains(event.target) && !button?.contains(event.target)) {
+        panel.classList.add('hidden');
+        button?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        document.getElementById('tagFilterPanel')?.classList.add('hidden');
+        document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
+        closeFeedbackModal();
+      }
+    });
 
     // Handle anchor link clicks within report content
     document.getElementById('reportContent')?.addEventListener('click', (e) => {
@@ -1566,12 +1729,16 @@
   }
 
   function showHome() {
+    closeFeedbackModal();
+    currentFeedbackReport = null;
     document.getElementById('categoryView').classList.remove('search-results-view');
     document.getElementById('homeView').classList.remove('hidden');
     document.getElementById('categoryView').classList.add('hidden');
     document.getElementById('reportView').classList.add('hidden');
     clearTOC();
     hideReadingProgress();
+    const filterBar = document.getElementById('activeFilterBar');
+    if (filterBar) { filterBar.classList.add('hidden'); filterBar.classList.remove('flex'); }
     // Sidebar visibility is user-controlled via the toggle button only.
   }
 
@@ -1581,6 +1748,8 @@
 
   // Switch the main area to the (reused) categoryView container.
   function openCategoryView() {
+    closeFeedbackModal();
+    currentFeedbackReport = null;
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
@@ -1605,16 +1774,17 @@
   const renderReportCrumb = (crumbs) => renderCrumbInto('reportBreadcrumb', crumbs);
 
   // A generic clickable drill-down card. `meta` is the small uppercase tag line.
-  function drillCard(onclick, icon, title, meta, desc) {
+  function drillCard(onclick, icon, title, meta, desc, tags = [], coverContext = null) {
     return `
       <article onclick="${onclick}" class="glass-card rounded-2xl p-5 flex items-start gap-4 group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-        <div class="w-12 h-12 shrink-0 rounded-xl bg-tech-accent/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-tech-accent">${icon}</span>
-        </div>
+        ${coverContext
+          ? renderReportCover(coverContext.report, coverContext.category, coverContext.model, 'w-28 h-20 shrink-0 rounded-xl')
+          : `<div class="w-12 h-12 shrink-0 rounded-xl bg-tech-accent/10 flex items-center justify-center"><span class="material-symbols-outlined text-tech-accent">${icon}</span></div>`}
         <div class="min-w-0">
           ${meta ? `<div class="text-[10px] font-bold uppercase tracking-wider text-tech-accent mb-1">${escHtml(meta)}</div>` : ''}
           <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(title)}</h3>
           <p class="text-slate-500 text-xs leading-relaxed line-clamp-2">${escHtml(desc)}</p>
+          ${tags.length ? `<div class="flex flex-wrap gap-1.5 mt-3">${renderTagChips(tags, true)}</div>` : ''}
         </div>
       </article>`;
   }
@@ -1637,7 +1807,8 @@
       grid.innerHTML = reports.length
         ? reports.map(r => drillCard(
             `showReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
-            'article', reportTitle(r), category, `Technical report in ${category}.`)).join('')
+            'article', reportTitle(r), category, `Technical report in ${category}.`, reportTags(r),
+            { report: r, category, model: model.name })).join('')
         : '<p class="text-slate-500">No reports available yet.</p>';
       return;
     }
@@ -1696,13 +1867,86 @@
     grid.innerHTML = reports.length
       ? reports.map(r => drillCard(
           `showReport('${escJs(category)}','${escJs(modelName)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
-          'article', reportTitle(r), modelName, `Technical report for ${modelName}.`)).join('')
+          'article', reportTitle(r), modelName, `Technical report for ${modelName}.`, reportTags(r),
+          { report: r, category, model: modelName })).join('')
       : '<p class="text-slate-500">No reports available yet.</p>';
   }
 
   // Show report directly from model name in sidebar
   function showModelReport(category, model, title, reportFile) {
     showReport(category, model, title, reportFile);
+  }
+
+  const sourceRepoFallback = {
+    'Infer': { sourceRepo: 'cann-recipes-infer', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-infer' },
+    'Train': { sourceRepo: 'cann-recipes-train', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-train' },
+    'Embodied Intelligence': { sourceRepo: 'cann-recipes-embodied-ai', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-embodied-ai' },
+    'CANN Features': { sourceRepo: 'cann-recipes-docs', sourceRepoUrl: 'https://gitcode.com/tian-ccs/cann-recipes-docs' },
+  };
+  let currentFeedbackReport = null;
+
+  function feedbackReportData(category, model, title, file) {
+    const modelData = (actualRepoModels[category] || repoModels[category] || []).find(item => item.name === model);
+    const report = modelData?.reports?.find(item => reportFile(item) === file) || {};
+    const fallback = sourceRepoFallback[category] || sourceRepoFallback['CANN Features'];
+    const config = repoConfig[category] || {};
+    const docPath = modelData?.docPath || '';
+    return {
+      title,
+      file,
+      category,
+      sourceRepo: report.sourceRepo || fallback.sourceRepo,
+      sourceRepoUrl: report.sourceRepoUrl || fallback.sourceRepoUrl,
+      sourcePath: report.sourcePath || [config.basePath, docPath, file].filter(Boolean).join('/'),
+    };
+  }
+
+  function openFeedbackModal() {
+    if (!currentFeedbackReport) return;
+    const modal = document.getElementById('feedbackModal');
+    const repoLabel = document.getElementById('feedbackRepoLabel');
+    if (repoLabel) repoLabel.textContent = `Issue destination: ${currentFeedbackReport.sourceRepo}`;
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    modal?.querySelector('.feedback-option')?.focus();
+  }
+
+  function closeFeedbackModal() {
+    const modal = document.getElementById('feedbackModal');
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  function issueTemplate(type, report) {
+    const related = `## Related report\n\n- Report title: ${report.title}\n- Report path: ${report.sourcePath}\n- Reading URL: ${location.href}\n`;
+    const templates = {
+      correction: `${related}\n## Problem description\n\n<!-- Describe the typo, incorrect data, or code issue -->\n\n## Suggested correction\n\n<!-- Provide the proposed correction -->`,
+      bug: `${related}\n## Bug description\n\n<!-- Describe what went wrong -->\n\n## Steps to reproduce\n\n1.\n2.\n3.\n\n## Expected behavior\n\n<!-- Describe the expected result -->\n\n## Environment\n\n- Browser:\n- Operating system:`,
+      suggestion: `## Related report\n\n- Report title: ${report.title}\n- Reading URL: ${location.href}\n\n## Feature description\n\n<!-- Describe the feature or improvement -->\n\n## Use case\n\n<!-- Explain when this would be useful -->`,
+      discussion: `${related}\n## Discussion topic\n\n<!-- Describe the technical question -->\n\n## Your perspective\n\n<!-- Share your understanding or proposed approach -->`,
+    };
+    return templates[type] || templates.discussion;
+  }
+
+  function openIssue(type) {
+    if (!currentFeedbackReport) return;
+    const labels = {
+      correction: '[内容纠错]', bug: '[Bug]', suggestion: '[建议]', discussion: '[讨论]',
+    };
+    const issueTitle = `${labels[type] || '[讨论]'} ${currentFeedbackReport.title}`;
+    const body = issueTemplate(type, currentFeedbackReport);
+    const params = new URLSearchParams();
+    // GitCode deployments have used both native and GitLab-compatible names.
+    params.set('title', issueTitle);
+    params.set('body', body);
+    params.set('issue[title]', issueTitle);
+    params.set('issue[description]', body);
+    const issueUrl = `${currentFeedbackReport.sourceRepoUrl}/issues/new?${params.toString()}`;
+    closeFeedbackModal();
+    const issueWindow = window.open(issueUrl, '_blank', 'noopener,noreferrer');
+    if (issueWindow) issueWindow.opener = null;
   }
 
   async function showReport(category, model, title, reportFile = '') {
@@ -1727,6 +1971,9 @@
     renderReportCrumb(crumbs);
     document.getElementById('reportCategory').textContent = category;
     document.getElementById('reportTitle').textContent = title;
+    currentFeedbackReport = reportFile ? feedbackReportData(category, model, title, reportFile) : null;
+    document.getElementById('reportFeedback')?.classList.toggle('hidden', !currentFeedbackReport);
+    document.getElementById('feedbackFloatingButton')?.classList.toggle('hidden', !currentFeedbackReport);
 
     // Show loading for date initially
     document.getElementById('reportDate').textContent = 'Loading...';
@@ -1769,6 +2016,7 @@
         if (content) {
           reportContent.innerHTML = content;
           enhanceCodeBlocks(reportContent);
+          enhanceReportTables(reportContent);
           buildTOC();
           renderReportNav(category, model, reportFile);
           showReadingProgress();
@@ -1812,10 +2060,73 @@
 
   // Track last search term to allow re-triggering the same search
   let lastSearchTerm = '';
+  let activeTag = '';
+
+  function collectTagCounts() {
+    const counts = new Map();
+    for (const category of Object.keys(repoModels)) {
+      for (const model of (actualRepoModels[category] || repoModels[category] || [])) {
+        for (const report of (model.reports || [])) {
+          for (const tag of reportTags(report)) counts.set(tag, (counts.get(tag) || 0) + 1);
+        }
+      }
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }
+
+  function renderTagFilterOptions() {
+    const container = document.getElementById('tagFilterOptions');
+    if (!container) return;
+    const tags = collectTagCounts();
+    container.innerHTML = tags.length ? tags.map(([tag, count]) => `
+      <button type="button" onclick="selectTag('${escJs(tag)}')"
+        class="${activeTag === tag ? 'bg-tech-accent text-white border-tech-accent' : 'bg-white/50 text-slate-600 border-black/5 hover:border-tech-accent/30 hover:text-tech-accent'} flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors">
+        <span class="text-xs font-semibold">${escHtml(tag)}</span>
+        <span class="text-[10px] opacity-70">${count}</span>
+      </button>`).join('') : '<p class="col-span-2 py-4 text-center text-xs text-slate-400">No tags available</p>';
+  }
+
+  function updateTagFilterUI() {
+    const badge = document.getElementById('tagFilterBadge');
+    const button = document.getElementById('tagFilterButton');
+    if (badge) {
+      badge.classList.toggle('hidden', !activeTag);
+      badge.classList.toggle('flex', !!activeTag);
+    }
+    if (button) button.classList.toggle('text-tech-accent', !!activeTag);
+    renderTagFilterOptions();
+  }
+
+  function toggleTagFilter(event) {
+    event?.stopPropagation();
+    const panel = document.getElementById('tagFilterPanel');
+    const button = document.getElementById('tagFilterButton');
+    if (!panel) return;
+    const willOpen = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', !willOpen);
+    button?.setAttribute('aria-expanded', String(willOpen));
+  }
+
+  function selectTag(tag) {
+    activeTag = activeTag === tag ? '' : tag;
+    updateTagFilterUI();
+    document.getElementById('tagFilterPanel')?.classList.add('hidden');
+    document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
+    filterContent(true);
+  }
+
+  function clearTagFilter(event) {
+    event?.stopPropagation();
+    activeTag = '';
+    updateTagFilterUI();
+    document.getElementById('tagFilterPanel')?.classList.add('hidden');
+    document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
+    filterContent(true);
+  }
 
   function filterContent(forceRefresh = false) {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!searchTerm) {
+    if (!searchTerm && !activeTag) {
       lastSearchTerm = '';
       showHome();
       return;
@@ -1829,13 +2140,6 @@
 
     // Collect all matching reports across all categories
     const results = [];
-    const thumbs = [
-      'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop',
-    ];
-
     for (const category of Object.keys(repoModels)) {
       const modelsSource = actualRepoModels[category] || repoModels[category] || [];
       for (const model of modelsSource) {
@@ -1843,17 +2147,21 @@
         if (model.reports.length > 0) {
           for (const report of model.reports) {
             const reportTitleStr = reportTitle(report);
-            if (modelMatch || reportTitleStr.toLowerCase().includes(searchTerm) || category.toLowerCase().includes(searchTerm)) {
+            const tags = reportTags(report);
+            const keywordMatch = !searchTerm || modelMatch || reportTitleStr.toLowerCase().includes(searchTerm) || category.toLowerCase().includes(searchTerm);
+            const tagMatch = !activeTag || tags.includes(activeTag);
+            if (keywordMatch && tagMatch) {
               results.push({
                 category,
                 model: model.name,
                 subcategory: model.subcategory || '',
                 report,
-                reportTitle: reportTitleStr
+                reportTitle: reportTitleStr,
+                tags
               });
             }
           }
-        } else if (modelMatch || category.toLowerCase().includes(searchTerm)) {
+        } else if (!activeTag && (modelMatch || category.toLowerCase().includes(searchTerm))) {
           results.push({ category, model: model.name, subcategory: model.subcategory || '', report: null, reportTitle: formatModelName(model.name) });
         }
       }
@@ -1870,14 +2178,22 @@
 
     renderCrumb([{ label: 'Search Results' }]);
     const headerEl = document.getElementById('categoryHeader');
-    if (headerEl) headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for "${searchTerm}"`;
+    if (headerEl) {
+      const criteria = [searchTerm ? `"${searchTerm}"` : '', activeTag ? `#${activeTag}` : ''].filter(Boolean).join(' + ');
+      headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for ${criteria}`;
+    }
+
+    const filterBar = document.getElementById('activeFilterBar');
+    if (filterBar) {
+      filterBar.classList.toggle('hidden', !activeTag);
+      filterBar.classList.toggle('flex', !!activeTag);
+      document.getElementById('activeFilterTag').textContent = activeTag;
+    }
 
     const reportsContainer = document.getElementById('categoryReports');
     let html = '';
-    let thumbIdx = 0;
 
     for (const r of results) {
-      const thumb = thumbs[thumbIdx++ % thumbs.length];
       // Build a hierarchical path for context:  Category > Subcategory > Model
       const pathParts = [r.category];
       if (r.subcategory) pathParts.push(formatModelName(r.subcategory));
@@ -1887,15 +2203,14 @@
       if (r.report) {
         html += `
           <article onclick="showReport('${escJs(r.category)}', '${escJs(r.model)}', '${escJs(r.reportTitle)}', '${escJs(reportFile(r.report))}')" class="search-result-card glass-card rounded-2xl overflow-hidden flex w-full items-stretch group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
-            <div class="search-result-cover overflow-hidden flex items-center justify-center">
-              <img alt="${escHtml(r.reportTitle)}" class="w-full h-full transition-transform duration-500 group-hover:scale-105" src="${thumb}" loading="lazy"/>
-            </div>
+            ${renderReportCover(r.report, r.category, r.model, 'search-result-cover')}
             <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
               <div class="flex gap-2 mb-2 flex-wrap">
                 <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${escHtml(r.category)}</span>
                 ${r.subcategory ? `<span class="px-2 py-0.5 text-slate-500 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.subcategory))}</span>` : ''}
                 <span class="px-2 py-0.5 text-coffee-brown/60 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.model))}</span>
               </div>
+              ${r.tags.length ? `<div class="flex flex-wrap gap-1.5 mb-2">${renderTagChips(r.tags, true)}</div>` : ''}
               <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
               <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
               <p class="search-result-description text-slate-500 text-sm leading-relaxed">Technical report in the ${escHtml(formatModelName(r.model))} series.</p>
@@ -1991,6 +2306,19 @@
         });
       });
       wrapper.appendChild(btn);
+    });
+  }
+
+  function enhanceReportTables(container) {
+    container.querySelectorAll('.report-markdown table').forEach(table => {
+      if (table.parentElement?.classList.contains('table-scroll-wrapper')) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-scroll-wrapper';
+      wrapper.tabIndex = 0;
+      wrapper.setAttribute('role', 'region');
+      wrapper.setAttribute('aria-label', 'Scrollable table');
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
     });
   }
 </script>

@@ -3,8 +3,9 @@
 Build a lightweight report metadata manifest from GitCode repositories.
 Dynamically discovers models and reports via the GitCode repository tree API.
 
-Report bodies and images are never fetched or persisted locally. Display titles
-are derived in the browser by removing the .md suffix from each filename.
+Report bodies and images are never persisted locally. Markdown is read
+transiently to discover the first cover image; display titles are derived in
+the browser by removing the .md suffix from each filename.
 
 Output:
   content/index.json — manifest with discovered models and report filenames
@@ -14,6 +15,7 @@ import json
 import os
 import re
 import sys
+import base64
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -50,6 +52,75 @@ REPO_CONFIG = {
     "Embodied Intelligence": {"repo": "cann-recipes-docs", "branch": "main", "basePath": "embodied"},
     "CANN Features":         {"repo": "cann-recipes-docs", "branch": "main", "basePath": "cann_features", "flat": True},
 }
+
+SOURCE_REPOS = {
+    "Infer": ("cann-recipes-infer", "https://gitcode.com/cann/cann-recipes-infer"),
+    "Train": ("cann-recipes-train", "https://gitcode.com/cann/cann-recipes-train"),
+    "Embodied Intelligence": ("cann-recipes-embodied-ai", "https://gitcode.com/cann/cann-recipes-embodied-ai"),
+    "CANN Features": ("cann-recipes-docs", "https://gitcode.com/tian-ccs/cann-recipes-docs"),
+}
+
+TAG_RULES = [
+    ("Prefill", ("prefill",)),
+    ("Decode", ("decode",)),
+    ("RL", ("_rl_", "rl_train")),
+    ("Pretrain", ("pre_train", "pretrain")),
+    ("Inference", ("inference", "_infer_")),
+    ("Operator", ("operator", "ascendc", "pypto", "tilelang", "autofuse", "_mhc_")),
+    ("Communication", ("shmem", "communication")),
+    ("Evaluation", ("evaluation", "accurancy", "accuracy")),
+    ("3D Vision", ("gaussian", "hunyuan3d", "vggt", "3d")),
+    ("Image Generation", ("hunyuan_image",)),
+    ("Recommendation", ("hstu",)),
+    ("Manipulation", ("gr00t", "pi0")),
+    ("Navigation", ("alpamayo",)),
+    ("World Model", ("cosmos",)),
+    ("Load Balance", ("load_balance",)),
+    ("Culling", ("culling",)),
+    ("Graph", ("graph",)),
+    ("Prefetch", ("prefetch",)),
+    ("Multi Stream", ("multi_stream",)),
+    ("Super Kernel", ("super_kernel",)),
+]
+
+
+def extract_first_image(markdown_content):
+    """Return the first Markdown or HTML image source in a report."""
+    patterns = (
+        r'!\[[^\]]*\]\((?:<)?([^)>\s]+)(?:>)?(?:\s+["\'][^"\']*["\'])?\)',
+        r'<img\b[^>]*\bsrc\s*=\s*["\']([^"\']+)["\']',
+    )
+    matches = []
+    for pattern in patterns:
+        match = re.search(pattern, markdown_content, re.IGNORECASE)
+        if match:
+            matches.append((match.start(), match.group(1)))
+    return min(matches, default=(None, None), key=lambda item: item[0])[1]
+
+
+def report_entry(category, repo, branch, doc_dir, report_file):
+    """Build tags and a remote cover URL without persisting report content."""
+    normalized = report_file.lower()
+    tags = [tag for tag, needles in TAG_RULES if any(needle in normalized for needle in needles)]
+    file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
+    markdown = fetch_file(repo, branch, file_path)
+    image_src = extract_first_image(markdown) if markdown else None
+    cover_image = None
+    if image_src:
+        if image_src.startswith(("http://", "https://", "data:")):
+            cover_image = image_src
+        else:
+            resolved = resolve_path(doc_dir, urllib.parse.unquote(image_src.split("?", 1)[0]))
+            cover_image = f"{GITCODE_RAW_CDN}/{repo}/raw/{branch}/{resolved}"
+    source_repo, source_repo_url = SOURCE_REPOS[category]
+    return {
+        "file": report_file,
+        "tags": tags,
+        "coverImage": cover_image,
+        "sourceRepo": source_repo,
+        "sourceRepoUrl": source_repo_url,
+        "sourcePath": file_path,
+    }
 
 
 def api_request(url):
@@ -276,7 +347,9 @@ def main():
             report_files = discover_flat_reports(repo, branch, base_path)
             print(f"  Found {len(report_files)} flat reports")
             cat_entry["flat"] = True
-            cat_entry["reports"] = report_files
+            cat_entry["reports"] = [
+                report_entry(category, repo, branch, base_path, report_file) for report_file in report_files
+            ]
         else:
             subs = discover_subcategories(repo, branch, base_path)
             print(f"  Found {len(subs)} subcategories")
@@ -288,7 +361,10 @@ def main():
                         out_models.append({
                             "name": model["name"],
                             "docPath": model["docPath"],
-                            "reports": model["reports"],
+                            "reports": [
+                                report_entry(category, repo, branch, f"{base_path}/{model['docPath']}", report_file)
+                                for report_file in model["reports"]
+                            ],
                         })
                 if out_models:
                     out_subs.append({"name": sub["name"], "models": out_models})
