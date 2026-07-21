@@ -17,6 +17,7 @@ import re
 import sys
 import base64
 import hashlib
+import time
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -382,16 +383,33 @@ def find_image_sources(markdown):
 
 def fetch_binary_url(url):
     """Download complete image bytes, rejecting HTML error/challenge pages."""
-    req = urllib.request.Request(url, headers=BROWSER_HEADERS)
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        data = resp.read()
-        content_type = resp.headers.get_content_type()
-    prefix = data[:256].lstrip().lower()
-    if not data or prefix.startswith((b"<!doctype", b"<html")):
-        raise RuntimeError("response is empty or HTML")
-    if not content_type.startswith("image/") and not url.lower().split("?", 1)[0].endswith(
-            (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".bmp")):
-        raise RuntimeError(f"unexpected content type: {content_type}")
+    last_error = None
+    for attempt in range(4):
+        try:
+            req = urllib.request.Request(url, headers=BROWSER_HEADERS)
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = resp.read()
+                content_type = resp.headers.get_content_type()
+            prefix = data[:256].lstrip().lower()
+            if not data or prefix.startswith((b"<!doctype", b"<html")):
+                raise RuntimeError("response is empty or HTML")
+            if not content_type.startswith("image/") and not url.lower().split("?", 1)[0].endswith(
+                    (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".bmp")):
+                raise RuntimeError(f"unexpected content type: {content_type}")
+            break
+        except urllib.error.HTTPError as error:
+            last_error = error
+            if error.code == 404 or attempt == 3:
+                raise
+        except (urllib.error.URLError, TimeoutError, RuntimeError) as error:
+            last_error = error
+            if attempt == 3:
+                raise
+        wait_seconds = 2 ** attempt
+        print(f"    [WARN] Image download retry {attempt + 2}/4 in {wait_seconds}s: {url} ({last_error})")
+        time.sleep(wait_seconds)
+    else:
+        raise last_error
     return data
 
 
