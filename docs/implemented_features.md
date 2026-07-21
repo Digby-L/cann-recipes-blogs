@@ -8,7 +8,8 @@
 
 - 支持分类、子分类、模型、报告四级内容导航。
 - 根据 `content/index.json` 动态生成可展开的侧边栏目录树。
-- 从 GitCode 远程加载 Markdown，不在本地持久化报告正文。
+- 本地开发从 GitCode 远程加载 Markdown，不在仓库中持久化报告正文。
+- GitHub Pages 从 CI 生成的同源静态正文缓存加载报告，避免 GitCode CORS/WAF 导致正文不可用。
 - 支持 Markdown 标题、列表、链接、引用、代码块、图片和表格。
 - 支持代码语法高亮和一键复制。
 - 支持 Mermaid 图表渲染。
@@ -74,6 +75,8 @@
 - manifest 包含文件路径、标签、封面和来源仓库路由元数据。
 - 支持 GitHub Pages 自动部署。
 - 支持定时刷新内容。
+- CI 会校验正文缓存数量；构建不完整时停止部署并保留上一版可用站点。
+- `content/reports/` 只存在于 Pages 部署产物，并通过 `.gitignore` 排除在仓库之外。
 - 提供本地静态服务器和可选的只读 GitCode 代理。
 
 ## 明确取消的功能

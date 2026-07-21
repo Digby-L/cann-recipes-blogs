@@ -33,8 +33,33 @@ jobs:
           python-version: '3.11'
 
       - name: Fetch content from GitCode repos
+        env:
+          PREFETCH_REPORTS: "1"
         run: |
-          python build_content.py || echo "WARNING: GitCode fetch failed, using committed content"
+          python build_content.py
+
+      - name: Validate static report cache
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("content/index.json").read_text(encoding="utf-8"))
+          expected = 0
+          for category in manifest.values():
+              if category.get("flat"):
+                  expected += len(category.get("reports", []))
+              else:
+                  expected += sum(
+                      len(model.get("reports", []))
+                      for subcategory in category.get("subcategories", [])
+                      for model in subcategory.get("models", [])
+                  )
+          generated = len(list(Path("content/reports").rglob("*.json")))
+          if expected == 0 or generated != expected:
+              raise SystemExit(f"Invalid report cache: expected {expected}, generated {generated}")
+          print(f"Validated {generated} cached reports")
+          PY
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

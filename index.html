@@ -1021,8 +1021,14 @@
     return prefetchedManifest;
   }
 
-  // Get pre-fetched content path for a report. Spaces are underscored in BOTH
-  // Fetch file content - tries multiple methods for reliability
+  function getPrefetchedReportPath(category, model, reportFile) {
+    const safeCategory = category.replace(/ /g, '_');
+    const safeModel = model.replace(/ /g, '_');
+    return `content/reports/${safeCategory}/${safeModel}/${reportFile.replace(/\.md$/i, '.json')}`;
+  }
+
+  // Fetch file content. Deployed static sites use the same-origin build cache;
+  // localhost keeps the live GitCode proxy workflow for development.
   async function fetchReportContent(category, model, reportFile) {
     console.log('fetchReportContent', { category, model, reportFile });
     const config    = repoConfig[category];
@@ -1035,6 +1041,23 @@
     const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
     const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
     console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
+
+    const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(location.hostname);
+    if (!isLocalDevelopment) {
+      try {
+        const cacheUrl = getPrefetchedReportPath(category, model, reportFile);
+        const cachedResponse = await fetch(cacheUrl);
+        if (cachedResponse.ok) {
+          const cachedReport = await cachedResponse.json();
+          if (cachedReport.markdown) {
+            console.log('Loaded from static report cache:', cacheUrl);
+            return renderMarkdown(cachedReport.markdown, config.ns, config.repo, config.branch, baseDir);
+          }
+        }
+      } catch (error) {
+        console.warn('Static report cache unavailable:', error.message);
+      }
+    }
 
     // Method 1: Try local proxy (optional, for development). It streams the
     // remote response and does not persist report content.

@@ -28,6 +28,8 @@ GITCODE_RAW = f"https://gitcode.com/{NS}"
 # raw.gitcode.com serves full binary bytes (no auth/headers, no truncation),
 # unlike the web-api files endpoint which caps binaries at ~8 KB (is_limited).
 GITCODE_RAW_CDN = f"https://raw.gitcode.com/{NS}"
+PREFETCH_REPORTS = os.environ.get("PREFETCH_REPORTS") == "1"
+REPORT_CACHE_DIR = None
 
 # Full browser-like headers. GitCode's CloudWAF returns HTTP 418 (a challenge
 # page) for requests with a bare "Mozilla/5.0" UA, so we mirror what proxy.py
@@ -98,12 +100,22 @@ def extract_first_image(markdown_content):
     return min(matches, default=(None, None), key=lambda item: item[0])[1]
 
 
-def report_entry(category, repo, branch, doc_dir, report_file):
+def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     """Build tags and a remote cover URL without persisting report content."""
     normalized = report_file.lower()
     tags = [tag for tag, needles in TAG_RULES if any(needle in normalized for needle in needles)]
     file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
     markdown = fetch_file(repo, branch, file_path)
+    if PREFETCH_REPORTS:
+        if not markdown:
+            raise RuntimeError(f"Failed to prefetch required report: {file_path}")
+        safe_category = category.replace(" ", "_")
+        safe_model = model_key.replace(" ", "_")
+        report_dir = os.path.join(REPORT_CACHE_DIR, safe_category, safe_model)
+        os.makedirs(report_dir, exist_ok=True)
+        report_path = os.path.join(report_dir, report_file.replace(".md", ".json"))
+        with open(report_path, "w", encoding="utf-8") as report_output:
+            json.dump({"markdown": markdown}, report_output, ensure_ascii=False)
     image_src = extract_first_image(markdown) if markdown else None
     cover_image = None
     if image_src:
@@ -331,7 +343,9 @@ def find_relative_images(md_content):
 
 
 def main():
+    global REPORT_CACHE_DIR
     script_dir = os.path.dirname(os.path.abspath(__file__))
+    REPORT_CACHE_DIR = os.path.join(script_dir, "content", "reports")
     # manifest: category -> 4-level tree (or flat), matching content/index.json schema
     manifest = {}
     for category, config in REPO_CONFIG.items():
@@ -345,13 +359,18 @@ def main():
 
         if is_flat:
             report_files = discover_flat_reports(repo, branch, base_path)
+            if PREFETCH_REPORTS and not report_files:
+                raise RuntimeError(f"No reports discovered for required category: {category}")
             print(f"  Found {len(report_files)} flat reports")
             cat_entry["flat"] = True
             cat_entry["reports"] = [
-                report_entry(category, repo, branch, base_path, report_file) for report_file in report_files
+                report_entry(category, category, repo, branch, base_path, report_file)
+                for report_file in report_files
             ]
         else:
             subs = discover_subcategories(repo, branch, base_path)
+            if PREFETCH_REPORTS and not subs:
+                raise RuntimeError(f"No subcategories discovered for required category: {category}")
             print(f"  Found {len(subs)} subcategories")
             out_subs = []
             for sub in subs:
@@ -362,7 +381,10 @@ def main():
                             "name": model["name"],
                             "docPath": model["docPath"],
                             "reports": [
-                                report_entry(category, repo, branch, f"{base_path}/{model['docPath']}", report_file)
+                                report_entry(
+                                    category, model["name"], repo, branch,
+                                    f"{base_path}/{model['docPath']}", report_file
+                                )
                                 for report_file in model["reports"]
                             ],
                         })
@@ -376,9 +398,12 @@ def main():
     manifest_path = os.path.join(script_dir, "content", "index.json")
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
+        f.write("\n")
 
     print("\nDone! Report metadata manifest generated")
     print(f"Manifest: {manifest_path}")
+    if PREFETCH_REPORTS:
+        print(f"Static report cache: {REPORT_CACHE_DIR}")
 
 
 if __name__ == "__main__":

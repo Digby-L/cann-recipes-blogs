@@ -324,7 +324,7 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 
 #### 3.3.1 内容预拉取 — `build_content.py`（已完成）
 
-**需求：** 自动从 4 个 GitCode 仓库拉取所有 Markdown 报告及图片，生成可直接 serve 的静态 JSON。
+**需求：** 自动从 GitCode 拉取报告元数据；在 CI 部署时额外生成可直接 serve 的 Markdown 正文缓存，避免 GitHub Pages 依赖跨域请求。
 
 **方案设计：**
 ```
@@ -332,14 +332,15 @@ build_content.py
 ├── discover_models() — 通过 GitCode tree API 递归发现模型目录
 ├── find_md_files_recursive() — 在模型目录下找到所有 .md 文件
 ├── fetch_file() — 拉取 Markdown 内容
-├── fetch_binary_file_base64() — 拉取图片并编码为 base64
-├── fetch_commit_date() — 获取文件最后提交日期
-└── 输出 → content/index.json + content/reports/**/*.json
+├── report_entry() — 生成标签、封面 URL、来源仓库等元数据
+├── 默认输出 → content/index.json
+└── PREFETCH_REPORTS=1 → 额外输出 content/reports/**/*.json
 ```
 
 **设计约束：**
 - 零 pip 依赖（只用 Python 标准库）
-- 容错：单个文件拉取失败不影响整体构建
+- 本地默认不生成正文缓存；`content/reports/` 被 `.gitignore` 忽略
+- GitHub Pages 部署必须完整生成全部正文缓存，任一必需报告失败则停止部署
 - 幂等：重复运行结果一致
 
 ---
@@ -351,8 +352,9 @@ build_content.py
 **方案设计：**
 - `.github/workflows/deploy.yml`
 - 触发条件：push main / cron `17 2 * * *` / 手动 dispatch
-- 流程：checkout → python build_content.py → upload artifact → deploy-pages
-- 失败兜底：若 build_content.py 失败，使用仓库中已提交的 `content/` 作为 baseline
+- 流程：checkout → `PREFETCH_REPORTS=1 python build_content.py` → 校验缓存数量 → upload artifact → deploy-pages
+- 线上读取：浏览器优先读取同源 `content/reports/**/*.json`，不依赖 GitCode CORS 或公共代理
+- 失败兜底：构建或缓存校验失败时终止本次部署，GitHub Pages 保留上一版可用站点
 
 ---
 
