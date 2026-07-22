@@ -40,22 +40,23 @@
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
     window.mermaid = mermaid;
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'beige-light': '#F9F8F6',
-            'coffee-brown': '#3E2723',
-            'tech-accent': '#E77A1D',
+            'beige-light': '#f7f9fc',
+            'coffee-brown': '#191c1e',
+            'tech-accent': '#695282',
             'glass-bg': 'rgba(255, 255, 255, 0.7)',
-            'primary': '#E77A1D',
+            'primary': '#695282',
+            'accent-purple': '#6b5284',
           },
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Public Sans', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
           },
         }
       }
@@ -63,19 +64,48 @@
   </script>
   <style>
     .glass-card {
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(157, 132, 183, 0.1);
+      box-shadow: 0 8px 32px rgba(107, 82, 132, 0.06);
     }
     .glass-sidebar {
-      background: rgba(245, 245, 240, 0.8);
+      background: rgba(247, 249, 252, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-right: 1px solid rgba(0, 0, 0, 0.05);
+      border-right: 1px solid rgba(107, 82, 132, 0.08);
     }
     .logo-gradient {
-      background: linear-gradient(135deg, #E77A1D 0%, #C85D00 100%);
+      background: linear-gradient(135deg, #6b5284 0%, #4a5fa8 100%);
+    }
+    .fused-gradient {
+      background: linear-gradient(135deg, #e0e7ff 0%, #efdbff 100%);
+    }
+    .glacier-btn {
+      background: linear-gradient(135deg, rgba(224, 231, 255, 0.35) 0%, rgba(196, 181, 253, 0.25) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(107, 82, 132, 0.12);
+      color: #695282;
+      box-shadow: 0 4px 16px rgba(107, 82, 132, 0.05);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .glacier-btn:hover {
+      background: linear-gradient(135deg, rgba(224, 231, 255, 0.5) 0%, rgba(196, 181, 253, 0.4) 100%);
+      border-color: rgba(107, 82, 132, 0.22);
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(107, 82, 132, 0.1);
+    }
+    .glacier-btn:active { transform: scale(0.95); }
+    html.dark .glacier-btn {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border-color: rgba(196, 181, 253, 0.2);
+      color: #c4b5fd;
+    }
+    html.dark .glacier-btn:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0.18) 100%);
+      border-color: rgba(196, 181, 253, 0.4);
     }
     details[open] summary svg.chevron {
       transform: rotate(180deg);
@@ -126,12 +156,12 @@
       gap: 0.35rem;
       padding: 0.75rem;
       text-align: center;
-      color: #3E2723;
-      background: #FFF3E8;
+      color: #533d6b;
+      background: linear-gradient(135deg, #e0e7ff 0%, #efdbff 100%);
     }
-    .cover-placeholder.cover-train { color: #245B48; background: #E9F5EF; }
-    .cover-placeholder.cover-embodied { color: #315C78; background: #EAF3F8; }
-    .cover-placeholder.cover-features { color: #655225; background: #F6F1DE; }
+    .cover-placeholder.cover-train { color: #245B48; background: linear-gradient(135deg, #dcfce7 0%, #e0e7ff 100%); }
+    .cover-placeholder.cover-embodied { color: #315C78; background: linear-gradient(135deg, #dbeafe 0%, #efdbff 100%); }
+    .cover-placeholder.cover-features { color: #4c1d95; background: linear-gradient(135deg, #efdbff 0%, #e0e7ff 100%); }
     .search-result-title {
       display: block;
       overflow: visible;
@@ -146,8 +176,8 @@
       border: 1px solid transparent;
     }
     .repository-link:hover {
-      border-color: rgba(231, 122, 29, 0.16);
-      background: rgba(231, 122, 29, 0.06);
+      border-color: rgba(107, 82, 132, 0.16);
+      background: rgba(107, 82, 132, 0.06);
     }
     .repository-icon {
       width: 1.75rem;
@@ -157,8 +187,8 @@
       align-items: center;
       justify-content: center;
       border-radius: 0.5rem;
-      color: #E77A1D;
-      background: rgba(231, 122, 29, 0.1);
+      color: #695282;
+      background: rgba(107, 82, 132, 0.1);
     }
     .tag-filter-panel {
       width: min(22rem, calc(100vw - 2rem));
@@ -174,30 +204,36 @@
       font-size: 0.72rem;
       line-height: 1;
       font-weight: 600;
-      color: #C85D00;
-      background: rgba(231, 122, 29, 0.1);
-      border: 1px solid rgba(231, 122, 29, 0.14);
+      color: #695282;
+      background: rgba(107, 82, 132, 0.08);
+      border: 1px solid rgba(107, 82, 132, 0.14);
       transition: background .15s, border-color .15s, color .15s;
     }
     .tag-chip:hover, .tag-chip.active {
       color: #fff;
-      background: #E77A1D;
-      border-color: #E77A1D;
+      background: linear-gradient(135deg, #695282, #826b9c);
+      border-color: #695282;
     }
     html.dark .tag-filter-panel { background: rgba(42,33,30,0.98); }
-    html.dark .tag-chip { color: #FFB46E; background: rgba(231,122,29,0.14); }
+    html.dark .tag-chip { color: #c4b5fd; background: rgba(99,102,241,0.12); border-color: rgba(165,180,252,0.2); }
+    html.dark .tag-chip:hover, html.dark .tag-chip.active { color: #fff; background: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(139,92,246,0.5)); border-color: rgba(165,180,252,0.4); }
     .feedback-option {
-      border: 1px solid rgba(62,39,35,0.08);
-      background: rgba(255,255,255,0.55);
-      transition: border-color .15s, background .15s, transform .15s;
+      background: linear-gradient(135deg, rgba(191, 219, 254, 0.3) 0%, rgba(165, 180, 252, 0.2) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(99, 102, 241, 0.1);
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.04);
+      transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
     }
     .feedback-option:hover {
-      border-color: rgba(231,122,29,0.32);
-      background: rgba(231,122,29,0.06);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, rgba(191, 219, 254, 0.5) 0%, rgba(165, 180, 252, 0.4) 100%);
+      border-color: rgba(99, 102, 241, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.1);
     }
-    html.dark .feedback-option { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
-    html.dark .feedback-option:hover { background: rgba(231,122,29,0.12); border-color: rgba(231,122,29,0.35); }
+    html.dark .feedback-option { background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(107,82,132,0.1) 100%); border-color: rgba(165,180,252,0.15); }
+    html.dark .feedback-option:hover { background: linear-gradient(135deg, rgba(99,102,241,0.22) 0%, rgba(107,82,132,0.18) 100%); border-color: rgba(165,180,252,0.35); }
+    html.dark #feedbackModal > div { background: rgba(15,23,42,0.95) !important; border-color: rgba(165,180,252,0.15) !important; }
     @media (max-width: 640px) {
       #categoryView.search-results-view { padding-left: 1rem; padding-right: 1rem; }
       .search-result-card { flex-direction: column; }
@@ -221,14 +257,14 @@
       background: transparent;
     }
     .overflow-y-auto::-webkit-scrollbar-thumb {
-      background: rgba(231, 122, 29, 0.3);
+      background: rgba(107, 82, 132, 0.3);
       border-radius: 3px;
     }
     .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-      background: rgba(231, 122, 29, 0.5);
+      background: rgba(107, 82, 132, 0.5);
     }
     /* Report markdown content styles */
-    .report-markdown h1, .report-markdown h2, .report-markdown h3, .report-markdown h4 { color: #3E2723; font-weight: 700; line-height: 1.3; }
+    .report-markdown h1, .report-markdown h2, .report-markdown h3, .report-markdown h4 { color: #191c1e; font-weight: 700; line-height: 1.3; }
     .report-markdown h1 { font-size: 1.875rem; margin: 2rem 0 1rem; }
     .report-markdown h2 { font-size: 1.5rem; margin: 1.75rem 0 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
     .report-markdown h3 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
@@ -248,9 +284,9 @@
     .report-markdown img { max-width: 100%; border-radius: 0.75rem; margin: 1.25rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: block; }
     .mermaid-diagram { margin: 1.25rem 0; padding: 1rem; background: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow-x: auto; text-align: center; }
     .mermaid-diagram svg { max-width: 100%; height: auto; }
-    .report-markdown a { color: #E77A1D; }
-    .report-markdown a:hover { text-decoration: underline; }
-    .report-markdown blockquote { border-left: 4px solid #E77A1D; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(231,122,29,0.05); border-radius: 0 0.5rem 0.5rem 0; }
+    .report-markdown a { color: #695282; }
+    .report-markdown a:hover { text-decoration: underline; color: #826b9c; }
+    .report-markdown blockquote { border-left: 4px solid #826b9c; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(107,82,132,0.04); border-radius: 0 0.5rem 0.5rem 0; }
     .report-markdown hr { border-color: #e2e8f0; margin: 1.75rem 0; }
     .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
     .table-scroll-wrapper {
@@ -270,17 +306,17 @@
       margin: 0;
     }
     .table-scroll-wrapper::-webkit-scrollbar { height: 8px; }
-    .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(62,39,35,0.06); border-radius: 999px; }
-    .table-scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(231,122,29,0.42); border-radius: 999px; }
-    .table-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(231,122,29,0.7); }
-    .report-markdown th { background: #f1f5f9; font-weight: 600; color: #3E2723; padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #e2e8f0; }
+    .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(107,82,132,0.06); border-radius: 999px; }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(107,82,132,0.35); border-radius: 999px; }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(107,82,132,0.6); }
+    .report-markdown th { background: #f1f5f9; font-weight: 600; color: #191c1e; padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #e2e8f0; }
     .report-markdown td { padding: 0.75rem 1rem; color: #475569; border-bottom: 1px solid #e2e8f0; }
     .report-markdown tr:hover td { background: #f8fafc; }
     .report-markdown strong { color: #1e293b; font-weight: 600; }
     .report-markdown em { font-style: italic; }
 
     /* ============ Reading progress bar ============ */
-    #readingProgress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: #E77A1D; z-index: 60; transition: width .1s linear; }
+    #readingProgress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, #4a5fa8, #6b5284); z-index: 60; transition: width .1s linear; }
 
     /* ============ Table of Contents (report TOC) ============ */
     /* Flex layout: centered article column + TOC column side by side. */
@@ -296,13 +332,13 @@
       overflow-wrap: anywhere;
       word-break: break-word;
     }
-    .toc-inner { overflow-y: auto; padding: 1rem 1rem 1rem 0.75rem; border-left: 2px solid rgba(231,122,29,0.15); }
-    .toc-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #3E2723; margin-bottom: 0.75rem; }
+    .toc-inner { overflow-y: auto; padding: 1rem 1rem 1rem 0.75rem; border-left: 2px solid rgba(107,82,132,0.15); }
+    .toc-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #191c1e; margin-bottom: 0.75rem; }
     .toc-list { display: flex; flex-direction: column; gap: 0.1rem; }
     .toc-link { display: block; padding: 0.3rem 0.6rem; font-size: 0.8rem; line-height: 1.35; color: #64748b; border-radius: 0.4rem; border-left: 2px solid transparent; margin-left: -0.6rem; cursor: pointer; transition: color .15s, background .15s, border-color .15s; text-decoration: none; }
-    .toc-link:hover { color: #E77A1D; background: rgba(231,122,29,0.06); }
+    .toc-link:hover { color: #695282; background: rgba(107,82,132,0.06); }
     .toc-link.toc-h3 { padding-left: 1.4rem; font-size: 0.76rem; }
-    .toc-link.toc-active { color: #E77A1D; font-weight: 600; border-left-color: #E77A1D; background: rgba(231,122,29,0.08); }
+    .toc-link.toc-active { color: #695282; font-weight: 600; border-left-color: #826b9c; background: rgba(107,82,132,0.08); }
     /* Wide screens (>=1280px): TOC is a sticky in-flow column beside the article. */
     @media (min-width: 1280px) {
       #tocPanel.toc-available { display: block; flex: 0 0 15rem; width: 15rem; position: sticky; top: 1.5rem; align-self: flex-start; }
@@ -310,96 +346,123 @@
     }
     /* Narrow screens (<1280px): TOC is an off-canvas slide-in drawer. */
     @media (max-width: 1279px) {
-      #tocPanel { position: fixed; top: 0; right: 0; bottom: 0; width: 17rem; z-index: 45; background: var(--toc-drawer-bg, rgba(249,248,246,0.98)); box-shadow: -8px 0 24px rgba(0,0,0,0.12); padding-top: 4rem; transform: translateX(100%); transition: transform .25s ease; }
+      #tocPanel { position: fixed; top: 0; right: 0; bottom: 0; width: 17rem; z-index: 45; background: var(--toc-drawer-bg, rgba(247,249,252,0.98)); box-shadow: -8px 0 24px rgba(0,0,0,0.12); padding-top: 4rem; transform: translateX(100%); transition: transform .25s ease; }
       #tocPanel.toc-open { display: block; transform: translateX(0); }
       #tocPanel .toc-inner { max-height: 100vh; border-left: none; }
       #tocToggle.toc-available { display: flex; }
     }
 
-    /* ============ Dark mode (Warm Coffee) — html.dark overrides ============
-       Palette: bg #1E1715, card #2A211E, text #F5EFE9, accent #E77A1D (kept).
+    /* ============ Dark mode (Deep Violet Slate) — html.dark overrides ============
+       Palette: bg #0f172a, card #1e293b, text #e2e8f0, accent #c4b5fd (lavender).
        Light mode is untouched; these rules only apply under html.dark. */
     html.dark body,
-    html.dark .bg-beige-light { background-color: #1E1715; }
+    html.dark .bg-beige-light { background-color: #0f172a; }
     html.dark { color-scheme: dark; }
 
     /* Text colors */
     html.dark .text-coffee-brown,
-    html.dark .text-slate-900 { color: #F5EFE9; }
+    html.dark .text-slate-900 { color: #e2e8f0; }
+    html.dark .text-tech-accent { color: #c4b5fd; }
     html.dark .text-slate-600 { color: #D6CDC5; }
     html.dark .text-slate-500 { color: #B3A9A0; }
     html.dark .text-slate-400 { color: #968B82; }
     html.dark .text-slate-300 { color: #7E736A; }
-    /* text-white and text-tech-accent stay as-is (accent is brand orange) */
+    html.dark .repository-icon { color: #e2e8f0; background: rgba(99,102,241,0.15); }
+    html.dark .text-tech-accent .material-symbols-outlined, html.dark .material-symbols-outlined.text-tech-accent { color: #e2e8f0; }
+    html.dark .repository-link:hover { border-color: rgba(165,180,252,0.2); background: rgba(99,102,241,0.08); }
+    html.dark .report-markdown a { color: #a5b4fc; }
+    html.dark .report-markdown a:hover { color: #c4b5fd; }
+
+    /* Cover placeholders dark */
+    html.dark .cover-placeholder { color: #c4b5fd; background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.1)); }
+    html.dark .cover-placeholder.cover-train { color: #93c5fd; background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.1)); }
+    html.dark .cover-placeholder.cover-embodied { color: #a5b4fc; background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(59,130,246,0.08)); }
+    html.dark .cover-placeholder.cover-features { color: #c4b5fd; background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.1)); }
+
+    /* Override inline style colors in dark mode */
+    html.dark [style*="color:#6b5284"], html.dark [style*="color:#4a5fa8"], html.dark [style*="color:#5b21b6"], html.dark [style*="color:#92400e"], html.dark [style*="color:#695282"] { color: #c4b5fd !important; }
 
     /* Glass surfaces */
-    html.dark .glass-card { background: rgba(42, 33, 30, 0.72); border-color: rgba(255,255,255,0.08); }
-    html.dark .glass-sidebar { background: rgba(30, 23, 21, 0.85); border-right-color: rgba(255,255,255,0.06); }
+    html.dark .glass-card { background: rgba(30, 41, 59, 0.72); border-color: rgba(165,180,252,0.1); }
+    html.dark .glass-sidebar { background: rgba(15, 23, 42, 0.85); border-right-color: rgba(165,180,252,0.08); }
 
-    /* White-ish backgrounds -> warm dark surfaces */
-    html.dark .bg-white { background-color: #2A211E; }
-    html.dark .bg-white\/60 { background-color: rgba(42, 33, 30, 0.6); }
+    /* White-ish backgrounds -> dark surfaces */
+    html.dark .bg-white { background-color: #1e293b; }
+    html.dark .bg-white\/60 { background-color: rgba(30, 41, 59, 0.6); }
     html.dark .bg-white\/50 { background-color: rgba(255,255,255,0.06); }
     html.dark .bg-white\/40 { background-color: rgba(255,255,255,0.05); }
     html.dark .bg-white\/30 { background-color: rgba(255,255,255,0.04); }
-    html.dark .bg-slate-100 { background-color: #2A211E; }
+    html.dark .bg-slate-100 { background-color: #1e293b; }
     html.dark .hover\:bg-white\/40:hover,
     html.dark .hover\:bg-white\/50:hover { background-color: rgba(255,255,255,0.08); }
 
     /* Borders / rings */
-    html.dark .border-black\/5 { border-color: rgba(255,255,255,0.08); }
-    html.dark .ring-black\/5 { --tw-ring-color: rgba(255,255,255,0.08); }
-    html.dark .border-white\/40 { border-color: rgba(255,255,255,0.15); }
+    html.dark .border-black\/5 { border-color: rgba(165,180,252,0.1); }
+    html.dark .ring-black\/5 { --tw-ring-color: rgba(165,180,252,0.1); }
+    html.dark .border-white\/40 { border-color: rgba(165,180,252,0.15); }
 
     /* Search input */
-    html.dark #searchInput { background-color: rgba(42,33,30,0.7); color: #F5EFE9; }
+    html.dark #searchInput { background-color: rgba(30,41,59,0.7); color: #e2e8f0; }
     html.dark #searchInput::placeholder { color: #968B82; }
 
     /* Markdown report body */
-    html.dark .report-markdown { color: #E4DAD2; }
+    html.dark .report-markdown { color: #e2e8f0; }
     html.dark .report-markdown h1,
     html.dark .report-markdown h2,
     html.dark .report-markdown h3,
     html.dark .report-markdown h4,
     html.dark .report-markdown h5,
-    html.dark .report-markdown h6 { color: #FBF4EE; }
-    html.dark .report-markdown h2 { border-bottom-color: #4A3B35; }
+    html.dark .report-markdown h6 { color: #f1f5f9; }
+    html.dark .report-markdown h2 { border-bottom-color: rgba(165,180,252,0.15); }
     html.dark .report-markdown p,
-    html.dark .report-markdown li { color: #D8CEC6; }
-    html.dark .report-markdown code { background: #2A211E; color: #F5EFE9; }
-    html.dark .report-markdown table { border: 1px solid #4A3B35; border-radius: 0.5rem; overflow: hidden; }
-    html.dark .report-markdown th { background: #3A2D28; color: #FBF4EE; border-bottom: 2px solid #E77A1D; }
-    html.dark .report-markdown td { color: #E4DAD2; border-bottom-color: #453731; }
-    html.dark .report-markdown tbody tr:nth-child(even) td { background: #241C1A; }
-    html.dark .report-markdown tr:hover td { background: #3A2D28; }
-    html.dark .report-markdown strong { color: #F5EFE9; }
-    html.dark .report-markdown blockquote { color: #B3A9A0; }
-    html.dark .report-markdown hr { border-color: #3A2E2A; }
+    html.dark .report-markdown li { color: #cbd5e1; }
+    html.dark .report-markdown code { background: #1e293b; color: #e2e8f0; }
+    html.dark .report-markdown table { border: 1px solid rgba(165,180,252,0.15); border-radius: 0.5rem; overflow: hidden; }
+    html.dark .report-markdown th { background: rgba(30,41,59,0.8); color: #f1f5f9; border-bottom: 2px solid #826b9c; }
+    html.dark .report-markdown td { color: #e2e8f0; border-bottom-color: rgba(165,180,252,0.1); }
+    html.dark .report-markdown tbody tr:nth-child(even) td { background: rgba(15,23,42,0.5); }
+    html.dark .report-markdown tr:hover td { background: rgba(30,41,59,0.6); }
+    html.dark .report-markdown strong { color: #f1f5f9; }
+    html.dark .report-markdown blockquote { color: #94a3b8; border-left-color: #6b5284; }
+    html.dark .report-markdown hr { border-color: rgba(165,180,252,0.1); }
     /* Mermaid diagrams keep a light canvas for diagram legibility */
+
+    /* Ambient gradient hiding in dark mode */
+    html.dark .dark-hide { opacity: 0; }
+    html.dark body::before { content: ''; position: fixed; inset: 0; z-index: -10; background: linear-gradient(135deg, rgba(99,102,241,0.03) 0%, rgba(139,92,246,0.02) 50%, rgba(59,130,246,0.02) 100%); pointer-events: none; }
 
     /* Theme toggle icon: show sun in dark, moon in light */
     #themeIcon::after { content: 'dark_mode'; }
     html.dark #themeIcon::after { content: 'light_mode'; }
 
     /* TOC dark mode */
-    html.dark .toc-inner { border-left-color: rgba(231,122,29,0.25); }
-    html.dark .toc-title { color: #F5EFE9; }
-    html.dark .toc-link { color: #B3A9A0; }
-    html.dark .toc-link:hover { color: #E77A1D; background: rgba(231,122,29,0.12); }
-    html.dark .toc-link.toc-active { color: #FF9838; border-left-color: #E77A1D; background: rgba(231,122,29,0.15); }
-    html.dark #tocPanel { --toc-drawer-bg: rgba(30,23,21,0.98); }
+    html.dark .toc-inner { border-left-color: rgba(99,102,241,0.25); }
+    html.dark .toc-title { color: #e2e8f0; }
+    html.dark .toc-link { color: #94a3b8; }
+    html.dark .toc-link:hover { color: #c4b5fd; background: rgba(99,102,241,0.12); }
+    html.dark .toc-link.toc-active { color: #c4b5fd; border-left-color: #c4b5fd; background: rgba(99,102,241,0.15); }
+    html.dark #tocPanel { --toc-drawer-bg: rgba(15,23,42,0.98); }
   </style>
 </head>
-<body class="bg-beige-light text-slate-900 font-sans min-h-screen flex">
+<body class="bg-beige-light text-slate-900 font-sans min-h-screen flex relative overflow-x-hidden">
 
 <!-- Reading progress bar (visible only in report view; updated on scroll) -->
 <div id="readingProgress" class="hidden"></div>
+
+<!-- Ambient gradient background blobs -->
+<div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark-hide">
+  <div class="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full opacity-50" style="background: radial-gradient(circle, rgba(196,181,253,0.6) 0%, transparent 65%);"></div>
+  <div class="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-45" style="background: radial-gradient(circle, rgba(191,219,254,0.7) 0%, transparent 65%);"></div>
+  <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] rounded-full opacity-35" style="background: radial-gradient(circle, rgba(252,211,225,0.6) 0%, transparent 65%);"></div>
+  <div class="absolute bottom-1/4 -left-20 w-[450px] h-[450px] rounded-full opacity-40" style="background: radial-gradient(circle, rgba(167,214,255,0.6) 0%, transparent 65%);"></div>
+  <div class="absolute -bottom-40 -right-40 w-[900px] h-[900px] opacity-50" style="background: radial-gradient(ellipse at 60% 60%, rgba(196,181,253,0.45) 0%, rgba(252,211,225,0.35) 20%, rgba(191,219,254,0.3) 40%, rgba(253,230,138,0.2) 60%, transparent 85%); filter: blur(80px);"></div>
+</div>
 
 <!-- Sidebar -->
 <aside id="sidebar" class="relative w-72 glass-sidebar h-screen sticky top-0 flex-shrink-0 z-50 flex flex-col p-6 transition-all duration-300">
   <div class="mb-8 px-2 flex items-center">
     <h1 class="font-bold tracking-tight flex items-center gap-2">
-      <span class="w-10 h-10 rounded-xl logo-gradient flex items-center justify-center text-white text-[10px] font-black shrink-0">CANN</span>
+      <img src="cann_logo.png" alt="CANN" class="w-10 h-10 rounded-xl shrink-0 object-cover bg-white p-1">
       <span class="text-coffee-brown text-sm font-bold whitespace-nowrap">CANN RECIPES BLOGS</span>
     </h1>
   </div>
@@ -426,13 +489,13 @@
   </nav>
 
   <div class="mt-auto pt-4">
-    <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-tech-accent/10 text-tech-accent font-semibold hover:bg-tech-accent/20 transition-colors">
+    <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl glacier-btn font-semibold transition-colors">
       <span class="material-symbols-outlined">description</span>
       <span class="flex-1 text-sm">Browse Docs Repo</span>
       <span class="material-symbols-outlined text-sm">open_in_new</span>
     </a>
     <div class="flex items-center gap-3 p-2 mt-4 pt-4 border-t border-black/5">
-      <div class="w-10 h-10 rounded-full bg-tech-accent/20 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(196,181,253,0.4), rgba(252,211,225,0.35), rgba(191,219,254,0.4));">
         <span class="material-symbols-outlined text-tech-accent">person</span>
       </div>
       <div>
@@ -499,7 +562,7 @@
           </div>
           <div class="p-4 flex flex-col justify-center">
             <div class="flex gap-2 mb-2">
-              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Infer</span>
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Infer</span>
             </div>
             <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Optimization Techniques for Model Inference</h3>
             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
@@ -516,7 +579,7 @@
           </div>
           <div class="p-4 flex flex-col justify-center">
             <div class="flex gap-2 mb-2">
-              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Train</span>
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Train</span>
             </div>
             <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Complete Training Guide for TrainModel-X</h3>
             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
@@ -533,7 +596,7 @@
           </div>
           <div class="p-4 flex flex-col justify-center">
             <div class="flex gap-2 mb-2">
-              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Embodied</span>
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Embodied</span>
             </div>
             <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Robot-Alpha: Advanced Robotic Systems</h3>
             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
@@ -550,7 +613,7 @@
           </div>
           <div class="p-4 flex flex-col justify-center">
             <div class="flex gap-2 mb-2">
-              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Spatial</span>
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Spatial</span>
             </div>
             <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">SpatialNet: Spatial Mapping & Navigation</h3>
             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
@@ -567,7 +630,7 @@
           </div>
           <div class="p-4 flex flex-col justify-center">
             <div class="flex gap-2 mb-2">
-              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Infer</span>
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Infer</span>
             </div>
             <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Model-B Inference Pipeline Architecture</h3>
             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
@@ -584,7 +647,7 @@
           </div>
           <div class="p-4 flex flex-col justify-center">
             <div class="flex gap-2 mb-2">
-              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Train</span>
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Train</span>
             </div>
             <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Distributed Training Best Practices</h3>
             <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
@@ -690,10 +753,10 @@
   <!-- Report View (hidden by default) -->
   <main id="reportView" class="hidden flex-grow px-10 py-4">
     <!-- Narrow-screen floating toggle for the TOC drawer -->
-    <button id="tocToggle" onclick="toggleTocPanel()" title="目录" aria-label="Toggle table of contents" class="hidden fixed right-4 bottom-6 z-40 w-12 h-12 rounded-full glass-card flex items-center justify-center text-tech-accent shadow-lg">
+    <button id="tocToggle" onclick="toggleTocPanel()" title="目录" aria-label="Toggle table of contents" class="hidden fixed right-4 bottom-6 z-40 w-12 h-12 rounded-full glacier-btn flex items-center justify-center text-tech-accent shadow-lg">
       <span class="material-symbols-outlined">toc</span>
     </button>
-    <button id="feedbackFloatingButton" onclick="openFeedbackModal()" title="Feedback" aria-label="Send feedback about this report" class="fixed right-24 bottom-8 z-40 w-12 h-12 rounded-full glass-card flex items-center justify-center text-tech-accent shadow-lg hover:bg-tech-accent hover:text-white transition-colors">
+    <button id="feedbackFloatingButton" onclick="openFeedbackModal()" title="Feedback" aria-label="Send feedback about this report" class="fixed right-24 bottom-8 z-40 w-12 h-12 rounded-full glacier-btn flex items-center justify-center text-tech-accent shadow-lg transition-colors">
       <span class="material-symbols-outlined">feedback</span>
     </button>
     <!-- Flex layout: centered article column + sticky TOC column (no overlap) -->
@@ -703,7 +766,7 @@
       <nav id="reportBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
       <article class="glass-card rounded-3xl p-8 md:p-12 fade-in">
-        <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">Category</span>
+        <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Category</span>
 
         <h1 id="reportTitle" class="text-4xl lg:text-5xl font-extrabold text-coffee-brown leading-tight mt-6 mb-6">
           Report Title
@@ -711,7 +774,7 @@
 
         <div class="flex items-center gap-6 pb-8 border-b border-tech-accent/10">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-tech-accent/20 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(196,181,253,0.4), rgba(252,211,225,0.35), rgba(191,219,254,0.4));">
               <span class="material-symbols-outlined text-tech-accent">person</span>
             </div>
             <div>
@@ -739,7 +802,7 @@
           <h2 class="text-base font-bold text-coffee-brown">Questions or feedback?</h2>
           <p class="text-sm text-slate-500 mt-1">Open a pre-filled Issue in the source repository.</p>
         </div>
-        <button onclick="openFeedbackModal()" class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-tech-accent text-white text-sm font-semibold hover:bg-tech-accent/90 transition-colors">
+        <button onclick="openFeedbackModal()" class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glacier-btn text-sm font-semibold transition-colors">
           <span class="material-symbols-outlined text-lg">rate_review</span>
           Feedback
         </button>
@@ -758,7 +821,7 @@
   </main>
 
   <div id="feedbackModal" class="hidden fixed inset-0 z-[100] items-center justify-center bg-black/35 p-4" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle" onclick="if(event.target===this) closeFeedbackModal()">
-    <div class="glass-card w-full max-w-2xl rounded-2xl p-6 shadow-2xl">
+    <div class="w-full max-w-2xl rounded-2xl p-6 shadow-2xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(245,240,255,0.88) 100%); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(107,82,132,0.06);">
       <div class="flex items-start justify-between gap-4 mb-5">
         <div>
           <h2 id="feedbackModalTitle" class="text-xl font-bold text-coffee-brown">Send feedback</h2>
@@ -790,10 +853,10 @@
 
 <!-- Floating Navigation Buttons -->
 <div class="fixed bottom-8 right-8 flex flex-col gap-3 z-[100]">
-  <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-12 h-12 glass-card rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg border border-white/40 group" title="Back to Top">
+  <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-12 h-12 glacier-btn rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg group" title="Back to Top">
     <span class="material-symbols-outlined">keyboard_arrow_up</span>
   </button>
-  <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="w-12 h-12 glass-card rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg border border-white/40 group" title="Go to Bottom">
+  <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="w-12 h-12 glacier-btn rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg group" title="Go to Bottom">
     <span class="material-symbols-outlined">keyboard_arrow_down</span>
   </button>
 </div>
@@ -1396,6 +1459,23 @@
     return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   }
 
+  function categoryGradient(category) {
+    const isDark = document.documentElement.classList.contains('dark');
+    const cat = (category || '').toLowerCase();
+    if (isDark) {
+      if (cat.includes('infer')) return 'background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.12));color:#c4b5fd;';
+      if (cat.includes('train')) return 'background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.12));color:#93c5fd;';
+      if (cat.includes('embodied')) return 'background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(59,130,246,0.1));color:#a5b4fc;';
+      if (cat.includes('cann') || cat.includes('feature')) return 'background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.1));color:#c4b5fd;';
+      return 'background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.1));color:#a5b4fc;';
+    }
+    if (cat.includes('infer')) return 'background: linear-gradient(135deg, rgba(239,219,255,0.4), rgba(252,211,225,0.3));color:#6b5284;';
+    if (cat.includes('train')) return 'background: linear-gradient(135deg, rgba(191,219,254,0.4), rgba(252,211,225,0.3));color:#4a5fa8;';
+    if (cat.includes('embodied')) return 'background: linear-gradient(135deg, rgba(253,230,138,0.35), rgba(252,211,225,0.3));color:#92400e;';
+    if (cat.includes('cann') || cat.includes('feature')) return 'background: linear-gradient(135deg, rgba(196,181,253,0.35), rgba(191,219,254,0.3));color:#5b21b6;';
+    return 'background: linear-gradient(135deg, rgba(224,231,255,0.4), rgba(239,219,255,0.3));color:#695282;';
+  }
+
   // Re-render the sidebar <nav> from the current repoModels data.
   // Prefer the document's H1 title; retain the filename as a legacy fallback.
   function reportTitle(report) {
@@ -1592,7 +1672,7 @@
             ${renderReportCover(report.report, report.category, report.model, 'w-48 h-32 shrink-0')}
             <div class="p-4 flex flex-col justify-center">
               <div class="flex gap-2 mb-2">
-                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${shortCategory}</span>
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${shortCategory}</span>
               </div>
               <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${report.reportTitle}</h3>
               <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${report.model} in ${report.category}.</p>
@@ -1973,7 +2053,7 @@
       <article onclick="${onclick}" class="glass-card rounded-2xl p-5 flex items-start gap-4 group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
         ${coverContext
           ? renderReportCover(coverContext.report, coverContext.category, coverContext.model, 'w-28 h-20 shrink-0 rounded-xl')
-          : `<div class="w-12 h-12 shrink-0 rounded-xl bg-tech-accent/10 flex items-center justify-center"><span class="material-symbols-outlined text-tech-accent">${icon}</span></div>`}
+          : `<div class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center" style="${categoryGradient(meta)}"><span class="material-symbols-outlined">${icon}</span></div>`}
         <div class="min-w-0">
           ${meta ? `<div class="text-[10px] font-bold uppercase tracking-wider text-tech-accent mb-1">${escHtml(meta)}</div>` : ''}
           <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(title)}</h3>
@@ -2174,7 +2254,9 @@
     }
     crumbs.push({ label: title });
     renderReportCrumb(crumbs);
-    document.getElementById('reportCategory').textContent = category;
+    const catEl = document.getElementById('reportCategory');
+    catEl.textContent = category;
+    catEl.setAttribute('style', categoryGradient(category));
     document.getElementById('reportTitle').textContent = title;
     currentFeedbackReport = reportFile ? feedbackReportData(category, model, title, reportFile) : null;
     document.getElementById('reportFeedback')?.classList.toggle('hidden', !currentFeedbackReport);
@@ -2232,7 +2314,7 @@
               <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
               <p class="text-slate-500 mb-2">Could not load content directly.</p>
               <p class="text-slate-400 text-sm mb-4">GitCode is temporarily unavailable. You can open the source document directly.</p>
-              <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-tech-accent text-white rounded-xl hover:bg-tech-accent/90 transition-colors">
+              <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 glacier-btn rounded-xl transition-colors">
                 <span>Open in GitCode</span>
                 <span class="material-symbols-outlined text-sm">open_in_new</span>
               </a>
@@ -2249,7 +2331,7 @@
         <div class="text-center py-12">
           <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
           <p class="text-slate-500 mb-4">No tech report available for this model yet.</p>
-          <a href="${repoUrl}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-tech-accent text-white rounded-xl hover:bg-tech-accent/90 transition-colors">
+          <a href="${repoUrl}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 glacier-btn rounded-xl transition-colors">
             <span>Browse in GitCode</span>
             <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
@@ -2412,7 +2494,7 @@
             ${renderReportCover(r.report, r.category, r.model, 'search-result-cover')}
             <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
               <div class="flex gap-2 mb-2 flex-wrap">
-                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${escHtml(r.category)}</span>
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${escHtml(r.category)}</span>
                 ${r.subcategory ? `<span class="px-2 py-0.5 text-slate-500 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.subcategory))}</span>` : ''}
                 <span class="px-2 py-0.5 text-coffee-brown/60 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.model))}</span>
               </div>
@@ -2432,7 +2514,7 @@
             </div>
             <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
               <div class="flex gap-2 mb-2">
-                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(231, 122, 29, 0.1);">${escHtml(r.category)}</span>
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${escHtml(r.category)}</span>
               </div>
               <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
               <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
