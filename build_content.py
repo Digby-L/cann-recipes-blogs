@@ -14,6 +14,7 @@ Output:
 import json
 import os
 import re
+import shutil
 import sys
 import base64
 import hashlib
@@ -32,6 +33,17 @@ GITCODE_RAW = f"https://gitcode.com/{NS}"
 # unlike the web-api files endpoint which caps binaries at ~8 KB (is_limited).
 GITCODE_RAW_CDN = f"https://raw.gitcode.com/{NS}"
 PREFETCH_REPORTS = os.environ.get("PREFETCH_REPORTS") == "1"
+DOCS_SNAPSHOT_DIR = os.path.abspath(os.environ["DOCS_SNAPSHOT_DIR"]) if os.environ.get("DOCS_SNAPSHOT_DIR") else None
+REPO_SNAPSHOT_DIRS = {
+    repo: os.path.abspath(os.environ[env_name])
+    for repo, env_name in {
+        "cann-recipes-docs": "DOCS_SNAPSHOT_DIR",
+        "cann-recipes-infer": "INFER_SNAPSHOT_DIR",
+        "cann-recipes-train": "TRAIN_SNAPSHOT_DIR",
+        "cann-recipes-embodied-ai": "EMBODIED_SNAPSHOT_DIR",
+    }.items()
+    if os.environ.get(env_name)
+}
 REPORT_CACHE_DIR = None
 ASSET_CACHE_DIR = None
 SEARCH_INDEX = []
@@ -231,8 +243,33 @@ def api_request(url):
         return None
 
 
+def snapshot_file_path(repo, file_path, require_file=True):
+    """Resolve a file inside an optional CI checkout without allowing escapes."""
+    snapshot_dir = REPO_SNAPSHOT_DIRS.get(repo)
+    if not snapshot_dir:
+        return None
+    candidate = os.path.realpath(os.path.join(snapshot_dir, *file_path.replace("\\", "/").split("/")))
+    snapshot_root = os.path.realpath(snapshot_dir)
+    if os.path.commonpath((snapshot_root, candidate)) != snapshot_root:
+        raise RuntimeError(f"Unsafe snapshot path: {file_path}")
+    if require_file and not os.path.isfile(candidate):
+        return None
+    return candidate
+
+
 def list_tree(repo, branch, path):
     """List directory contents via GitCode tree API. Returns list of {name, path, type}."""
+    snapshot_dir = snapshot_file_path(repo, path, require_file=False)
+    if snapshot_dir and os.path.isdir(snapshot_dir):
+        items = []
+        for entry in os.scandir(snapshot_dir):
+            relative_path = f"{path.rstrip('/')}/{entry.name}" if path else entry.name
+            items.append({
+                "name": entry.name,
+                "path": relative_path,
+                "type": "tree" if entry.is_dir() else "blob",
+            })
+        return sorted(items, key=lambda item: item["name"])
     repo_id = urllib.parse.quote(f"{NS}/{repo}", safe="")
     url = (
         f"{GITCODE_API}/projects/{repo_id}/repository/tree"
@@ -331,6 +368,10 @@ def raw_fetch_file(repo, branch, file_path):
 
 def fetch_file(repo, branch, file_path):
     """Fetch file content, trying API first then raw."""
+    snapshot_path = snapshot_file_path(repo, file_path)
+    if snapshot_path:
+        with open(snapshot_path, "r", encoding="utf-8", errors="replace") as source:
+            return source.read()
     content = api_fetch_file(repo, branch, file_path)
     if content:
         return content
@@ -478,6 +519,8 @@ def cache_report_images(markdown, repo, branch, doc_dir):
     for src in find_image_sources(markdown):
         decoded_src = urllib.parse.unquote(src)
         parsed = urllib.parse.urlparse(decoded_src)
+        source_path = None
+        snapshot_repo = None
         if parsed.scheme in ("http", "https"):
             source_url = decoded_src
             clean_path = parsed.path
@@ -486,6 +529,7 @@ def cache_report_images(markdown, repo, branch, doc_dir):
             ) if parsed.netloc in ("gitcode.com", "raw.gitcode.com") else None
             if raw_match:
                 source_repo, source_branch, source_path = raw_match.groups()
+                snapshot_repo = source_repo
                 source_url = f"{GITCODE_RAW_CDN}/{source_repo}/raw/{source_branch}/{source_path}"
                 asset_rel = f"{source_repo}/{source_path}"
             else:
@@ -498,6 +542,7 @@ def cache_report_images(markdown, repo, branch, doc_dir):
             continue
         else:
             source_path = resolve_path(doc_dir, parsed.path)
+            snapshot_repo = repo
             source_url = f"{GITCODE_RAW_CDN}/{repo}/raw/{branch}/{urllib.parse.quote(source_path, safe='/')}"
             asset_rel = f"{repo}/{source_path}"
 
@@ -507,27 +552,37 @@ def cache_report_images(markdown, repo, branch, doc_dir):
             raise RuntimeError(f"Unsafe image path: {src}")
         try:
             if not os.path.isfile(destination) or os.path.getsize(destination) == 0:
-                try:
-                    data = fetch_binary_url(source_url)
-                except urllib.error.HTTPError as primary_error:
-                    fallback = next(
-                        ((prefix, value) for prefix, value in IMAGE_SOURCE_FALLBACKS.items()
-                         if source_path.startswith(prefix)),
-                        None,
-                    )
-                    if not fallback or primary_error.code != 404:
-                        raise
+                os.makedirs(os.path.dirname(destination), exist_ok=True)
+                snapshot_source = snapshot_file_path(snapshot_repo, source_path) if source_path else None
+                fallback = next(
+                    ((prefix, value) for prefix, value in IMAGE_SOURCE_FALLBACKS.items()
+                     if source_path and source_path.startswith(prefix)),
+                    None,
+                )
+                fallback_source = None
+                fallback_url = None
+                if fallback:
                     source_prefix, fallback_config = fallback
                     fallback_ns, fallback_repo, fallback_branch, fallback_dir = fallback_config
                     fallback_path = fallback_dir + source_path[len(source_prefix):]
+                    fallback_source = snapshot_file_path(fallback_repo, fallback_path)
                     fallback_url = (
                         f"https://raw.gitcode.com/{fallback_ns}/{fallback_repo}/raw/"
                         f"{fallback_branch}/{urllib.parse.quote(fallback_path, safe='/')}"
                     )
-                    data = fetch_binary_url(fallback_url)
-                os.makedirs(os.path.dirname(destination), exist_ok=True)
-                with open(destination, "wb") as image_output:
-                    image_output.write(data)
+                if snapshot_source:
+                    shutil.copyfile(snapshot_source, destination)
+                elif fallback_source:
+                    shutil.copyfile(fallback_source, destination)
+                else:
+                    try:
+                        data = fetch_binary_url(source_url)
+                    except urllib.error.HTTPError as primary_error:
+                        if not fallback or primary_error.code != 404:
+                            raise
+                        data = fetch_binary_url(fallback_url)
+                    with open(destination, "wb") as image_output:
+                        image_output.write(data)
             images[src] = "content/assets/" + urllib.parse.quote(asset_rel, safe="/")
         except Exception as error:
             raise RuntimeError(f"Failed to cache image {src} from {source_url}: {error}") from error
@@ -540,6 +595,8 @@ def main():
     REPORT_CACHE_DIR = os.path.join(script_dir, "content", "reports")
     ASSET_CACHE_DIR = os.path.join(script_dir, "content", "assets")
     SEARCH_INDEX = []
+    if DOCS_SNAPSHOT_DIR and not os.path.isfile(os.path.join(DOCS_SNAPSHOT_DIR, "metadata_enums.py")):
+        raise RuntimeError(f"Invalid DOCS_SNAPSHOT_DIR: {DOCS_SNAPSHOT_DIR}")
     # manifest: category -> 4-level tree (or flat), matching content/index.json schema
     manifest = {}
     for category, config in REPO_CONFIG.items():
