@@ -25,7 +25,7 @@
 - 根据 manifest 数据生成 Recent Reports 列表。
 - 从远程 Markdown 的第一张图片提取报告封面。
 - 报告没有图片或图片加载失败时，显示按分类设计的 CSS 占位封面。
-- 提供 Infer、Train、Embodied Intelligence 和 Docs 仓库快捷入口。
+- 提供 Infer、Train、Embodie_AI 和 Docs 仓库快捷入口。
 - 侧边栏提供唯一的 `Browse Docs Repo` 入口。
 
 ## 搜索与发现

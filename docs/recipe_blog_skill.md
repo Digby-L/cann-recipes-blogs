@@ -12,7 +12,7 @@ The CANN Recipes Blog website displays tech reports from 4 GitCode repositories.
 
 | Feature | Description |
 |---------|-------------|
-| **Four-category navigation** | Reports organized under Infer, Train, Spatial Intelligence, Embodied Intelligence |
+| **Four-category navigation** | Reports organized under Infer, Train, Spatial Intelligence, Embodie_AI |
 | **Hierarchical sidebar** | Collapsible left sidebar (w-72) with categories → models → reports tree |
 | **Dynamic model discovery** | `build_content.py` auto-discovers new models/reports from GitCode repos via tree API — no hardcoded lists |
 | **Three main views** | Home (recent + popular), Category (card grid), Report (full article) |
@@ -84,7 +84,7 @@ The CANN Recipes Blog website displays tech reports from 4 GitCode repositories.
 | Infer | cann/cann-recipes-infer | `docs/models` |
 | Train | cann/cann-recipes-train | `docs` |
 | Spatial Intelligence | cann/cann-recipes-spatial-intelligence | `docs/models` |
-| Embodied Intelligence | cann/cann-recipes-embodied-intelligence | `docs` |
+| Embodie_AI | cann/cann-recipes-embodied-intelligence | `docs` |
 
 ## Architecture
 
@@ -141,7 +141,7 @@ content/
     │   └── ...
     ├── Train/
     ├── Spatial_Intelligence/
-    └── Embodied_Intelligence/
+    └── Embodie_AI/
 ```
 
 **Report JSON format:**
@@ -318,7 +318,7 @@ cann-recipes-blogs/
 │       ├── Infer/
 │       ├── Train/
 │       ├── Spatial_Intelligence/
-│       └── Embodied_Intelligence/
+│       └── Embodie_AI/
 ├── docs/
 │   ├── recipe_blog_skill.md       # This documentation
 │   └── blog.md                    # Original task specification

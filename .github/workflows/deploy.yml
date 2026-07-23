@@ -70,6 +70,13 @@ jobs:
               raise SystemExit(f"Invalid report cache: expected {expected}, generated {generated}")
           print(f"Validated {generated} cached reports")
 
+          search_index = json.loads(Path("content/search-index.json").read_text(encoding="utf-8"))
+          if len(search_index) != expected or any(not item.get("text") for item in search_index):
+              raise SystemExit(
+                  f"Invalid search index: expected {expected}, generated {len(search_index)}"
+              )
+          print(f"Validated {len(search_index)} full-text search entries")
+
           reports = list(Path("content/reports").rglob("*.json"))
           referenced_assets = set()
           for report in reports:

@@ -13,7 +13,7 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 **核心价值：**
 1. 让开发者无需逐个翻看仓库，即可快速发现、阅读和分享 CANN recipe 生态中的最佳实践和优化指南。
 2. 将文档和图片从 recipe 代码仓中剥离——原仓库因大量 Markdown 和图片导致体积膨胀，clone 慢、IDE 打开卡顿。文档迁移到 Blog 站点后，代码仓可瘦身为纯代码，开发者日常操作不再被文档资产拖累。
-3. 作为多仓库的统一门户——将 Infer、Train、Spatial Intelligence、Embodied Intelligence 四个仓库的信息聚合呈现，用户先在门户中总览全貌、搜索定位，再按需跳转到具体仓库深入了解代码实现，实现"信息聚焦，再分流"。
+3. 作为多仓库的统一门户——将 Infer、Train、Spatial Intelligence、Embodie_AI 四个仓库的信息聚合呈现，用户先在门户中总览全貌、搜索定位，再按需跳转到具体仓库深入了解代码实现，实现"信息聚焦，再分流"。
 
 ### 1.2 目标用户
 
@@ -32,7 +32,7 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 | 推理 (Infer) | `cann/cann-recipes-infer` | `docs/models` | 大模型推理优化（DeepSeek、Qwen、Hunyuan 等） |
 | 训练 (Train) | `cann/cann-recipes-train` | `docs` | 预训练、RL 训练优化 |
 | 空间智能 (Spatial Intelligence) | `cann/cann-recipes-spatial-intelligence` | `docs/models` | 3D 生成、视觉几何 |
-| 具身智能 (Embodied Intelligence) | `cann/cann-recipes-embodied-intelligence` | `docs` | 机器人 VLA 推理 |
+| 具身智能 (`Embodie_AI`) | `cann/cann-recipes-embodied-intelligence` | `docs` | 机器人 VLA 推理 |
 
 ### 1.4 部署形态
 
@@ -247,7 +247,7 @@ CANN Recipes Blog 是一个面向 **Ascend 开发者社区** 的技术报告浏�
 
 **方案设计：**
 - "Recent Reports" 区：按 commitDate 排序取最新 6 篇，以卡片形式展示
-- 右侧 "Repositories" 区：提供 Infer、Train、Embodied Intelligence、Docs 仓库跳转入口
+- 右侧 "Repositories" 区：提供 Infer、Train、Embodie_AI、Docs 仓库跳转入口
 - 卡片包含：缩略图、分类标签、标题、模型名
 
 首页不展示 "Popular Reports" 排行，原因见[访问统计取消说明](#cancel-popular-reports)。
@@ -401,7 +401,7 @@ build_content.py
 - Infer → `memory`（芯片）
 - Train → `model_training`
 - Spatial Intelligence → `view_in_ar`
-- Embodied Intelligence → `smart_toy`
+- Embodie_AI → `smart_toy`
 
 ---
 
@@ -940,7 +940,7 @@ if not has_readme_link:
 | Infer | `docs/models` | `docs/models/{model_name}/` 下多个 .md | 较规范，模型维度清晰 |
 | Train | `docs` | `docs/` 下直接放 .md | 缺少模型子目录层级，文件扁平 |
 | Spatial Intelligence | `docs/models` | 同 Infer 风格 | 较规范 |
-| Embodied Intelligence | `docs` | 同 Train 风格 | 缺少模型子目录层级 |
+| Embodie_AI | `docs` | 同 Train 风格 | 缺少模型子目录层级 |
 
 **确认的目录层级（Blog 侧边栏展示结构）：**
 
@@ -1088,7 +1088,7 @@ cann-recipes-{domain}/
 
 | # | 功能 | 说明 |
 |---|------|------|
-| 1 | 四分类浏览 | Infer / Train / Spatial Intelligence / Embodied Intelligence |
+| 1 | 四分类浏览 | Infer / Train / Spatial Intelligence / Embodie_AI |
 | 2 | 层级侧边栏 | 可折叠，分类 → 模型 → 报告三级展开 |
 | 3 | 动态模型发现 | build_content.py 通过 tree API 自动发现新模型，无需手动维护列表 |
 | 4 | 三视图切换 | Home（首页推荐）、Category（分类网格）、Report（文章详情） |
@@ -1106,7 +1106,7 @@ cann-recipes-{domain}/
 | 11 | 关键词搜索 | 按模型名、标题、分类名过滤 |
 | 12 | 搜索结果网格 | 卡片展示，带匹配数量提示 |
 | 13 | 首页最新报告 | 按 commitDate 排序的卡片 |
-| 14 | 仓库快捷入口 | 首页右侧展示 Infer、Train、Embodied Intelligence、Docs 仓库链接 |
+| 14 | 仓库快捷入口 | 首页右侧展示 Infer、Train、Embodie_AI、Docs 仓库链接 |
 
 ### 4.3 UI/UX
 

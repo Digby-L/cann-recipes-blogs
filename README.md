@@ -4,7 +4,7 @@ A static website for browsing technical reports from CANN GitCode repositories.
 
 ## Features
 
-- Browse tech reports across four categories: Infer, Train, Spatial Intelligence, Embodied Intelligence
+- Browse tech reports across four categories: Infer, Train, Spatial Intelligence, Embodie_AI
 - Responsive design with collapsible sidebar
 - Direct fetching of markdown content from GitCode repositories
 - Fallback to CORS proxy for cross-origin requests
@@ -65,7 +65,7 @@ Reports are fetched from the following GitCode repositories:
 | Infer | https://gitcode.com/cann/cann-recipes-infer |
 | Train | https://gitcode.com/cann/cann-recipes-train |
 | Spatial Intelligence | https://gitcode.com/cann/cann-recipes-spatial-intelligence |
-| Embodied Intelligence | https://gitcode.com/cann/cann-recipes-embodied-intelligence |
+| Embodie_AI | https://gitcode.com/cann/cann-recipes-embodied-intelligence |
 
 ## License
 

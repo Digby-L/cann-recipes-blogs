@@ -107,7 +107,7 @@
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0.18) 100%);
       border-color: rgba(196, 181, 253, 0.4);
     }
-    details[open] summary svg.chevron {
+    details[open] > summary svg.chevron {
       transform: rotate(180deg);
     }
     details summary::-webkit-details-marker {
@@ -138,13 +138,28 @@
       margin-right: auto;
     }
     #categoryView.search-results-view > div { max-width: 80rem; }
+    .search-result-card {
+      flex-shrink: 0;
+      height: 16rem;
+      min-height: 16rem;
+      max-height: 16rem;
+    }
     .search-result-cover {
       width: 16rem;
-      aspect-ratio: 4 / 3;
+      height: 16rem;
+      min-height: 16rem;
+      max-height: 16rem;
       flex-shrink: 0;
       background: rgba(255, 255, 255, 0.45);
     }
-    .search-result-cover img { object-fit: contain; }
+    .search-result-cover img { width: 100%; height: 100%; object-fit: contain; }
+    .search-result-body { height: 16rem; overflow: hidden; }
+    .search-result-meta, .search-result-tags {
+      min-height: 1.5rem;
+      max-height: 1.5rem;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
     .report-cover-image { object-fit: contain; background: rgba(255,255,255,0.5); }
     .cover-placeholder {
       width: 100%;
@@ -163,14 +178,21 @@
     .cover-placeholder.cover-embodied { color: #315C78; background: linear-gradient(135deg, #dbeafe 0%, #efdbff 100%); }
     .cover-placeholder.cover-features { color: #4c1d95; background: linear-gradient(135deg, #efdbff 0%, #e0e7ff 100%); }
     .search-result-title {
-      display: block;
-      overflow: visible;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
       overflow-wrap: anywhere;
       line-height: 1.45;
+      min-height: 4.35rem;
+      flex-shrink: 0;
     }
     .search-result-description {
-      display: block;
-      overflow: visible;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      overflow-wrap: anywhere;
     }
     .repository-link {
       border: 1px solid transparent;
@@ -236,8 +258,9 @@
     html.dark #feedbackModal > div { background: rgba(15,23,42,0.95) !important; border-color: rgba(165,180,252,0.15) !important; }
     @media (max-width: 640px) {
       #categoryView.search-results-view { padding-left: 1rem; padding-right: 1rem; }
-      .search-result-card { flex-direction: column; }
-      .search-result-cover { width: 100%; }
+      .search-result-card { flex-direction: column; height: auto; min-height: 0; max-height: none; }
+      .search-result-cover { width: 100%; height: auto; min-height: 0; max-height: none; aspect-ratio: 16 / 9; }
+      .search-result-body { width: 100%; height: 16rem; flex: none; }
     }
     #sidebar {
       transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
@@ -404,6 +427,13 @@
     /* Search input */
     html.dark #searchInput { background-color: rgba(30,41,59,0.7); color: #e2e8f0; }
     html.dark #searchInput::placeholder { color: #968B82; }
+    #reportSearchBar { width: min(34rem, calc(100vw - 2rem)); }
+    #reportSearchDragHandle { cursor: grab; touch-action: none; user-select: none; }
+    #reportSearchDragHandle:active { cursor: grabbing; }
+    .report-search-hit { background: #EDE4FF; color: inherit; border-radius: 0.18rem; padding: 0 0.08rem; }
+    .report-search-hit.current { background: #695282; color: #fff; box-shadow: 0 0 0 2px rgba(107,82,132,0.2); }
+    html.dark .report-search-hit { background: #4C3C60; color: #F2ECFA; }
+    html.dark .report-search-hit.current { background: #826B9C; color: #fff; }
 
     /* Markdown report body */
     html.dark .report-markdown { color: #e2e8f0; }
@@ -590,7 +620,7 @@
         </article>
 
         <!-- Card 3 -->
-        <article onclick="showReport('Embodied Intelligence', 'Robot-Alpha', 'Robot Systems')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+        <article onclick="showReport('Embodie_AI', 'Robot-Alpha', 'Robot Systems')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
           <div class="w-48 h-32 shrink-0 overflow-hidden">
             <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop"/>
           </div>
@@ -676,7 +706,7 @@
           </a>
           <a href="https://gitcode.com/cann/cann-recipes-embodied-ai" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
             <span class="repository-icon"><span class="material-symbols-outlined text-base">smart_toy</span></span>
-            <span class="min-w-0 flex-1 text-sm font-semibold leading-snug text-tech-accent">Embodied Intelligence</span>
+            <span class="min-w-0 flex-1 text-sm font-semibold leading-snug text-tech-accent">Embodie_AI</span>
             <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
           </a>
           <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
@@ -759,6 +789,17 @@
     <button id="feedbackFloatingButton" onclick="openFeedbackModal()" title="Feedback" aria-label="Send feedback about this report" class="fixed right-24 bottom-8 z-40 w-12 h-12 rounded-full glacier-btn flex items-center justify-center text-tech-accent shadow-lg transition-colors">
       <span class="material-symbols-outlined">feedback</span>
     </button>
+    <div id="reportSearchBar" class="hidden fixed top-24 right-4 sm:right-8 z-[80] glass-card rounded-xl border border-white/60 p-2 shadow-2xl" role="search" aria-label="Find in document">
+      <div class="flex items-center gap-1.5">
+        <button id="reportSearchDragHandle" type="button" title="Drag search bar" aria-label="Drag search bar" onpointerdown="startReportSearchDrag(event)" class="w-8 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:bg-black/5 hover:text-coffee-brown transition-colors"><span class="material-symbols-outlined text-xl">drag_indicator</span></button>
+        <span class="material-symbols-outlined text-lg text-slate-400 pl-1">search</span>
+        <input id="reportSearchInput" type="search" autocomplete="off" placeholder="Find in this document" oninput="runReportSearch(this.value)" onkeydown="handleReportSearchKeydown(event)" class="min-w-0 flex-1 border-0 bg-transparent px-1 py-2 text-sm text-coffee-brown outline-none focus:ring-0">
+        <span id="reportSearchCount" class="min-w-14 text-center text-xs tabular-nums text-slate-400" aria-live="polite">0 / 0</span>
+        <button onclick="moveReportSearch(-1)" title="Previous match" aria-label="Previous match" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-500 hover:bg-tech-accent/10 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-xl">keyboard_arrow_up</span></button>
+        <button onclick="moveReportSearch(1)" title="Next match" aria-label="Next match" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-500 hover:bg-tech-accent/10 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-xl">keyboard_arrow_down</span></button>
+        <button onclick="closeReportSearch()" title="Close search" aria-label="Close document search" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-500 hover:bg-black/5 hover:text-coffee-brown transition-colors"><span class="material-symbols-outlined text-xl">close</span></button>
+      </div>
+    </div>
     <!-- Flex layout: centered article column + sticky TOC column (no overlap) -->
     <div class="report-layout">
       <div class="report-main">
@@ -766,7 +807,10 @@
       <nav id="reportBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
       <article class="glass-card rounded-3xl p-8 md:p-12 fade-in">
-        <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Category</span>
+        <div class="flex items-center justify-between gap-4">
+          <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Category</span>
+          <button id="reportSearchButton" onclick="openReportSearch()" class="inline-flex items-center gap-2 rounded-lg border border-black/5 bg-white/50 px-3 py-2 text-xs font-semibold text-slate-500 hover:border-tech-accent/20 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-base">search</span><span class="hidden sm:inline">Find in document</span></button>
+        </div>
 
         <h1 id="reportTitle" class="text-4xl lg:text-5xl font-extrabold text-coffee-brown leading-tight mt-6 mb-6">
           Report Title
@@ -879,7 +923,7 @@
   let repoConfig = {
     "Infer":                 { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "infer" },
     "Train":                 { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "train" },
-    "Embodied Intelligence": { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "embodied" },
+    "Embodie_AI":            { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "embodied" },
     "CANN Features":         { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "cann_features", flat: true }
   };
 
@@ -1001,7 +1045,7 @@
       {"name": "deepseek_v3_2", "subcategory": "pretrain", "docPath": "pretrain/deepseek_v3_2", "reports": ["deepseek-v32_pre_train_optimization.md"]},
       {"name": "qwen3_235b", "subcategory": "rl", "docPath": "rl/qwen3_235b", "reports": ["qwen3_235B_32k_longseq_rl_train_optimization.md"]}
     ],
-    "Embodied Intelligence": [
+    "Embodie_AI": [
       {"name": "gaussian_splatting", "subcategory": "3d_vision", "docPath": "3d_vision/gaussian_splatting", "reports": ["gaussian_splatting_alpha_blending_optimization.md", "gaussian_splatting_culling_optimization.md", "gaussian_splatting_load_balance_optimization.md", "gaussian_splatting_precise_intersection_optimization.md"]},
       {"name": "hunyuan3d", "subcategory": "3d_vision", "docPath": "3d_vision/hunyuan3d", "reports": ["Hunyuan3D_optimization.md"]},
       {"name": "vggt", "subcategory": "3d_vision", "docPath": "3d_vision/vggt", "reports": ["vggt_accurancy_evaluation.md", "vggt_optimization.md"]},
@@ -1138,6 +1182,37 @@
     return prefetchedManifest;
   }
 
+  let fullTextSearchIndex = null;
+  let fullTextSearchIndexPromise = null;
+  async function loadFullTextSearchIndex() {
+    if (fullTextSearchIndex !== null) return fullTextSearchIndex;
+    if (!fullTextSearchIndexPromise) {
+      fullTextSearchIndexPromise = (async () => {
+        try {
+          const response = await fetch('content/search-index.json');
+          if (response.ok) {
+            const entries = await response.json();
+            fullTextSearchIndex = new Map(entries.map(entry => [
+              `${entry.category}\u0000${entry.model}\u0000${entry.file}`,
+              entry.text || ''
+            ]));
+            return fullTextSearchIndex;
+          }
+        } catch (error) {
+          console.warn('Full-text search index unavailable:', error.message);
+        }
+        fullTextSearchIndex = new Map();
+        return fullTextSearchIndex;
+      })();
+      try {
+        return await fullTextSearchIndexPromise;
+      } finally {
+        fullTextSearchIndexPromise = null;
+      }
+    }
+    return fullTextSearchIndexPromise;
+  }
+
   function getPrefetchedReportPath(category, model, reportFile) {
     const safeCategory = category.replace(/ /g, '_');
     const safeModel = model.replace(/ /g, '_');
@@ -1238,6 +1313,10 @@
     md = md.replace(/<script\b[\s\S]*?<\/script>/gi, '');
     md = md.replace(/<style\b[\s\S]*?<\/style>/gi, '');
     md = md.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
+
+    // The report shell already displays the document H1 as its page title.
+    // Remove only the first Markdown H1 from the body to avoid duplication.
+    md = md.replace(/^[ \t]{0,3}#[ \t]+.+?[ \t]*#*[ \t]*\r?$/m, '');
 
     // Some source reports indent standalone images by four spaces. Markdown
     // treats those lines as code blocks, so normalize image-only lines first.
@@ -1484,6 +1563,11 @@
     return filename.replace(/\.md$/i, '');
   }
 
+  function reportSidebarTitle(report) {
+    if (report && typeof report === 'object' && report.sidebarTitle) return report.sidebarTitle;
+    return reportTitle(report);
+  }
+
   // Get the filename string. Object support keeps older manifests compatible.
   function reportFile(r) {
     return typeof r === 'string' ? r : (r && r.file ? r.file : '');
@@ -1517,7 +1601,7 @@
 
   function coverMeta(category) {
     if (category === 'Train') return { css: 'cover-train', icon: 'model_training' };
-    if (category === 'Embodied Intelligence') return { css: 'cover-embodied', icon: 'smart_toy' };
+    if (category === 'Embodie_AI') return { css: 'cover-embodied', icon: 'smart_toy' };
     if (category === 'CANN Features') return { css: 'cover-features', icon: 'tune' };
     return { css: 'cover-infer', icon: 'memory' };
   }
@@ -1567,7 +1651,7 @@
     const icons = {
       "Infer": "memory",
       "Train": "model_training",
-      "Embodied Intelligence": "smart_toy",
+      "Embodie_AI": "smart_toy",
       "Spatial Intelligence": "language",
       "CANN Features": "tune",
     };
@@ -1579,7 +1663,7 @@
     function renderModel(category, model) {
       const sub = 'flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer';
       const reportLink = (r) =>
-        `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(r))}</a>`;
+        `<a title="${escHtml(reportTitle(r))}" onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportSidebarTitle(r))}</a>`;
       const body = model.reports.length
         ? model.reports.map(reportLink).join('')
         : `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(model.name)}','')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(model.name)}</a>`;
@@ -1611,7 +1695,7 @@
       if (subs === null) {
         // Flat category: reports sit directly under the category (no sub/model).
         for (const model of models) for (const report of model.reports) {
-          html += `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(report))}','${escJs(reportFile(report))}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportTitle(report))}</a>`;
+          html += `<a title="${escHtml(reportTitle(report))}" onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(report))}','${escJs(reportFile(report))}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportSidebarTitle(report))}</a>`;
         }
       } else {
         // 4-level: Subcategory <details> wrapping Model <details>/links.
@@ -1708,7 +1792,17 @@
       }
     });
     document.addEventListener('keydown', (event) => {
+      const reportVisible = !document.getElementById('reportView')?.classList.contains('hidden');
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f' && reportVisible) {
+        event.preventDefault();
+        openReportSearch();
+        return;
+      }
       if (event.key === 'Escape') {
+        if (!document.getElementById('reportSearchBar')?.classList.contains('hidden')) {
+          closeReportSearch();
+          return;
+        }
         document.getElementById('tagFilterPanel')?.classList.add('hidden');
         document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
         closeFeedbackModal();
@@ -1729,7 +1823,169 @@
     });
 
     window.addEventListener('popstate', () => restoreViewFromPath());
+    window.addEventListener('resize', clampReportSearchBar);
   });
+
+  // ---- Find in document ----------------------------------------------------
+  let reportSearchHits = [];
+  let reportSearchIndex = -1;
+  let reportSearchDrag = null;
+
+  function reportSearchBounds(left, top) {
+    const bar = document.getElementById('reportSearchBar');
+    if (!bar) return { left, top };
+    const margin = 8;
+    return {
+      left: Math.min(Math.max(margin, left), Math.max(margin, window.innerWidth - bar.offsetWidth - margin)),
+      top: Math.min(Math.max(margin, top), Math.max(margin, window.innerHeight - bar.offsetHeight - margin)),
+    };
+  }
+
+  function positionReportSearchBar(left, top) {
+    const bar = document.getElementById('reportSearchBar');
+    if (!bar) return;
+    const bounded = reportSearchBounds(left, top);
+    bar.style.left = `${bounded.left}px`;
+    bar.style.top = `${bounded.top}px`;
+    bar.style.right = 'auto';
+  }
+
+  function startReportSearchDrag(event) {
+    if (event.button !== 0 && event.pointerType !== 'touch') return;
+    const bar = document.getElementById('reportSearchBar');
+    const handle = event.currentTarget;
+    if (!bar || !handle) return;
+    const rect = bar.getBoundingClientRect();
+    reportSearchDrag = { pointerId: event.pointerId, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
+    handle.setPointerCapture(event.pointerId);
+    handle.addEventListener('pointermove', moveReportSearchDrag);
+    handle.addEventListener('pointerup', endReportSearchDrag);
+    handle.addEventListener('pointercancel', endReportSearchDrag);
+    event.preventDefault();
+  }
+
+  function moveReportSearchDrag(event) {
+    if (!reportSearchDrag || event.pointerId !== reportSearchDrag.pointerId) return;
+    positionReportSearchBar(event.clientX - reportSearchDrag.offsetX, event.clientY - reportSearchDrag.offsetY);
+  }
+
+  function endReportSearchDrag(event) {
+    if (!reportSearchDrag || event.pointerId !== reportSearchDrag.pointerId) return;
+    const handle = event.currentTarget;
+    if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+    handle.removeEventListener('pointermove', moveReportSearchDrag);
+    handle.removeEventListener('pointerup', endReportSearchDrag);
+    handle.removeEventListener('pointercancel', endReportSearchDrag);
+    reportSearchDrag = null;
+  }
+
+  function clampReportSearchBar() {
+    const bar = document.getElementById('reportSearchBar');
+    if (!bar || bar.classList.contains('hidden')) return;
+    const rect = bar.getBoundingClientRect();
+    positionReportSearchBar(rect.left, rect.top);
+  }
+
+  function clearReportSearchHighlights() {
+    const parents = new Set();
+    document.querySelectorAll('#reportContent mark.report-search-hit').forEach(mark => {
+      const parent = mark.parentNode;
+      parents.add(parent);
+      mark.replaceWith(document.createTextNode(mark.textContent));
+    });
+    parents.forEach(parent => parent?.normalize());
+    reportSearchHits = [];
+    reportSearchIndex = -1;
+  }
+
+  function updateReportSearchCount() {
+    const count = document.getElementById('reportSearchCount');
+    if (count) count.textContent = reportSearchHits.length ? `${reportSearchIndex + 1} / ${reportSearchHits.length}` : '0 / 0';
+  }
+
+  function activateReportSearchHit(index, scroll = true) {
+    if (!reportSearchHits.length) { updateReportSearchCount(); return; }
+    reportSearchHits[reportSearchIndex]?.classList.remove('current');
+    reportSearchIndex = (index + reportSearchHits.length) % reportSearchHits.length;
+    const current = reportSearchHits[reportSearchIndex];
+    current.classList.add('current');
+    updateReportSearchCount();
+    if (scroll) current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function runReportSearch(rawQuery) {
+    clearReportSearchHighlights();
+    const query = rawQuery.trim();
+    if (!query) { updateReportSearchCount(); return; }
+    const expression = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const content = document.getElementById('reportContent');
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if (!parent || parent.closest('script, style, mark.report-search-hit')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const node of nodes) {
+      const value = node.nodeValue;
+      expression.lastIndex = 0;
+      if (!expression.test(value)) continue;
+      expression.lastIndex = 0;
+      const fragment = document.createDocumentFragment();
+      let cursor = 0;
+      for (const match of value.matchAll(expression)) {
+        fragment.append(document.createTextNode(value.slice(cursor, match.index)));
+        const mark = document.createElement('mark');
+        mark.className = 'report-search-hit';
+        mark.textContent = match[0];
+        fragment.append(mark);
+        reportSearchHits.push(mark);
+        cursor = match.index + match[0].length;
+      }
+      fragment.append(document.createTextNode(value.slice(cursor)));
+      node.replaceWith(fragment);
+    }
+    if (reportSearchHits.length) activateReportSearchHit(0, false);
+    else updateReportSearchCount();
+  }
+
+  function moveReportSearch(direction) {
+    if (!reportSearchHits.length) {
+      runReportSearch(document.getElementById('reportSearchInput')?.value || '');
+      if (!reportSearchHits.length) return;
+    }
+    activateReportSearchHit(reportSearchIndex + direction);
+  }
+
+  function handleReportSearchKeydown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      moveReportSearch(event.shiftKey ? -1 : 1);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      closeReportSearch();
+    }
+  }
+
+  function openReportSearch() {
+    const bar = document.getElementById('reportSearchBar');
+    const input = document.getElementById('reportSearchInput');
+    bar?.classList.remove('hidden');
+    requestAnimationFrame(clampReportSearchBar);
+    requestAnimationFrame(() => { input?.focus(); input?.select(); });
+  }
+
+  function closeReportSearch(restoreFocus = true) {
+    clearReportSearchHighlights();
+    document.getElementById('reportSearchBar')?.classList.add('hidden');
+    const input = document.getElementById('reportSearchInput');
+    if (input) input.value = '';
+    updateReportSearchCount();
+    if (restoreFocus) document.getElementById('reportSearchButton')?.focus();
+  }
 
   // ---- Report Table of Contents (TOC) --------------------------------------
   let tocHeadings = [];        // [{ id, el }] in document order
@@ -2157,7 +2413,7 @@
   const sourceRepoFallback = {
     'Infer': { sourceRepo: 'cann-recipes-infer', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-infer' },
     'Train': { sourceRepo: 'cann-recipes-train', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-train' },
-    'Embodied Intelligence': { sourceRepo: 'cann-recipes-embodied-ai', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-embodied-ai' },
+    'Embodie_AI': { sourceRepo: 'cann-recipes-embodied-ai', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-embodied-ai' },
     'CANN Features': { sourceRepo: 'cann-recipes-docs', sourceRepoUrl: 'https://gitcode.com/tian-ccs/cann-recipes-docs' },
   };
   let currentFeedbackReport = null;
@@ -2228,6 +2484,7 @@
 
   async function showReport(category, model, title, reportFile = '', updateHistory = true) {
     console.log('showReport', { category, model, title, reportFile });
+    closeReportSearch(false);
     if (updateHistory && reportFile) {
       const modelData = (actualRepoModels[category] || repoModels[category] || []).find(item => item.name === model);
       const parts = (repoConfig[category] || {}).flat
@@ -2348,6 +2605,39 @@
   // Track last search term to allow re-triggering the same search
   let lastSearchTerm = '';
   let activeTag = '';
+  let searchRequestId = 0;
+
+  function splitSearchTerms(value) {
+    return value.toLowerCase().split(/\s+/).filter(Boolean);
+  }
+
+  function includesAllTerms(value, terms) {
+    const normalized = value.toLowerCase();
+    return terms.every(term => normalized.includes(term));
+  }
+
+  function fullTextSnippet(value, terms) {
+    if (!value || !terms.length) return '';
+    const normalized = value.toLowerCase();
+    const positions = terms.map(term => normalized.indexOf(term)).filter(position => position >= 0);
+    if (!positions.length) return '';
+    const start = Math.max(0, Math.min(...positions) - 70);
+    const end = Math.min(value.length, start + 210);
+    return `${start ? '...' : ''}${value.slice(start, end).trim()}${end < value.length ? '...' : ''}`;
+  }
+
+  function highlightSearchTerms(value, terms) {
+    if (!value || !terms.length) return escHtml(value || '');
+    const expression = new RegExp(`(${terms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    let html = '';
+    let cursor = 0;
+    for (const match of value.matchAll(expression)) {
+      html += escHtml(value.slice(cursor, match.index));
+      html += `<mark class="search-highlight">${escHtml(match[0])}</mark>`;
+      cursor = match.index + match[0].length;
+    }
+    return html + escHtml(value.slice(cursor));
+  }
 
   function collectTagCounts() {
     const counts = new Map();
@@ -2411,7 +2701,7 @@
     filterContent(true);
   }
 
-  function filterContent(forceRefresh = false) {
+  async function filterContent(forceRefresh = false) {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     if (!searchTerm && !activeTag) {
       lastSearchTerm = '';
@@ -2424,6 +2714,10 @@
     // the user can re-trigger a search while reading a document.
     if (!forceRefresh && searchTerm === lastSearchTerm) return;
     lastSearchTerm = searchTerm;
+    const requestId = ++searchRequestId;
+    const terms = splitSearchTerms(searchTerm);
+    const searchIndex = searchTerm ? await loadFullTextSearchIndex() : new Map();
+    if (requestId !== searchRequestId) return;
 
     // Collect all matching reports across all categories
     const results = [];
@@ -2435,7 +2729,11 @@
           for (const report of model.reports) {
             const reportTitleStr = reportTitle(report);
             const tags = reportTags(report);
-            const keywordMatch = !searchTerm || modelMatch || reportTitleStr.toLowerCase().includes(searchTerm) || category.toLowerCase().includes(searchTerm);
+            const metadata = `${category} ${model.name} ${model.subcategory || ''} ${reportTitleStr}`;
+            const metadataMatch = !searchTerm || includesAllTerms(metadata, terms);
+            const body = searchIndex.get(`${category}\u0000${model.name}\u0000${reportFile(report)}`) || '';
+            const bodyMatch = !!searchTerm && includesAllTerms(body, terms);
+            const keywordMatch = !searchTerm || metadataMatch || bodyMatch;
             const tagMatch = !activeTag || tags.includes(activeTag);
             if (keywordMatch && tagMatch) {
               results.push({
@@ -2444,7 +2742,9 @@
                 subcategory: model.subcategory || '',
                 report,
                 reportTitle: reportTitleStr,
-                tags
+                tags,
+                snippet: bodyMatch ? fullTextSnippet(body, terms) : '',
+                score: metadataMatch ? 2 : 1
               });
             }
           }
@@ -2470,6 +2770,7 @@
       const criteria = [searchTerm ? `"${searchTerm}"` : '', activeTag ? `#${activeTag}` : ''].filter(Boolean).join(' + ');
       headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for ${criteria}`;
     }
+    results.sort((left, right) => (right.score || 0) - (left.score || 0));
 
     const filterBar = document.getElementById('activeFilterBar');
     if (filterBar) {
@@ -2492,16 +2793,16 @@
         html += `
           <article onclick="showReport('${escJs(r.category)}', '${escJs(r.model)}', '${escJs(r.reportTitle)}', '${escJs(reportFile(r.report))}')" class="search-result-card glass-card rounded-2xl overflow-hidden flex w-full items-stretch group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
             ${renderReportCover(r.report, r.category, r.model, 'search-result-cover')}
-            <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
-              <div class="flex gap-2 mb-2 flex-wrap">
+            <div class="search-result-body p-4 flex-1 min-w-0 flex flex-col justify-start">
+              <div class="search-result-meta flex gap-2 mb-1.5 flex-nowrap">
                 <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${escHtml(r.category)}</span>
                 ${r.subcategory ? `<span class="px-2 py-0.5 text-slate-500 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.subcategory))}</span>` : ''}
                 <span class="px-2 py-0.5 text-coffee-brown/60 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.model))}</span>
               </div>
-              ${r.tags.length ? `<div class="flex flex-wrap gap-1.5 mb-2">${renderTagChips(r.tags, true)}</div>` : ''}
+              ${r.tags.length ? `<div class="search-result-tags flex flex-nowrap gap-1.5 mb-1.5">${renderTagChips(r.tags, true)}</div>` : '<div class="search-result-tags mb-1.5"></div>'}
               <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
               <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
-              <p class="search-result-description text-slate-500 text-sm leading-relaxed">Technical report in the ${escHtml(formatModelName(r.model))} series.</p>
+              <p class="search-result-description text-slate-500 text-sm leading-relaxed">${r.snippet ? highlightSearchTerms(r.snippet, terms) : `Technical report in the ${escHtml(formatModelName(r.model))} series.`}</p>
             </div>
           </article>
         `;
@@ -2512,8 +2813,8 @@
             <div class="search-result-cover bg-slate-100 dark:bg-white/5 flex items-center justify-center">
               <span class="material-symbols-outlined text-5xl text-slate-300">folder_open</span>
             </div>
-            <div class="p-5 flex-1 min-w-0 flex flex-col justify-center">
-              <div class="flex gap-2 mb-2">
+            <div class="search-result-body p-4 flex-1 min-w-0 flex flex-col justify-start">
+              <div class="search-result-meta flex gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${escHtml(r.category)}</span>
               </div>
               <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>

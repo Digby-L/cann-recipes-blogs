@@ -17,6 +17,7 @@ import re
 import sys
 import base64
 import hashlib
+import html
 import time
 import urllib.request
 import urllib.error
@@ -33,6 +34,7 @@ GITCODE_RAW_CDN = f"https://raw.gitcode.com/{NS}"
 PREFETCH_REPORTS = os.environ.get("PREFETCH_REPORTS") == "1"
 REPORT_CACHE_DIR = None
 ASSET_CACHE_DIR = None
+SEARCH_INDEX = []
 
 # Full browser-like headers. GitCode's CloudWAF returns HTTP 418 (a challenge
 # page) for requests with a bare "Mozilla/5.0" UA, so we mirror what proxy.py
@@ -54,14 +56,14 @@ BROWSER_HEADERS = {
 REPO_CONFIG = {
     "Infer":                 {"repo": "cann-recipes-docs", "branch": "main", "basePath": "infer"},
     "Train":                 {"repo": "cann-recipes-docs", "branch": "main", "basePath": "train"},
-    "Embodied Intelligence": {"repo": "cann-recipes-docs", "branch": "main", "basePath": "embodied"},
+    "Embodie_AI":            {"repo": "cann-recipes-docs", "branch": "main", "basePath": "embodied"},
     "CANN Features":         {"repo": "cann-recipes-docs", "branch": "main", "basePath": "cann_features", "flat": True},
 }
 
 SOURCE_REPOS = {
     "Infer": ("cann-recipes-infer", "https://gitcode.com/cann/cann-recipes-infer"),
     "Train": ("cann-recipes-train", "https://gitcode.com/cann/cann-recipes-train"),
-    "Embodied Intelligence": ("cann-recipes-embodied-ai", "https://gitcode.com/cann/cann-recipes-embodied-ai"),
+    "Embodie_AI": ("cann-recipes-embodied-ai", "https://gitcode.com/cann/cann-recipes-embodied-ai"),
     "CANN Features": ("cann-recipes-docs", "https://gitcode.com/tian-ccs/cann-recipes-docs"),
 }
 
@@ -138,6 +140,34 @@ def extract_document_title(markdown_content, fallback_filename):
     return re.sub(r'\.md$', '', fallback_filename, flags=re.IGNORECASE)
 
 
+def extract_document_metadata(markdown_content):
+    """Parse the JSON cann-meta comment embedded after the document H1."""
+    match = re.search(r'<!--\s*cann-meta\s*([\s\S]*?)-->', markdown_content, re.IGNORECASE)
+    if not match:
+        return {}
+    try:
+        metadata = json.loads(match.group(1).strip())
+    except json.JSONDecodeError as error:
+        raise RuntimeError(f"Invalid cann-meta JSON: {error}") from error
+    if not isinstance(metadata, dict):
+        raise RuntimeError("cann-meta must contain a JSON object")
+    return metadata
+
+
+def extract_search_text(markdown_content):
+    """Convert Markdown to compact readable text for the client search index."""
+    content = re.sub(r'^---\s*\n[\s\S]*?\n---\s*\n?', '', markdown_content, count=1)
+    content = re.sub(r'<!--([\s\S]*?)-->', ' ', content)
+    content = re.sub(r'!\[([^\]]*)\]\([^)]+\)', r' \1 ', content)
+    content = re.sub(r'\[([^\]]+)\]\([^)]+\)', r' \1 ', content)
+    content = re.sub(r'<[^>]+>', ' ', content)
+    content = re.sub(r'^\s{0,3}#{1,6}\s*', '', content, flags=re.MULTILINE)
+    content = re.sub(r'^\s*[-+*>]\s*', '', content, flags=re.MULTILINE)
+    content = re.sub(r'[`*_~|]+', ' ', content)
+    content = html.unescape(content)
+    return re.sub(r'\s+', ' ', content).strip()
+
+
 def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     """Build tags and a remote cover URL without persisting report content."""
     normalized = report_file.lower()
@@ -145,6 +175,17 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
     markdown = fetch_file(repo, branch, file_path)
     title = extract_document_title(markdown or "", report_file)
+    metadata = extract_document_metadata(markdown or "")
+    sidebar_title = metadata.get("sidebarTitle")
+    if not isinstance(sidebar_title, str) or not sidebar_title.strip():
+        sidebar_title = title
+    SEARCH_INDEX.append({
+        "category": category,
+        "model": model_key,
+        "file": report_file,
+        "sourcePath": file_path,
+        "text": extract_search_text(markdown or ""),
+    })
     images = {}
     if PREFETCH_REPORTS:
         if not markdown:
@@ -171,6 +212,7 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
     return {
         "file": report_file,
         "title": title,
+        "sidebarTitle": sidebar_title.strip(),
         "tags": tags,
         "coverImage": cover_image,
         "sourceRepo": source_repo,
@@ -493,10 +535,11 @@ def cache_report_images(markdown, repo, branch, doc_dir):
 
 
 def main():
-    global REPORT_CACHE_DIR, ASSET_CACHE_DIR
+    global REPORT_CACHE_DIR, ASSET_CACHE_DIR, SEARCH_INDEX
     script_dir = os.path.dirname(os.path.abspath(__file__))
     REPORT_CACHE_DIR = os.path.join(script_dir, "content", "reports")
     ASSET_CACHE_DIR = os.path.join(script_dir, "content", "assets")
+    SEARCH_INDEX = []
     # manifest: category -> 4-level tree (or flat), matching content/index.json schema
     manifest = {}
     for category, config in REPO_CONFIG.items():
@@ -551,8 +594,14 @@ def main():
         json.dump(manifest, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
+    search_index_path = os.path.join(script_dir, "content", "search-index.json")
+    with open(search_index_path, "w", encoding="utf-8") as f:
+        json.dump(SEARCH_INDEX, f, ensure_ascii=False, separators=(",", ":"))
+        f.write("\n")
+
     print("\nDone! Report metadata manifest generated")
     print(f"Manifest: {manifest_path}")
+    print(f"Search index: {search_index_path} ({len(SEARCH_INDEX)} reports)")
     if PREFETCH_REPORTS:
         print(f"Static report cache: {REPORT_CACHE_DIR}")
 
