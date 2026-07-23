@@ -203,21 +203,53 @@ GitCode's raw URLs (`gitcode.com/cann/.../raw/...`) return HTML pages, not binar
 ## Frontend (`index.html`)
 
 ### Design
-- **Color Theme:** Primary #E77A1D (orange), Background #F9F8F6 (beige), Text #3E2723 (coffee brown)
-- **Fonts:** Public Sans (display), Inter (body)
+
+#### Color Theme (Blue-Purple Glassmorphism)
+
+| Token | Light Mode | Dark Mode | 用途 |
+|-------|-----------|-----------|------|
+| `beige-light` | `#f7f9fc` | `#0f172a` | 页面背景 |
+| `coffee-brown` | `#191c1e` | `#e2e8f0` | 主要文字 |
+| `tech-accent` / `primary` | `#695282` | `#c4b5fd` | 主色调（紫） |
+| `accent-purple` | `#6b5284` | `#c4b5fd` | 辅助紫色 |
+| Logo 渐变 | `#6b5284 → #4a5fa8` | — | 紫→蓝渐变 |
+| 进度条 | `#4a5fa8 → #6b5284` | 同 | 蓝→紫渐变 |
+
+**按钮 `.glacier-btn`：** 半透明蓝紫渐变毛玻璃（`rgba(224,231,255,0.35) → rgba(196,181,253,0.25)`），`backdrop-filter: blur(12px)`，hover 加深 + 微放大。
+
+**反馈按钮 `.feedback-option`：** 浅蓝→冷靛紫渐变（`rgba(191,219,254,0.3) → rgba(165,180,252,0.2)`）。
+
+**分类标签 `categoryGradient()`：** 按类别返回不同渐变色：
+- Infer：粉紫（`rgba(239,219,255) → rgba(252,211,225)`），文字 `#6b5284`
+- Train：蓝粉（`rgba(191,219,254) → rgba(252,211,225)`），文字 `#4a5fa8`
+- Embodied：黄粉（`rgba(253,230,138) → rgba(252,211,225)`），文字 `#92400e`
+- CANN Features：紫蓝（`rgba(196,181,253) → rgba(191,219,254)`），文字 `#5b21b6`
+- 暗色模式下自动切换为可见的亮色变体（`#c4b5fd` / `#93c5fd` / `#a5b4fc`）
+
+**背景氛围光：** 5 个 `radial-gradient` 圆形光斑（紫、蓝、粉、蓝、多色混合），通过 `fixed` 定位铺满背景，暗色模式下隐藏（`opacity: 0`），暗色用 `body::before` 的淡蓝紫线性渐变替代。
+
+**暗色模式 (Dark Mode)：**
+- 背景 `#0f172a`，卡片 `rgba(30,41,59,0.72)`
+- 所有紫色文字/图标自动变为亮紫 `#c4b5fd`
+- 行内 style 的颜色通过 `[style*="color:..."] { color: #c4b5fd !important; }` 覆盖
+- Material icons 在暗色下变白 `#e2e8f0`
+
+- **Fonts:** Plus Jakarta Sans (primary), Inter (fallback)
 - **Icons:** Material Symbols Outlined (Google Fonts)
+- **Logo:** `cann_logo.png`（白底圆角正方形）
 - **Framework:** Tailwind CSS (CDN)
 - **Markdown:** marked.js v4.3.0, highlight.js for code blocks
-- **Effects:** Glassmorphism cards with backdrop-filter blur
+- **Effects:** Glassmorphism cards with backdrop-filter blur, ambient gradient background blobs
 
 ### Key Features
 
 1. **Left Sidebar Navigation** — Collapsible (w-72), categories with nested models, toggle button on right edge
-2. **Three Main Views** — Home (recent + popular reports), Category (grid), Report (full article)
+2. **Three Main Views** — Home (recent reports + repositories), Category (drill-down grid), Report (full article)
 3. **Search** — Filters sidebar and content by keyword
-4. **Floating Nav** — Back-to-top / go-to-bottom buttons (fixed bottom-right)
-5. **Subscribe** — Opens `https://mailweb.cann.osinfra.cn/mailman3/lists/recipes.cann.osinfra.cn/`
+4. **Floating Nav** — Back-to-top / go-to-bottom / TOC toggle / feedback buttons (glacier-btn style)
+5. **Dark Mode** — Toggle in header; deep violet slate palette; ambient gradients hidden
 6. **Report Metadata** — Shows latest commit date (from manifest or GitCode API)
+7. **Feedback / Issue** — Floating button + modal with 4 issue types, routes to source GitCode repo
 
 ### Key JavaScript Functions
 
