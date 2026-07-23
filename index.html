@@ -288,16 +288,17 @@
     }
     /* Report markdown content styles */
     .report-markdown h1, .report-markdown h2, .report-markdown h3, .report-markdown h4 { color: #191c1e; font-weight: 700; line-height: 1.3; }
-    .report-markdown h1 { font-size: 1.875rem; margin: 2rem 0 1rem; }
-    .report-markdown h2 { font-size: 1.5rem; margin: 1.75rem 0 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
-    .report-markdown h3 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
-    .report-markdown h4 { font-size: 1.125rem; margin: 1.25rem 0 0.5rem; }
+    .report-markdown { font-size: var(--report-font-size, 16px); }
+    .report-markdown h1 { font-size: 1.875em; margin: 2rem 0 1rem; }
+    .report-markdown h2 { font-size: 1.5em; margin: 1.75rem 0 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+    .report-markdown h3 { font-size: 1.25em; margin: 1.5rem 0 0.5rem; }
+    .report-markdown h4 { font-size: 1.125em; margin: 1.25rem 0 0.5rem; }
     .report-markdown p { color: #475569; line-height: 1.8; margin-bottom: 1rem; }
     .report-markdown ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
     .report-markdown ol { list-style: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
     .report-markdown li { color: #475569; line-height: 1.75; margin-bottom: 0.25rem; }
-    .report-markdown pre { background: #282c34; color: #abb2bf; padding: 1.25rem; border-radius: 0.75rem; margin: 1.25rem 0; overflow-x: auto; font-size: 0.875rem; line-height: 1.625; position: relative; }
-    .report-markdown code { background: #f1f5f9; color: #1e293b; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; font-family: ui-monospace, monospace; }
+    .report-markdown pre { background: #282c34; color: #abb2bf; padding: 1.25rem; border-radius: 0.75rem; margin: 1.25rem 0; overflow-x: auto; font-size: 0.875em; line-height: 1.625; position: relative; }
+    .report-markdown code { background: #f1f5f9; color: #1e293b; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.875em; font-family: ui-monospace, monospace; }
     .report-markdown pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
     .report-markdown pre code.hljs { background: none; padding: 0; }
     .code-block-wrapper { position: relative; }
@@ -311,7 +312,7 @@
     .report-markdown a:hover { text-decoration: underline; color: #826b9c; }
     .report-markdown blockquote { border-left: 4px solid #826b9c; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(107,82,132,0.04); border-radius: 0 0.5rem 0.5rem 0; }
     .report-markdown hr { border-color: #e2e8f0; margin: 1.75rem 0; }
-    .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+    .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9em; }
     .table-scroll-wrapper {
       width: 100%;
       max-width: 100%;
@@ -367,7 +368,11 @@
     .toc-link.toc-active { color: #695282; font-weight: 600; border-left-color: #826b9c; background: rgba(107,82,132,0.08); }
     /* Keep enough room for the left sidebar, article, gap, and TOC column. */
     @media (min-width: 1600px) {
-      #tocPanel.toc-available { display: block; flex: 0 0 15rem; width: 15rem; position: sticky; top: 1.5rem; align-self: flex-start; }
+      #sidebar { width: clamp(18rem, 18vw, 22rem); }
+      #reportView { padding-left: clamp(1.5rem, 2.5vw, 4rem); padding-right: clamp(1.5rem, 2.5vw, 4rem); }
+      .report-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(13rem, 16vw, 18rem); gap: clamp(1.5rem, 2.5vw, 2.5rem); width: min(100%, 110rem); margin: 0 auto; }
+      .report-main { max-width: none; width: 100%; min-width: 0; }
+      #tocPanel.toc-available { display: block; width: 100%; position: sticky; top: 1.5rem; align-self: flex-start; min-width: 0; }
       #tocPanel.toc-available .toc-inner { max-height: calc(100vh - 3rem); }
     }
     /* Constrained screens: use a drawer instead of squeezing the TOC off-screen. */
@@ -811,9 +816,16 @@
       <nav id="reportBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
       <article class="glass-card rounded-3xl p-8 md:p-12 fade-in">
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Category</span>
-          <button id="reportSearchButton" onclick="openReportSearch()" class="inline-flex items-center gap-2 rounded-lg border border-black/5 bg-white/50 px-3 py-2 text-xs font-semibold text-slate-500 hover:border-tech-accent/20 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-base">search</span><span class="hidden sm:inline">Find in document</span></button>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <div class="inline-flex h-9 items-stretch overflow-hidden rounded-lg border border-black/5 bg-white/50" role="group" aria-label="Document font size">
+              <button id="reportFontDecrease" type="button" onclick="adjustReportFontSize(-1)" class="w-9 border-r border-black/5 text-xs font-bold text-slate-500 hover:bg-black/5 hover:text-tech-accent disabled:cursor-not-allowed disabled:opacity-35" title="Decrease document font size" aria-label="Decrease document font size">A-</button>
+              <button id="reportFontSizeLabel" type="button" onclick="resetReportFontSize()" class="min-w-12 px-2 text-[11px] font-semibold tabular-nums text-slate-500 hover:bg-black/5 hover:text-tech-accent" title="Reset document font size" aria-label="Reset document font size">16px</button>
+              <button id="reportFontIncrease" type="button" onclick="adjustReportFontSize(1)" class="w-9 border-l border-black/5 text-sm font-bold text-slate-500 hover:bg-black/5 hover:text-tech-accent disabled:cursor-not-allowed disabled:opacity-35" title="Increase document font size" aria-label="Increase document font size">A+</button>
+            </div>
+            <button id="reportSearchButton" onclick="openReportSearch()" class="inline-flex h-9 items-center gap-2 rounded-lg border border-black/5 bg-white/50 px-3 text-xs font-semibold text-slate-500 hover:border-tech-accent/20 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-base">search</span><span class="hidden sm:inline">Find in document</span></button>
+          </div>
         </div>
 
         <h1 id="reportTitle" class="text-4xl lg:text-5xl font-extrabold text-coffee-brown leading-tight mt-6 mb-6">
@@ -1779,6 +1791,41 @@
   }
 
 
+  // ---- Document font size --------------------------------------------------
+  const REPORT_FONT_MIN = 14;
+  const REPORT_FONT_MAX = 22;
+  const REPORT_FONT_DEFAULT = 16;
+  let reportFontSize = REPORT_FONT_DEFAULT;
+
+  function clampReportFontSize(value) {
+    return Math.min(REPORT_FONT_MAX, Math.max(REPORT_FONT_MIN, value));
+  }
+
+  function applyReportFontSize(value, persist = true) {
+    reportFontSize = clampReportFontSize(Number.isFinite(value) ? value : REPORT_FONT_DEFAULT);
+    document.documentElement.style.setProperty('--report-font-size', `${reportFontSize}px`);
+    const label = document.getElementById('reportFontSizeLabel');
+    const decrease = document.getElementById('reportFontDecrease');
+    const increase = document.getElementById('reportFontIncrease');
+    if (label) label.textContent = `${reportFontSize}px`;
+    if (decrease) decrease.disabled = reportFontSize <= REPORT_FONT_MIN;
+    if (increase) increase.disabled = reportFontSize >= REPORT_FONT_MAX;
+    if (persist) localStorage.setItem('reportFontSize', String(reportFontSize));
+  }
+
+  function adjustReportFontSize(direction) {
+    applyReportFontSize(reportFontSize + (direction < 0 ? -1 : 1));
+  }
+
+  function resetReportFontSize() {
+    applyReportFontSize(REPORT_FONT_DEFAULT);
+  }
+
+  function initializeReportFontSize() {
+    const stored = Number.parseInt(localStorage.getItem('reportFontSize') || '', 10);
+    applyReportFontSize(Number.isFinite(stored) ? stored : REPORT_FONT_DEFAULT, false);
+  }
+
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', async () => {
     // Load models from pre-fetched manifest (dynamic discovery)
@@ -1788,6 +1835,7 @@
     renderSidebar();
     updateHomePage();
     updateTagFilterUI();
+    initializeReportFontSize();
     await restoreViewFromPath();
 
     document.addEventListener('click', (event) => {
