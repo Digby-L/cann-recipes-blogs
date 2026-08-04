@@ -3098,7 +3098,7 @@
     const subcategorySection = document.getElementById('scopeSubcategorySection');
     if (!categoryContainer || !subcategoryContainer || !subcategorySection) return;
 
-    const categories = Object.keys(repoModels);
+    const categories = Object.keys(repoModels).filter(category => !(repoConfig[category] || {}).flat);
     categoryContainer.innerHTML = categories.map(category => `
       <button type="button" onclick="toggleCategoryFilter('${escJs(category)}')"
         class="${selectedCategories.has(category) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-white/50 text-slate-600 border-black/5 hover:border-tech-accent/30 hover:text-tech-accent'} flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors">

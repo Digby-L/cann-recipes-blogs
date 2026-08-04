@@ -356,7 +356,7 @@
 | 页面或模块 | 使用字段 |
 |---|---|
 | 侧边栏与紧凑导航 | `sidebarTitle` |
-| 分类筛选 | `quantization`、`parallelism`、`operator`、`cannFeatures`、`hardware`、`frameworks` |
+| 分类筛选 | 场景范围仅包含 `Infer`、`Train`、`Embodie_AI`；技术属性包含 `quantization`、`parallelism`、`operator`、`cannFeatures`、`hardware`、`frameworks` |
 | 报告页属性区 | `quantization`、`parallelism`、`operator`、`cannFeatures`、`hardware`、`frameworks` |
 | 封面 | `cover` |
 
