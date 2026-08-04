@@ -28,15 +28,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Validate checked-in static content
+      - name: Build local content index
+        run: |
+          python validate_metadata.py
+          python site/build_content.py
+
+      - name: Validate generated content index
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
 
-          manifest = json.loads(Path("content/index.json").read_text(encoding="utf-8"))
+          manifest = json.loads(Path("site/content/index.json").read_text(encoding="utf-8"))
           expected = 0
-          expected_language_versions = 0
           for category in manifest.values():
             if category.get("flat"):
               category_reports = category.get("reports", [])
@@ -48,39 +52,21 @@ jobs:
                   for report in model.get("reports", [])
               ]
             expected += len(category_reports)
-            expected_language_versions += sum(
-                1 + len(report.get("translations", {}))
-                for report in category_reports
-            )
-          generated = len(list(Path("content/reports").rglob("*.json")))
-          if expected == 0 or generated != expected_language_versions:
-            raise SystemExit(
-                f"Invalid report cache: expected {expected_language_versions} language versions, generated {generated}"
-            )
-          print(f"Validated {generated} cached report language versions")
+          if expected == 0:
+            raise SystemExit("Invalid manifest: no reports discovered")
+          print(f"Validated manifest with {expected} reports")
 
-          search_index = json.loads(Path("content/search-index.json").read_text(encoding="utf-8"))
-          if len(search_index) != expected_language_versions or any(not item.get("text") for item in search_index):
+          search_index = json.loads(Path("site/content/search-index.json").read_text(encoding="utf-8"))
+          if len(search_index) < expected or any(not item.get("text") for item in search_index):
               raise SystemExit(
-                  f"Invalid search index: expected {expected_language_versions}, generated {len(search_index)}"
+                  f"Invalid search index: expected at least {expected}, generated {len(search_index)}"
               )
           print(f"Validated {len(search_index)} full-text search entries")
-
-          reports = list(Path("content/reports").rglob("*.json"))
-          referenced_assets = set()
-          for report in reports:
-              data = json.loads(report.read_text(encoding="utf-8"))
-              referenced_assets.update(data.get("images", {}).values())
-          missing = [path for path in referenced_assets if not Path(path).is_file() or Path(path).stat().st_size == 0]
-          if missing:
-              raise SystemExit(f"Missing or empty cached images: {missing[:10]}")
-          generated_assets = [path for path in Path("content/assets").rglob("*") if path.is_file()]
-          if len(generated_assets) != len(referenced_assets):
-              raise SystemExit(
-                  f"Invalid image cache: {len(referenced_assets)} referenced, {len(generated_assets)} generated"
-              )
-          print(f"Validated {len(generated_assets)} cached images")
           PY
+
+      - name: Assemble Pages artifact
+        run: |
+          cp -R infer train embodied cann_features models site/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -88,7 +74,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'site'
 
       - name: Deploy to GitHub Pages
         id: deployment
