@@ -154,7 +154,7 @@
     }
     .search-result-cover img { width: 100%; height: 100%; object-fit: contain; }
     .search-result-body { height: 16rem; overflow: hidden; }
-    .search-result-meta, .search-result-tags {
+    .search-result-meta {
       min-height: 1.5rem;
       max-height: 1.5rem;
       overflow: hidden;
@@ -212,33 +212,12 @@
       color: #695282;
       background: rgba(107, 82, 132, 0.1);
     }
-    .tag-filter-panel {
+    .scope-filter-panel {
       width: min(22rem, calc(100vw - 2rem));
       max-height: min(28rem, calc(100vh - 7rem));
       overflow-y: auto;
     }
-    .tag-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      border-radius: 999px;
-      padding: 0.28rem 0.65rem;
-      font-size: 0.72rem;
-      line-height: 1;
-      font-weight: 600;
-      color: #695282;
-      background: rgba(107, 82, 132, 0.08);
-      border: 1px solid rgba(107, 82, 132, 0.14);
-      transition: background .15s, border-color .15s, color .15s;
-    }
-    .tag-chip:hover, .tag-chip.active {
-      color: #fff;
-      background: linear-gradient(135deg, #695282, #826b9c);
-      border-color: #695282;
-    }
-    html.dark .tag-filter-panel { background: rgba(42,33,30,0.98); }
-    html.dark .tag-chip { color: #c4b5fd; background: rgba(99,102,241,0.12); border-color: rgba(165,180,252,0.2); }
-    html.dark .tag-chip:hover, html.dark .tag-chip.active { color: #fff; background: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(139,92,246,0.5)); border-color: rgba(165,180,252,0.4); }
+    html.dark .scope-filter-panel { background: rgba(42,33,30,0.98); }
     .feedback-option {
       background: linear-gradient(135deg, rgba(253, 230, 138, 0.12) 0%, rgba(191, 219, 254, 0.18) 50%, rgba(196, 181, 253, 0.12) 100%);
       backdrop-filter: blur(12px);
@@ -514,7 +493,7 @@
     <!-- Home -->
     <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
       <span class="material-symbols-outlined">home</span>
-      Home
+      <span data-i18n="home">Home</span>
     </a>
 
     <!-- Categories with expandable models.
@@ -530,7 +509,7 @@
   <div class="mt-auto pt-4">
     <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl glacier-btn font-semibold transition-colors">
       <span class="material-symbols-outlined">description</span>
-      <span class="flex-1 text-sm">Browse Docs Repo</span>
+      <span class="flex-1 text-sm" data-i18n="browseDocsRepo">Browse Docs Repo</span>
       <span class="material-symbols-outlined text-sm">open_in_new</span>
     </a>
     <div class="flex items-center gap-3 p-2 mt-4 pt-4 border-t border-black/5">
@@ -562,24 +541,33 @@
         <input id="searchInput" oninput="filterContent()" onkeydown="if(event.key==='Enter'){event.preventDefault();filterContent(true);}" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
       </div>
       <div class="relative shrink-0">
-        <button id="tagFilterButton" onclick="toggleTagFilter(event)" title="Filter by tag" aria-label="Filter reports by tag" aria-expanded="false" class="h-10 px-3 glass-card rounded-xl flex items-center gap-2 text-sm font-semibold text-coffee-brown hover:text-tech-accent transition-colors">
-          <span class="material-symbols-outlined text-lg">label</span>
-          <span class="hidden sm:inline">Tags</span>
-          <span id="tagFilterBadge" class="hidden min-w-5 h-5 px-1 rounded-full bg-tech-accent text-white text-[10px] items-center justify-center">1</span>
+        <button id="scopeFilterButton" onclick="toggleScopeFilter(event)" title="Filter by content area" aria-label="Filter reports by content area" aria-expanded="false" class="h-10 px-3 glass-card rounded-xl flex items-center gap-2 text-sm font-semibold text-coffee-brown hover:text-tech-accent transition-colors">
+          <span class="material-symbols-outlined text-lg">account_tree</span>
+          <span class="hidden sm:inline" data-i18n="filters">Filters</span>
+          <span id="scopeFilterBadge" class="hidden min-w-5 h-5 px-1 rounded-full bg-tech-accent text-white text-[10px] items-center justify-center">1</span>
         </button>
-        <div id="tagFilterPanel" class="tag-filter-panel hidden absolute right-0 top-full mt-2 z-[70] glass-card rounded-2xl p-4 shadow-xl border border-white/50">
+        <div id="scopeFilterPanel" class="scope-filter-panel hidden absolute right-0 top-full mt-2 z-[70] glass-card rounded-2xl p-4 shadow-xl border border-white/50">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <p class="text-sm font-bold text-coffee-brown">Filter by tag</p>
-              <p class="text-xs text-slate-400 mt-0.5">Combine with keywords</p>
+              <p class="text-sm font-bold text-coffee-brown" data-i18n="filterTitle">Filter content area</p>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="filterHint">Select areas, then narrow by subcategory</p>
             </div>
-            <button onclick="clearTagFilter(event)" class="text-xs font-semibold text-tech-accent hover:underline">Clear</button>
+            <button onclick="clearScopeFilter(event)" class="text-xs font-semibold text-tech-accent hover:underline" data-i18n="clear">Clear</button>
           </div>
-          <div id="tagFilterOptions" class="grid grid-cols-2 gap-2"></div>
+          <div id="scopeCategoryOptions" class="grid grid-cols-2 gap-2"></div>
+          <div id="scopeSubcategorySection" class="hidden mt-4 border-t border-black/5 pt-4">
+            <p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500" data-i18n="subcategories">Subcategories</p>
+            <div id="scopeSubcategoryOptions" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div class="mt-4 border-t border-black/10 pt-4">
+            <p class="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500" data-i18n="metadataFilters">Technical attributes</p>
+            <div id="metadataFilterOptions" class="space-y-4"></div>
+          </div>
         </div>
       </div>
     </div>
-    <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="ml-auto shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
+    <button id="languageToggle" type="button" onclick="toggleLanguage()" title="切换到中文" aria-label="Switch interface language" class="ml-auto shrink-0 h-10 min-w-12 px-3 glass-card rounded-xl flex items-center justify-center text-xs font-bold text-coffee-brown hover:text-tech-accent transition-all shadow-sm">中文</button>
+    <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
       <span id="themeIcon" class="material-symbols-outlined"></span>
     </button>
   </header>
@@ -589,7 +577,7 @@
     <section class="flex-grow space-y-8">
       <!-- Recent Reports -->
       <div class="flex items-center justify-between mb-2">
-        <h2 class="text-2xl font-bold text-coffee-brown">Recent Reports</h2>
+        <h2 class="text-2xl font-bold text-coffee-brown" data-i18n="recentReports">Recent Reports</h2>
       </div>
 
       <div class="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
@@ -701,7 +689,7 @@
     <!-- Sidebar Widgets -->
     <aside class="w-56 flex-shrink-0 space-y-6">
       <div class="glass-card rounded-3xl p-6">
-        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider">Repositories</h4>
+        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider" data-i18n="repositories">Repositories</h4>
         <div class="space-y-2">
           <a href="https://gitcode.com/cann/cann-recipes-infer" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
             <span class="repository-icon"><span class="material-symbols-outlined text-base">memory</span></span>
@@ -735,15 +723,15 @@
       <!-- Dynamic breadcrumb, rendered by renderCrumb() per drill-down level -->
       <nav id="categoryBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
 
-      <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-4">Tech Reports</h2>
+      <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-4" data-i18n="techReports">Tech Reports</h2>
 
       <div id="activeFilterBar" class="hidden mb-5 items-center justify-between gap-4 rounded-xl border border-tech-accent/15 bg-tech-accent/5 px-4 py-3">
         <div class="flex items-center gap-2 min-w-0">
           <span class="material-symbols-outlined text-tech-accent text-lg">filter_alt</span>
-          <span class="text-sm text-slate-600">Active tag:</span>
-          <span id="activeFilterTag" class="tag-chip active"></span>
+          <span class="text-sm text-slate-600" data-i18n="activeFilter">Active filter:</span>
+          <span id="activeFilterScopes" class="text-sm font-semibold text-tech-accent"></span>
         </div>
-        <button onclick="clearTagFilter(event)" class="shrink-0 text-xs font-semibold text-tech-accent hover:underline">Clear filter</button>
+        <button onclick="clearScopeFilter(event)" class="shrink-0 text-xs font-semibold text-tech-accent hover:underline" data-i18n="clearFilter">Clear filter</button>
       </div>
 
       <div id="categoryReports" class="flex flex-col gap-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
@@ -848,7 +836,7 @@
             </span>
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-base">schedule</span>
-              <span>8 min read</span>
+              <span id="reportReadingTime">1 min read</span>
             </span>
           </div>
         </div>
@@ -859,12 +847,12 @@
       </article>
       <section id="reportFeedback" class="mt-6 border-t border-tech-accent/15 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="min-w-0">
-          <h2 class="text-base font-bold text-coffee-brown">Questions or feedback?</h2>
-          <p class="text-sm text-slate-500 mt-1">Open a pre-filled Issue in the source repository.</p>
+          <h2 class="text-base font-bold text-coffee-brown" data-i18n="feedbackTitle">Questions or feedback?</h2>
+          <p class="text-sm text-slate-500 mt-1" data-i18n="feedbackHint">Open a pre-filled Issue in the source repository.</p>
         </div>
         <button onclick="openFeedbackModal()" class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glacier-btn text-sm font-semibold transition-colors">
           <span class="material-symbols-outlined text-lg">rate_review</span>
-          Feedback
+          <span data-i18n="feedback">Feedback</span>
         </button>
       </section>
       <!-- Prev / Next navigation within the same category (rendered by renderReportNav) -->
@@ -874,7 +862,7 @@
       <aside id="tocPanel" class="hidden">
         <div class="toc-inner">
           <div class="toc-header">
-            <div class="toc-title"><span class="material-symbols-outlined text-base">toc</span>目录</div>
+          <div class="toc-title"><span class="material-symbols-outlined text-base">toc</span><span data-i18n="toc">Contents</span></div>
             <button type="button" onclick="toggleTocPanel()" class="toc-close w-9 h-9 items-center justify-center rounded-lg text-slate-500 hover:bg-black/5 hover:text-tech-accent" title="Close table of contents" aria-label="Close table of contents"><span class="material-symbols-outlined text-xl">close</span></button>
           </div>
           <nav id="tocList" class="toc-list"></nav>
@@ -887,7 +875,7 @@
     <div class="w-full max-w-2xl rounded-2xl p-6 shadow-2xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(245,240,255,0.88) 100%); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(107,82,132,0.06);">
       <div class="flex items-start justify-between gap-4 mb-5">
         <div>
-          <h2 id="feedbackModalTitle" class="text-xl font-bold text-coffee-brown">Send feedback</h2>
+          <h2 id="feedbackModalTitle" class="text-xl font-bold text-coffee-brown" data-i18n="sendFeedback">Send feedback</h2>
           <p id="feedbackRepoLabel" class="text-sm text-slate-500 mt-1"></p>
         </div>
         <button onclick="closeFeedbackModal()" title="Close" aria-label="Close feedback dialog" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:bg-black/5 hover:text-coffee-brown transition-colors">
@@ -895,10 +883,10 @@
         </button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button onclick="openIssue('correction')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">edit_note</span><span><span class="block text-sm font-bold text-coffee-brown">Content correction</span><span class="block text-xs text-slate-500 mt-1">Typos, incorrect data, or code errors</span></span></button>
-        <button onclick="openIssue('bug')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">bug_report</span><span><span class="block text-sm font-bold text-coffee-brown">Bug report</span><span class="block text-xs text-slate-500 mt-1">Rendering, image, or broken-link issues</span></span></button>
-        <button onclick="openIssue('suggestion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">lightbulb</span><span><span class="block text-sm font-bold text-coffee-brown">Feature suggestion</span><span class="block text-xs text-slate-500 mt-1">Ideas to improve the content or experience</span></span></button>
-        <button onclick="openIssue('discussion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">forum</span><span><span class="block text-sm font-bold text-coffee-brown">Technical discussion</span><span class="block text-xs text-slate-500 mt-1">Questions about the report's approach</span></span></button>
+        <button onclick="openIssue('correction')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">edit_note</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="contentCorrection">Content correction</span><span class="block text-xs text-slate-500 mt-1" data-i18n="contentCorrectionHint">Typos, incorrect data, or code errors</span></span></button>
+        <button onclick="openIssue('bug')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">bug_report</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="bugReport">Bug report</span><span class="block text-xs text-slate-500 mt-1" data-i18n="bugReportHint">Rendering, image, or broken-link issues</span></span></button>
+        <button onclick="openIssue('suggestion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">lightbulb</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="featureSuggestion">Feature suggestion</span><span class="block text-xs text-slate-500 mt-1" data-i18n="featureSuggestionHint">Ideas to improve the content or experience</span></span></button>
+        <button onclick="openIssue('discussion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">forum</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="technicalDiscussion">Technical discussion</span><span class="block text-xs text-slate-500 mt-1" data-i18n="technicalDiscussionHint">Questions about the report's approach</span></span></button>
       </div>
     </div>
   </div>
@@ -932,6 +920,91 @@
       `<a href="${href}"${title ? ` title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
     marked.setOptions({ renderer: r, breaks: true, gfm: true });
   })();
+
+  const i18n = {
+    en: {
+      home: 'Home', repositories: 'Repositories', browseDocsRepo: 'Browse Docs Repo', filters: 'Filters',
+      filterTitle: 'Filter content area', filterHint: 'Select areas, then narrow by subcategory', subcategories: 'Subcategories', metadataFilters: 'Technical attributes', clear: 'Clear',
+      recentReports: 'Recent Reports', techReports: 'Tech Reports',
+      activeFilter: 'Active filter:', clearFilter: 'Clear filter',
+      feedbackTitle: 'Questions or feedback?', feedbackHint: 'Open a pre-filled Issue in the source repository.',
+      feedback: 'Feedback', toc: 'Contents', searchPlaceholder: 'Search tech reports...',
+      readTime: (minutes) => `${minutes} min read`,
+      sendFeedback: 'Send feedback', issueDestination: 'Issue destination:',
+      contentCorrection: 'Content correction', contentCorrectionHint: 'Typos, incorrect data, or code errors',
+      bugReport: 'Bug report', bugReportHint: 'Rendering, image, or broken-link issues',
+      featureSuggestion: 'Feature suggestion', featureSuggestionHint: 'Ideas to improve the content or experience',
+      technicalDiscussion: 'Technical discussion', technicalDiscussionHint: "Questions about the report's approach",
+      languageButton: '中文', languageTitle: '切换到中文', loading: 'Loading content...',
+      englishUnavailable: 'This document does not have an English version yet. The Chinese version is shown below.',
+      loadFailed: 'Could not load content directly.', sourceUnavailable: 'GitCode is temporarily unavailable. You can open the source document directly.',
+      openGitCode: 'Open in GitCode', noReport: 'Report not available.'
+    },
+    zh: {
+      home: '首页', repositories: '仓库', browseDocsRepo: '浏览文档仓库', filters: '筛选',
+      filterTitle: '筛选内容范围', filterHint: '先选大类，再按子类缩小范围', subcategories: '子类', metadataFilters: '技术属性', clear: '清除',
+      recentReports: '最新文档', techReports: '技术文档',
+      activeFilter: '当前筛选：', clearFilter: '清除筛选',
+      feedbackTitle: '有疑问或建议？', feedbackHint: '前往源仓库提交预填充的 Issue。',
+      feedback: '反馈', toc: '目录', searchPlaceholder: '搜索技术文档...',
+      readTime: (minutes) => `预计阅读 ${minutes} 分钟`,
+      sendFeedback: '提交反馈', issueDestination: 'Issue 提交仓库：',
+      contentCorrection: '内容纠错', contentCorrectionHint: '错别字、数据错误或代码问题',
+      bugReport: '问题报告', bugReportHint: '渲染、图片或链接失效问题',
+      featureSuggestion: '功能建议', featureSuggestionHint: '改进内容或阅读体验的建议',
+      technicalDiscussion: '技术讨论', technicalDiscussionHint: '针对文档技术方案提出问题或讨论',
+      languageButton: 'EN', languageTitle: 'Switch to English', loading: '正在加载文档...',
+      englishUnavailable: '该文档暂未提供英文版本，以下继续显示中文内容。',
+      loadFailed: '无法直接加载文档内容。', sourceUnavailable: 'GitCode 暂时不可用，可直接打开源文档。',
+      openGitCode: '在 GitCode 中打开', noReport: '暂无可用文档。'
+    }
+  };
+  let currentLanguage = localStorage.getItem('uiLanguage') === 'zh' ? 'zh' : 'en';
+  let currentReportView = null;
+
+  function t(key) {
+    return i18n[currentLanguage]?.[key] || i18n.en[key] || key;
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = currentLanguage === 'zh' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      element.textContent = t(element.dataset.i18n);
+    });
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = t('searchPlaceholder');
+    const toggle = document.getElementById('languageToggle');
+    if (toggle) {
+      toggle.textContent = t('languageButton');
+      toggle.title = t('languageTitle');
+      toggle.setAttribute('aria-label', t('languageTitle'));
+    }
+    const feedbackRepoLabel = document.getElementById('feedbackRepoLabel');
+    if (feedbackRepoLabel && currentFeedbackReport) {
+      feedbackRepoLabel.textContent = `${t('issueDestination')} ${currentFeedbackReport.sourceRepo}`;
+    }
+  }
+
+  async function setLanguage(language) {
+    if (!i18n[language]) return;
+    currentLanguage = language;
+    localStorage.setItem('uiLanguage', language);
+    applyLanguage();
+    renderSidebar();
+    updateHomePage();
+    updateScopeFilterUI();
+    if (currentReportView) {
+      const { category, model, file } = currentReportView;
+      const report = findReport(category, model, file);
+      await showReport(category, model, reportTitle(report), file, false);
+    } else {
+      await restoreViewFromPath();
+    }
+  }
+
+  function toggleLanguage() {
+    setLanguage(currentLanguage === 'en' ? 'zh' : 'en');
+  }
 
   // Repo configuration per category. This is only a FALLBACK — the real config
   // (ns, repo, branch, basePath, flat) is loaded from content/index.json by
@@ -1157,9 +1230,11 @@
     const modelsSource = actualRepoModels[category] || repoModels[category];
     const modelData = modelsSource.find(m => m.name === model);
     if (!modelData || !reportFile) return null;
+    const report = findReport(category, model, reportFile);
+    const translatedPath = reportLanguageVariant(report)?.sourcePath;
     const docPath = modelData.docPath || '';
-    // Handle empty docPath (flat structure)
-    const fullPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+    // Handle empty docPath (flat structure) and optional language variants.
+    const fullPath = translatedPath || (docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`);
     return `https://gitcode.com/${config.ns}/${config.repo}/blob/${config.branch}/${fullPath}`;
   }
 
@@ -1212,7 +1287,7 @@
           if (response.ok) {
             const entries = await response.json();
             fullTextSearchIndex = new Map(entries.map(entry => [
-              `${entry.category}\u0000${entry.model}\u0000${entry.file}`,
+              `${entry.category}\u0000${entry.model}\u0000${entry.file}\u0000${entry.language || 'zh'}`,
               entry.text || ''
             ]));
             return fullTextSearchIndex;
@@ -1232,10 +1307,11 @@
     return fullTextSearchIndexPromise;
   }
 
-  function getPrefetchedReportPath(category, model, reportFile) {
+  function getPrefetchedReportPath(category, model, reportFile, language = currentLanguage) {
     const safeCategory = category.replace(/ /g, '_');
     const safeModel = model.replace(/ /g, '_');
-    return `content/reports/${safeCategory}/${safeModel}/${reportFile.replace(/\.md$/i, '.json')}`;
+    const languageDir = language === 'en' ? 'en/' : '';
+    return `content/reports/${safeCategory}/${safeModel}/${languageDir}${reportFile.replace(/\.md$/i, '.json')}`;
   }
 
   // Fetch file content. Deployed static sites use the same-origin build cache;
@@ -1248,15 +1324,19 @@
     console.log('modelData', modelData, 'source:', actualRepoModels[category] ? 'actual' : 'hardcoded');
     if (!modelData || !reportFile) return null;
 
+    const report = findReport(category, model, reportFile);
+    const variant = reportLanguageVariant(report);
     const docPath = modelData.docPath || '';
-    const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
-    const baseDir  = docPath ? `${config.basePath}/${docPath}` : config.basePath;
+    const defaultPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+    const filePath = variant?.sourcePath || defaultPath;
+    const baseDir = filePath.includes('/') ? filePath.slice(0, filePath.lastIndexOf('/')) : '';
+    const contentLanguage = variant ? currentLanguage : 'zh';
     console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
 
     const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(location.hostname);
     if (!isLocalDevelopment) {
       try {
-        const cacheUrl = getPrefetchedReportPath(category, model, reportFile);
+        const cacheUrl = getPrefetchedReportPath(category, model, reportFile, contentLanguage);
         const cachedResponse = await fetch(cacheUrl);
         if (cachedResponse.ok) {
           const cachedReport = await cachedResponse.json();
@@ -1577,14 +1657,29 @@
   // Re-render the sidebar <nav> from the current repoModels data.
   // Prefer the document's H1 title; retain the filename as a legacy fallback.
   function reportTitle(report) {
+    const translation = reportLanguageVariant(report);
+    if (translation?.title) return translation.title;
     if (report && typeof report === 'object' && report.title) return report.title;
     const filename = typeof report === 'string' ? report : (report && report.file ? report.file : '');
     return filename.replace(/\.md$/i, '');
   }
 
   function reportSidebarTitle(report) {
+    const translation = reportLanguageVariant(report);
+    if (translation?.sidebarTitle) return translation.sidebarTitle;
     if (report && typeof report === 'object' && report.sidebarTitle) return report.sidebarTitle;
     return reportTitle(report);
+  }
+
+  function reportLanguageVariant(report, language = currentLanguage) {
+    if (!report || typeof report !== 'object' || language === 'zh') return null;
+    return report.translations?.[language] || null;
+  }
+
+  function findReport(category, model, file) {
+    const modelData = (actualRepoModels[category] || repoModels[category] || [])
+      .find(item => item.name === model);
+    return modelData?.reports?.find(item => reportFile(item) === file) || null;
   }
 
   // Get the filename string. Object support keeps older manifests compatible.
@@ -1594,24 +1689,6 @@
 
   function decodeURIComponentSafe(value) {
     try { return decodeURIComponent(value); } catch (e) { return value; }
-  }
-
-  const tagRules = [
-    ['Prefill', ['prefill']], ['Decode', ['decode']], ['RL', ['_rl_', 'rl_train']],
-    ['Pretrain', ['pre_train', 'pretrain']], ['Inference', ['inference', '_infer_']],
-    ['Operator', ['operator', 'ascendc', 'pypto', 'tilelang', 'autofuse', '_mhc_']],
-    ['Communication', ['shmem', 'communication']], ['Evaluation', ['evaluation', 'accurancy', 'accuracy']],
-    ['3D Vision', ['gaussian', 'hunyuan3d', 'vggt', '3d']], ['Image Generation', ['hunyuan_image']],
-    ['Recommendation', ['hstu']], ['Manipulation', ['gr00t', 'pi0']],
-    ['Navigation', ['alpamayo']], ['World Model', ['cosmos']], ['Load Balance', ['load_balance']],
-    ['Culling', ['culling']], ['Graph', ['graph']], ['Prefetch', ['prefetch']],
-    ['Multi Stream', ['multi_stream']], ['Super Kernel', ['super_kernel']],
-  ];
-
-  function reportTags(report) {
-    if (report && typeof report === 'object' && Array.isArray(report.tags)) return report.tags;
-    const filename = reportFile(report).toLowerCase();
-    return tagRules.filter(([, needles]) => needles.some(needle => filename.includes(needle))).map(([tag]) => tag);
   }
 
   function reportCover(report) {
@@ -1654,13 +1731,6 @@
     </div>`;
   }
 
-  function renderTagChips(tags, compact = false) {
-    return tags.map(tag => `
-      <button type="button" onclick="event.stopPropagation(); selectTag('${escJs(tag)}')"
-        class="tag-chip ${activeTag === tag ? 'active' : ''} ${compact ? 'text-[10px]' : ''}">${escHtml(tag)}</button>
-    `).join('');
-  }
-
   // Format a model name (underscore-separated) into a readable label.
   function formatModelName(name) {
     return name.replace(/[_-]/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g, l => l.toUpperCase());
@@ -1695,7 +1765,7 @@
     let html = `
       <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
         <span class="material-symbols-outlined">home</span>
-        Home
+        ${escHtml(t('home'))}
       </a>
       <div class="mt-4 space-y-1">
     `;
@@ -1826,21 +1896,41 @@
     applyReportFontSize(Number.isFinite(stored) ? stored : REPORT_FONT_DEFAULT, false);
   }
 
+  // Estimate reading time from the rendered report instead of using a fixed
+  // placeholder. Chinese text is counted by characters; Latin text by words;
+  // code receives a slower per-line reading allowance.
+  function updateReportReadingTime() {
+    const content = document.getElementById('reportContent');
+    const output = document.getElementById('reportReadingTime');
+    if (!content || !output) return;
+    const clone = content.cloneNode(true);
+    clone.querySelectorAll('script, style, .mermaid').forEach(node => node.remove());
+    const text = clone.textContent || '';
+    const cjk = (text.match(/[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g) || []).length;
+    const latinWords = (text.replace(/[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g, ' ')
+      .match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g) || []).length;
+    const codeLines = [...content.querySelectorAll('pre code')]
+      .reduce((total, code) => total + (code.textContent || '').split(/\r?\n/).filter(line => line.trim()).length, 0);
+    const minutes = Math.max(1, Math.ceil(cjk / 380 + latinWords / 210 + codeLines / 45));
+    output.textContent = typeof t('readTime') === 'function' ? t('readTime')(minutes) : `${minutes} min read`;
+  }
+
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', async () => {
+    applyLanguage();
     // Load models from pre-fetched manifest (dynamic discovery)
     const loaded = await loadModelsFromManifest();
     console.log('Manifest loaded:', loaded, 'models:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length}`));
 
     renderSidebar();
     updateHomePage();
-    updateTagFilterUI();
+    updateScopeFilterUI();
     initializeReportFontSize();
     await restoreViewFromPath();
 
     document.addEventListener('click', (event) => {
-      const panel = document.getElementById('tagFilterPanel');
-      const button = document.getElementById('tagFilterButton');
+      const panel = document.getElementById('scopeFilterPanel');
+      const button = document.getElementById('scopeFilterButton');
       if (panel && !panel.contains(event.target) && !button?.contains(event.target)) {
         panel.classList.add('hidden');
         button?.setAttribute('aria-expanded', 'false');
@@ -1858,8 +1948,8 @@
           closeReportSearch();
           return;
         }
-        document.getElementById('tagFilterPanel')?.classList.add('hidden');
-        document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
+        document.getElementById('scopeFilterPanel')?.classList.add('hidden');
+        document.getElementById('scopeFilterButton')?.setAttribute('aria-expanded', 'false');
         closeFeedbackModal();
       }
     });
@@ -2314,6 +2404,7 @@
     if (updateHistory) updateRoute([]);
     closeFeedbackModal();
     currentFeedbackReport = null;
+    currentReportView = null;
     document.getElementById('categoryView').classList.remove('search-results-view');
     document.getElementById('homeView').classList.remove('hidden');
     document.getElementById('categoryView').classList.add('hidden');
@@ -2334,6 +2425,7 @@
   function openCategoryView() {
     closeFeedbackModal();
     currentFeedbackReport = null;
+    currentReportView = null;
     document.getElementById('homeView').classList.add('hidden');
     document.getElementById('categoryView').classList.remove('hidden');
     document.getElementById('reportView').classList.add('hidden');
@@ -2349,7 +2441,7 @@
   // crumbs. A crumb without onclick is the current (non-clickable) level.
   function renderCrumbInto(targetId, crumbs) {
     const sep = '<span class="material-symbols-outlined text-xs">chevron_right</span>';
-    const home = `<a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1"><span class="material-symbols-outlined text-base">home</span>Home</a>`;
+    const home = `<a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1"><span class="material-symbols-outlined text-base">home</span>${escHtml(t('home'))}</a>`;
     const parts = crumbs.map(c => c.onclick
       ? `<a onclick="${c.onclick}" class="hover:text-tech-accent transition-colors cursor-pointer">${escHtml(c.label)}</a>`
       : `<span class="text-slate-900 font-medium">${escHtml(c.label)}</span>`);
@@ -2359,7 +2451,7 @@
   const renderReportCrumb = (crumbs) => renderCrumbInto('reportBreadcrumb', crumbs);
 
   // A generic clickable drill-down card. `meta` is the small uppercase tag line.
-  function drillCard(onclick, icon, title, meta, desc, tags = [], coverContext = null) {
+  function drillCard(onclick, icon, title, meta, desc, coverContext = null) {
     return `
       <article onclick="${onclick}" class="glass-card rounded-2xl p-5 flex items-start gap-4 group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
         ${coverContext
@@ -2369,7 +2461,6 @@
           ${meta ? `<div class="text-[10px] font-bold uppercase tracking-wider text-tech-accent mb-1">${escHtml(meta)}</div>` : ''}
           <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(title)}</h3>
           <p class="text-slate-500 text-xs leading-relaxed line-clamp-2">${escHtml(desc)}</p>
-          ${tags.length ? `<div class="flex flex-wrap gap-1.5 mt-3">${renderTagChips(tags, true)}</div>` : ''}
         </div>
       </article>`;
   }
@@ -2393,7 +2484,7 @@
       grid.innerHTML = reports.length
         ? reports.map(r => drillCard(
             `showReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
-            'article', reportTitle(r), category, `Technical report in ${category}.`, reportTags(r),
+            'article', reportTitle(r), category, `Technical report in ${category}.`,
             { report: r, category, model: model.name })).join('')
         : '<p class="text-slate-500">No reports available yet.</p>';
       return;
@@ -2455,7 +2546,7 @@
     grid.innerHTML = reports.length
       ? reports.map(r => drillCard(
           `showReport('${escJs(category)}','${escJs(modelName)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
-          'article', reportTitle(r), modelName, `Technical report for ${modelName}.`, reportTags(r),
+          'article', reportTitle(r), modelName, `Technical report for ${modelName}.`,
           { report: r, category, model: modelName })).join('')
       : '<p class="text-slate-500">No reports available yet.</p>';
   }
@@ -2493,7 +2584,7 @@
     if (!currentFeedbackReport) return;
     const modal = document.getElementById('feedbackModal');
     const repoLabel = document.getElementById('feedbackRepoLabel');
-    if (repoLabel) repoLabel.textContent = `Issue destination: ${currentFeedbackReport.sourceRepo}`;
+    if (repoLabel) repoLabel.textContent = `${t('issueDestination')} ${currentFeedbackReport.sourceRepo}`;
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
     document.body.style.overflow = 'hidden';
@@ -2539,6 +2630,9 @@
 
   async function showReport(category, model, title, reportFile = '', updateHistory = true) {
     console.log('showReport', { category, model, title, reportFile });
+    const selectedReport = reportFile ? findReport(category, model, reportFile) : null;
+    title = selectedReport ? reportTitle(selectedReport) : title;
+    currentReportView = reportFile ? { category, model, file: reportFile } : null;
     closeReportSearch(false);
     if (updateHistory && reportFile) {
       const modelData = (actualRepoModels[category] || repoModels[category] || []).find(item => item.name === model);
@@ -2584,7 +2678,8 @@
       const modelData = modelsSource.find(m => m.name === model);
       if (config && modelData) {
         const docPath = modelData.docPath || '';
-        const filePath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+        const defaultPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+        const filePath = reportLanguageVariant(selectedReport)?.sourcePath || defaultPath;
         fetchLatestCommitDate(config.ns, config.repo, config.branch, filePath).then(date => {
           document.getElementById('reportDate').textContent = date || 'N/A';
         });
@@ -2600,7 +2695,7 @@
     reportContent.innerHTML = `
       <div class="flex items-center justify-center py-12">
         <span class="material-symbols-outlined text-4xl text-tech-accent animate-spin">sync</span>
-        <span class="ml-3 text-slate-500">Loading content...</span>
+        <span class="ml-3 text-slate-500">${t('loading')}</span>
       </div>
     `;
     // Reset prev/next nav + progress bar; both re-show only on successful load.
@@ -2614,8 +2709,16 @@
         const content = await fetchReportContent(category, model, reportFile);
         if (content) {
           reportContent.innerHTML = content;
+          if (currentLanguage === 'en' && !reportLanguageVariant(selectedReport)) {
+            reportContent.insertAdjacentHTML('afterbegin', `
+              <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+                ${escHtml(t('englishUnavailable'))}
+              </div>
+            `);
+          }
           enhanceCodeBlocks(reportContent);
           enhanceReportTables(reportContent);
+          updateReportReadingTime();
           buildTOC();
           renderReportNav(category, model, reportFile);
           showReadingProgress();
@@ -2624,17 +2727,17 @@
           reportContent.innerHTML = `
             <div class="text-center py-12 glass-card rounded-2xl">
               <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
-              <p class="text-slate-500 mb-2">Could not load content directly.</p>
-              <p class="text-slate-400 text-sm mb-4">GitCode is temporarily unavailable. You can open the source document directly.</p>
+              <p class="text-slate-500 mb-2">${t('loadFailed')}</p>
+              <p class="text-slate-400 text-sm mb-4">${t('sourceUnavailable')}</p>
               <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 glacier-btn rounded-xl transition-colors">
-                <span>Open in GitCode</span>
+                <span>${t('openGitCode')}</span>
                 <span class="material-symbols-outlined text-sm">open_in_new</span>
               </a>
             </div>
           `;
         }
       } else {
-        reportContent.innerHTML = '<p class="text-slate-500">Report not available.</p>';
+        reportContent.innerHTML = `<p class="text-slate-500">${t('noReport')}</p>`;
       }
     } else {
       // No report file - show message or link to repo
@@ -2659,7 +2762,49 @@
 
   // Track last search term to allow re-triggering the same search
   let lastSearchTerm = '';
-  let activeTag = '';
+  const selectedCategories = new Set();
+  const selectedSubcategories = new Set();
+  const metadataFilterFields = [
+    'quantization', 'parallelism', 'operator', 'cannFeatures', 'hardware', 'frameworks'
+  ];
+  const selectedMetadataFilters = new Map(
+    metadataFilterFields.map(field => [field, new Set()])
+  );
+  const metadataFilterLabels = {
+    quantization: { en: 'Quantization', zh: '量化' },
+    parallelism: { en: 'Parallelism', zh: '并行切分' },
+    operator: { en: 'Operator', zh: '算子方式' },
+    cannFeatures: { en: 'CANN Features', zh: 'CANN 特性' },
+    hardware: { en: 'Hardware', zh: '硬件' },
+    frameworks: { en: 'Frameworks', zh: '框架' },
+  };
+  const metadataValueLabels = {
+    'data-parallel': { en: 'Data parallel', zh: '数据并行' },
+    'tensor-parallel': { en: 'Tensor parallel', zh: '张量并行' },
+    'pipeline-parallel': { en: 'Pipeline parallel', zh: '流水并行' },
+    'context-parallel': { en: 'Context parallel', zh: '上下文并行' },
+    'sequence-parallel': { en: 'Sequence parallel', zh: '序列并行' },
+    'expert-parallel': { en: 'Expert parallel', zh: '专家并行' },
+    'multi-stream': { en: 'MultiStream', zh: '多流并行' },
+    superkernel: { en: 'SuperKernel', zh: '超级内核' },
+    quantization: { en: 'Quantization', zh: '量化' },
+    parallelism: { en: 'Parallelism', zh: '并行执行' },
+    prefetch: { en: 'Prefetch', zh: '数据预取' },
+    npugraph: { en: 'NPUGraph', zh: '图模式' },
+    ascendc: { en: 'AscendC', zh: 'AscendC' },
+    tilelang: { en: 'TileLang', zh: 'TileLang' },
+    pypto: { en: 'PyPTO', zh: 'PyPTO' },
+    autofuse: { en: 'AutoFuse', zh: 'AutoFuse' },
+    'atlas-a2': { en: 'Atlas A2', zh: 'Atlas A2' },
+    'atlas-a3': { en: 'Atlas A3', zh: 'Atlas A3' },
+    'ascend-950': { en: 'Ascend 950', zh: 'Ascend 950' },
+    'cann-recipes': { en: 'CANN Recipes', zh: 'CANN Recipes' },
+    mindspore: { en: 'MindSpore', zh: 'MindSpore' },
+    torchtitan: { en: 'TorchTitan', zh: 'TorchTitan' },
+    megatron: { en: 'Megatron', zh: 'Megatron' },
+    onnx: { en: 'ONNX', zh: 'ONNX' },
+    atb: { en: 'ATB', zh: 'ATB' },
+  };
   let searchRequestId = 0;
 
   function splitSearchTerms(value) {
@@ -2694,71 +2839,192 @@
     return html + escHtml(value.slice(cursor));
   }
 
-  function collectTagCounts() {
-    const counts = new Map();
-    for (const category of Object.keys(repoModels)) {
-      for (const model of (actualRepoModels[category] || repoModels[category] || [])) {
-        for (const report of (model.reports || [])) {
-          for (const tag of reportTags(report)) counts.set(tag, (counts.get(tag) || 0) + 1);
-        }
+  function scopeKey(category, subcategory) {
+    return `${category}\u0000${subcategory}`;
+  }
+
+  function categoryLabel(category) {
+    return category === 'Embodie_AI' ? 'Embodied AI' : category;
+  }
+
+  function metadataFieldLabel(field) {
+    return metadataFilterLabels[field]?.[currentLanguage] || field;
+  }
+
+  function metadataValueLabel(value) {
+    if (value === 'none') return currentLanguage === 'zh' ? '无' : 'None';
+    return metadataValueLabels[value]?.[currentLanguage] || formatModelName(value);
+  }
+
+  function selectedSubcategoriesFor(category) {
+    const prefix = `${category}\u0000`;
+    return [...selectedSubcategories]
+      .filter(key => key.startsWith(prefix))
+      .map(key => key.slice(prefix.length));
+  }
+
+  function categoryReportCount(category, subcategory = null) {
+    return (actualRepoModels[category] || repoModels[category] || []).reduce(
+      (total, model) => total + (!subcategory || model.subcategory === subcategory ? model.reports.length : 0), 0
+    );
+  }
+
+  function allReports() {
+    const reports = [];
+    for (const [category, models] of Object.entries(actualRepoModels || repoModels)) {
+      for (const model of models || []) {
+        for (const report of model.reports || []) reports.push({ category, model, report });
       }
     }
-    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    return reports;
   }
 
-  function renderTagFilterOptions() {
-    const container = document.getElementById('tagFilterOptions');
-    if (!container) return;
-    const tags = collectTagCounts();
-    container.innerHTML = tags.length ? tags.map(([tag, count]) => `
-      <button type="button" onclick="selectTag('${escJs(tag)}')"
-        class="${activeTag === tag ? 'bg-tech-accent text-white border-tech-accent' : 'bg-white/50 text-slate-600 border-black/5 hover:border-tech-accent/30 hover:text-tech-accent'} flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors">
-        <span class="text-xs font-semibold">${escHtml(tag)}</span>
-        <span class="text-[10px] opacity-70">${count}</span>
-      </button>`).join('') : '<p class="col-span-2 py-4 text-center text-xs text-slate-400">No tags available</p>';
-  }
-
-  function updateTagFilterUI() {
-    const badge = document.getElementById('tagFilterBadge');
-    const button = document.getElementById('tagFilterButton');
-    if (badge) {
-      badge.classList.toggle('hidden', !activeTag);
-      badge.classList.toggle('flex', !!activeTag);
+  function metadataValues(field) {
+    const values = new Set();
+    for (const { report } of allReports()) {
+      for (const value of report?.[field] || []) values.add(value);
     }
-    if (button) button.classList.toggle('text-tech-accent', !!activeTag);
-    renderTagFilterOptions();
+    return [...values].sort((left, right) => {
+      if (left === 'none') return 1;
+      if (right === 'none') return -1;
+      return metadataValueLabel(left).localeCompare(metadataValueLabel(right));
+    });
   }
 
-  function toggleTagFilter(event) {
+  function renderMetadataFilterOptions() {
+    const container = document.getElementById('metadataFilterOptions');
+    if (!container) return;
+    container.innerHTML = metadataFilterFields.map(field => {
+      const selected = selectedMetadataFilters.get(field) || new Set();
+      const options = metadataValues(field);
+      return `
+        <section>
+          <p class="mb-2 text-xs font-semibold text-slate-600">${escHtml(metadataFieldLabel(field))}</p>
+          <div class="flex flex-wrap gap-2">
+            ${options.map(value => `<button type="button" onclick="toggleMetadataFilter('${escJs(field)}','${escJs(value)}')"
+              class="${selected.has(value) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-slate-100/80 text-slate-600 hover:bg-tech-accent/10 hover:text-tech-accent'} rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold transition-colors">
+              ${escHtml(metadataValueLabel(value))}
+            </button>`).join('')}
+          </div>
+        </section>`;
+    }).join('');
+  }
+
+  function renderScopeFilterOptions() {
+    const categoryContainer = document.getElementById('scopeCategoryOptions');
+    const subcategoryContainer = document.getElementById('scopeSubcategoryOptions');
+    const subcategorySection = document.getElementById('scopeSubcategorySection');
+    if (!categoryContainer || !subcategoryContainer || !subcategorySection) return;
+
+    const categories = Object.keys(repoModels);
+    categoryContainer.innerHTML = categories.map(category => `
+      <button type="button" onclick="toggleCategoryFilter('${escJs(category)}')"
+        class="${selectedCategories.has(category) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-white/50 text-slate-600 border-black/5 hover:border-tech-accent/30 hover:text-tech-accent'} flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors">
+        <span class="text-xs font-semibold">${escHtml(categoryLabel(category))}</span>
+        <span class="text-[10px] opacity-70">${categoryReportCount(category)}</span>
+      </button>`).join('');
+
+    const subcategories = [];
+    for (const category of selectedCategories) {
+      for (const subcategory of (getSubcategories(category) || [])) {
+        subcategories.push({ category, name: subcategory.name });
+      }
+    }
+    subcategorySection.classList.toggle('hidden', subcategories.length === 0);
+    subcategoryContainer.innerHTML = subcategories.map(({ category, name }) => {
+      const key = scopeKey(category, name);
+      return `<button type="button" onclick="toggleSubcategoryFilter('${escJs(category)}','${escJs(name)}')"
+        class="${selectedSubcategories.has(key) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-slate-100/80 text-slate-600 hover:bg-tech-accent/10 hover:text-tech-accent'} rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">
+        ${escHtml(categoryLabel(category))} / ${escHtml(formatModelName(name))}
+      </button>`;
+    }).join('');
+    renderMetadataFilterOptions();
+  }
+
+  function updateScopeFilterUI() {
+    const metadataSelectionCount = [...selectedMetadataFilters.values()]
+      .reduce((total, selected) => total + selected.size, 0);
+    const selectionCount = selectedCategories.size + selectedSubcategories.size + metadataSelectionCount;
+    const badge = document.getElementById('scopeFilterBadge');
+    const button = document.getElementById('scopeFilterButton');
+    if (badge) {
+      badge.textContent = String(selectionCount);
+      badge.classList.toggle('hidden', selectionCount === 0);
+      badge.classList.toggle('flex', selectionCount > 0);
+    }
+    if (button) button.classList.toggle('text-tech-accent', selectionCount > 0);
+    renderScopeFilterOptions();
+  }
+
+  function toggleScopeFilter(event) {
     event?.stopPropagation();
-    const panel = document.getElementById('tagFilterPanel');
-    const button = document.getElementById('tagFilterButton');
+    const panel = document.getElementById('scopeFilterPanel');
+    const button = document.getElementById('scopeFilterButton');
     if (!panel) return;
     const willOpen = panel.classList.contains('hidden');
     panel.classList.toggle('hidden', !willOpen);
     button?.setAttribute('aria-expanded', String(willOpen));
   }
 
-  function selectTag(tag) {
-    activeTag = activeTag === tag ? '' : tag;
-    updateTagFilterUI();
-    document.getElementById('tagFilterPanel')?.classList.add('hidden');
-    document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
+  function toggleCategoryFilter(category) {
+    if (selectedCategories.has(category)) {
+      selectedCategories.delete(category);
+      for (const key of [...selectedSubcategories]) {
+        if (key.startsWith(`${category}\u0000`)) selectedSubcategories.delete(key);
+      }
+    } else {
+      selectedCategories.add(category);
+    }
+    updateScopeFilterUI();
     filterContent(true);
   }
 
-  function clearTagFilter(event) {
-    event?.stopPropagation();
-    activeTag = '';
-    updateTagFilterUI();
-    document.getElementById('tagFilterPanel')?.classList.add('hidden');
-    document.getElementById('tagFilterButton')?.setAttribute('aria-expanded', 'false');
+  function toggleSubcategoryFilter(category, subcategory) {
+    const key = scopeKey(category, subcategory);
+    if (selectedSubcategories.has(key)) selectedSubcategories.delete(key);
+    else selectedSubcategories.add(key);
+    updateScopeFilterUI();
     filterContent(true);
+  }
+
+  function toggleMetadataFilter(field, value) {
+    const selected = selectedMetadataFilters.get(field);
+    if (!selected) return;
+    if (selected.has(value)) selected.delete(value);
+    else selected.add(value);
+    updateScopeFilterUI();
+    filterContent(true);
+  }
+
+  function clearScopeFilter(event) {
+    event?.stopPropagation();
+    selectedCategories.clear();
+    selectedSubcategories.clear();
+    for (const selected of selectedMetadataFilters.values()) selected.clear();
+    updateScopeFilterUI();
+    document.getElementById('scopeFilterPanel')?.classList.add('hidden');
+    document.getElementById('scopeFilterButton')?.setAttribute('aria-expanded', 'false');
+    filterContent(true);
+  }
+
+  function matchesScope(category, subcategory) {
+    if (!selectedCategories.size) return true;
+    if (!selectedCategories.has(category)) return false;
+    const selected = selectedSubcategoriesFor(category);
+    return selected.length === 0 || selected.includes(subcategory || '');
+  }
+
+  function matchesMetadataFilters(report) {
+    return metadataFilterFields.every(field => {
+      const selected = selectedMetadataFilters.get(field);
+      return !selected?.size || (report?.[field] || []).some(value => selected.has(value));
+    });
   }
 
   async function filterContent(forceRefresh = false) {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!searchTerm && !activeTag) {
+    const hasMetadataFilter = [...selectedMetadataFilters.values()].some(selected => selected.size > 0);
+    if (!searchTerm && selectedCategories.size === 0 && !hasMetadataFilter) {
       lastSearchTerm = '';
       showHome();
       return;
@@ -2783,27 +3049,28 @@
         if (model.reports.length > 0) {
           for (const report of model.reports) {
             const reportTitleStr = reportTitle(report);
-            const tags = reportTags(report);
             const metadata = `${category} ${model.name} ${model.subcategory || ''} ${reportTitleStr}`;
             const metadataMatch = !searchTerm || includesAllTerms(metadata, terms);
-            const body = searchIndex.get(`${category}\u0000${model.name}\u0000${reportFile(report)}`) || '';
+            const searchKey = `${category}\u0000${model.name}\u0000${reportFile(report)}`;
+            const body = searchIndex.get(`${searchKey}\u0000${currentLanguage}`)
+              || searchIndex.get(`${searchKey}\u0000zh`) || '';
             const bodyMatch = !!searchTerm && includesAllTerms(body, terms);
             const keywordMatch = !searchTerm || metadataMatch || bodyMatch;
-            const tagMatch = !activeTag || tags.includes(activeTag);
-            if (keywordMatch && tagMatch) {
+            const scopeMatch = matchesScope(category, model.subcategory || '');
+            const metadataFilterMatch = matchesMetadataFilters(report);
+            if (keywordMatch && scopeMatch && metadataFilterMatch) {
               results.push({
                 category,
                 model: model.name,
                 subcategory: model.subcategory || '',
                 report,
                 reportTitle: reportTitleStr,
-                tags,
                 snippet: bodyMatch ? fullTextSnippet(body, terms) : '',
                 score: metadataMatch ? 2 : 1
               });
             }
           }
-        } else if (!activeTag && (modelMatch || category.toLowerCase().includes(searchTerm))) {
+        } else if (!hasMetadataFilter && selectedCategories.size === 0 && (modelMatch || category.toLowerCase().includes(searchTerm))) {
           results.push({ category, model: model.name, subcategory: model.subcategory || '', report: null, reportTitle: formatModelName(model.name) });
         }
       }
@@ -2820,18 +3087,28 @@
     hideReadingProgress();
 
     renderCrumb([{ label: 'Search Results' }]);
+    const selectedScopes = [...selectedCategories].map(category => {
+      const subs = selectedSubcategoriesFor(category);
+      return subs.length ? `${categoryLabel(category)} / ${subs.map(formatModelName).join(', ')}` : categoryLabel(category);
+    });
+    const selectedMetadata = metadataFilterFields.flatMap(field =>
+      [...(selectedMetadataFilters.get(field) || [])]
+        .map(value => `${metadataFieldLabel(field)}: ${metadataValueLabel(value)}`)
+    );
     const headerEl = document.getElementById('categoryHeader');
     if (headerEl) {
-      const criteria = [searchTerm ? `"${searchTerm}"` : '', activeTag ? `#${activeTag}` : ''].filter(Boolean).join(' + ');
+      const criteria = [searchTerm ? `"${searchTerm}"` : '', ...selectedScopes, ...selectedMetadata]
+        .filter(Boolean).join(' + ');
       headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for ${criteria}`;
     }
     results.sort((left, right) => (right.score || 0) - (left.score || 0));
 
     const filterBar = document.getElementById('activeFilterBar');
     if (filterBar) {
-      filterBar.classList.toggle('hidden', !activeTag);
-      filterBar.classList.toggle('flex', !!activeTag);
-      document.getElementById('activeFilterTag').textContent = activeTag;
+      const hasActiveFilter = selectedCategories.size > 0 || hasMetadataFilter;
+      filterBar.classList.toggle('hidden', !hasActiveFilter);
+      filterBar.classList.toggle('flex', hasActiveFilter);
+      document.getElementById('activeFilterScopes').textContent = [...selectedScopes, ...selectedMetadata].join(' + ');
     }
 
     const reportsContainer = document.getElementById('categoryReports');
@@ -2854,7 +3131,6 @@
                 ${r.subcategory ? `<span class="px-2 py-0.5 text-slate-500 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.subcategory))}</span>` : ''}
                 <span class="px-2 py-0.5 text-coffee-brown/60 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.model))}</span>
               </div>
-              ${r.tags.length ? `<div class="search-result-tags flex flex-nowrap gap-1.5 mb-1.5">${renderTagChips(r.tags, true)}</div>` : '<div class="search-result-tags mb-1.5"></div>'}
               <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
               <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
               <p class="search-result-description text-slate-500 text-sm leading-relaxed">${r.snippet ? highlightSearchTerms(r.snippet, terms) : `Technical report in the ${escHtml(formatModelName(r.model))} series.`}</p>

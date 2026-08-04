@@ -16,25 +16,73 @@
                 "file": "deepseek_r1_decode_optimization.md",
                 "title": "基于Atlas A3集群的DeepSeek-R1模型decode阶段推理性能优化",
                 "sidebarTitle": "Decode阶段推理优化",
-                "tags": [
-                  "Decode"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_r1/deepseek_r1_decode_optimization.md"
+                "sourcePath": "infer/llm/deepseek_r1/deepseek_r1_decode_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "w8a8"
+                ],
+                "parallelism": [
+                  "expert-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "superkernel",
+                  "multi-stream"
+                ],
+                "hardware": [
+                  "atlas-a3"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_r1/deepseek_r1_prefill_optimization.md",
+                  "cann_features/super_kernel.md"
+                ]
               },
               {
                 "file": "deepseek_r1_prefill_optimization.md",
                 "title": "基于Atlas A3集群的DeepSeek-R1模型prefill阶段推理性能优化实践",
                 "sidebarTitle": "Prefill阶段推理优化",
-                "tags": [
-                  "Prefill"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_r1/figures/image_attention_dp.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_r1/deepseek_r1_prefill_optimization.md"
+                "sourcePath": "infer/llm/deepseek_r1/deepseek_r1_prefill_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "tensor-parallel",
+                  "sequence-parallel",
+                  "expert-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "parallelism"
+                ],
+                "hardware": [
+                  "atlas-a3"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_r1/deepseek_r1_decode_optimization.md"
+                ]
               }
             ]
           },
@@ -46,85 +94,255 @@
                 "file": "deepseek_v4_ascendc_operator_guide.md",
                 "title": "NPU DeepSeek-V4 Ascend C 融合算子优化",
                 "sidebarTitle": "Ascend C融合算子优化",
-                "tags": [
-                  "Operator"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/aicore.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_ascendc_operator_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_ascendc_operator_guide.md",
+                "translations": {},
+                "quantization": [
+                  "fp8"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "ascendc"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "atlas-a3",
+                  "ascend-950"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md"
+                ]
               },
               {
                 "file": "deepseek_v4_autofuse_guide.md",
                 "title": "NPU DeepSeek-V4 AutoFuse算子自动融合优化",
                 "sidebarTitle": "自动融合算子优化",
-                "tags": [
-                  "Operator"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/image.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_autofuse_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_autofuse_guide.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "autofuse"
+                ],
+                "cannFeatures": [
+                  "npugraph"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md"
+                ]
               },
               {
                 "file": "deepseek_v4_inference_guide.md",
                 "title": "NPU DeepSeek-V4推理优化实践",
                 "sidebarTitle": "大模型推理优化实践",
-                "tags": [
-                  "Inference"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/model_architecture.jpg",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md",
+                "translations": {},
+                "quantization": [
+                  "int8",
+                  "int4",
+                  "fp8",
+                  "w8a8",
+                  "w4a8"
+                ],
+                "parallelism": [
+                  "data-parallel",
+                  "tensor-parallel",
+                  "context-parallel",
+                  "expert-parallel"
+                ],
+                "operator": [
+                  "tilelang",
+                  "pypto"
+                ],
+                "cannFeatures": [
+                  "quantization",
+                  "multi-stream",
+                  "superkernel",
+                  "parallelism"
+                ],
+                "hardware": [
+                  "atlas-a3",
+                  "ascend-950"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_ascendc_operator_guide.md",
+                  "infer/llm/deepseek_v4/deepseek_v4_shmem_guide.md"
+                ]
               },
               {
                 "file": "deepseek_v4_mHC_guide.md",
                 "title": "融合算子mHC实现",
                 "sidebarTitle": "mHC融合算子实现",
-                "tags": [
-                  "Operator"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/mHC-fuseops.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_mHC_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_mHC_guide.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "ascendc"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md"
+                ]
               },
               {
                 "file": "deepseek_v4_pypto_operator_guide.md",
                 "title": "NPU DeepSeek-V4模型 PyPTO 融合算子优化",
                 "sidebarTitle": "PyPTO融合算子优化",
-                "tags": [
-                  "Operator"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/hc_pre_swimlane.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_pypto_operator_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_pypto_operator_guide.md",
+                "translations": {},
+                "quantization": [
+                  "fp8"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "pypto"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_ascendc_operator_guide.md",
+                  "infer/llm/deepseek_v4/deepseek_v4_tilelang_operator_guide.md"
+                ]
               },
               {
                 "file": "deepseek_v4_shmem_guide.md",
                 "title": "NPU DeepSeek SHMEM通信优化实践",
                 "sidebarTitle": "SHMEM通信优化",
-                "tags": [
-                  "Communication"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/shmem-interface.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_shmem_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_shmem_guide.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "multi-stream"
+                ],
+                "hardware": [
+                  "atlas-a3"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_inference_guide.md"
+                ]
               },
               {
                 "file": "deepseek_v4_tilelang_operator_guide.md",
                 "title": "NPU DeepSeek-V4 TileLang算子开发实践",
                 "sidebarTitle": "TileLang算子开发",
-                "tags": [
-                  "Operator"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/llm/deepseek_v4/figures/tl_autosync.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_tilelang_operator_guide.md"
+                "sourcePath": "infer/llm/deepseek_v4/deepseek_v4_tilelang_operator_guide.md",
+                "translations": {},
+                "quantization": [
+                  "int8"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "tilelang"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "infer/llm/deepseek_v4/deepseek_v4_pypto_operator_guide.md",
+                  "infer/llm/deepseek_v4/deepseek_v4_ascendc_operator_guide.md"
+                ]
               }
             ]
           }
@@ -141,13 +359,33 @@
                 "file": "hunyuan_image_3_optimization.md",
                 "title": "NPU HunyuanImage-3.0模型推理优化实践",
                 "sidebarTitle": "图像生成推理优化",
-                "tags": [
-                  "Image Generation"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/multimodal/hunyuan_image_3_0/figures/attention_tp.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/multimodal/hunyuan_image_3_0/hunyuan_image_3_optimization.md"
+                "sourcePath": "infer/multimodal/hunyuan_image_3_0/hunyuan_image_3_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "tensor-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "parallelism"
+                ],
+                "hardware": [
+                  "atlas-a2",
+                  "atlas-a3"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -164,13 +402,33 @@
                 "file": "hstu_optimization.md",
                 "title": "NPU HSTU 模型推理优化实践",
                 "sidebarTitle": "推荐推理性能优化",
-                "tags": [
-                  "Recommendation"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/infer/recommendation/hstu/figures/embedding_tp.png",
                 "sourceRepo": "cann-recipes-infer",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-infer",
-                "sourcePath": "infer/recommendation/hstu/hstu_optimization.md"
+                "sourcePath": "infer/recommendation/hstu/hstu_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "data-parallel",
+                  "tensor-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "parallelism"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -195,13 +453,35 @@
                 "file": "deepseek-v32_pre_train_optimization.md",
                 "title": "CANN+TorchTitan: DeepSeek-V3.2 32k长序列预训练昇腾优化实践",
                 "sidebarTitle": "长序列预训练优化",
-                "tags": [
-                  "Pretrain"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/train/pretrain/deepseek_v3_2/figures/deepseek_v32/EP_optimize_before.png",
                 "sourceRepo": "cann-recipes-train",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-train",
-                "sourcePath": "train/pretrain/deepseek_v3_2/deepseek-v32_pre_train_optimization.md"
+                "sourcePath": "train/pretrain/deepseek_v3_2/deepseek-v32_pre_train_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "fp8"
+                ],
+                "parallelism": [
+                  "context-parallel",
+                  "pipeline-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "parallelism",
+                  "prefetch"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes",
+                  "torchtitan"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -218,13 +498,38 @@
                 "file": "qwen3_235B_32k_longseq_rl_train_optimization.md",
                 "title": "Qwen3-235B 32K长序列RL训练优化实践",
                 "sidebarTitle": "长序列强化学习训练",
-                "tags": [
-                  "RL"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/train/rl/qwen3_235b/figures/qwen3_figures/image1.png",
                 "sourceRepo": "cann-recipes-train",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-train",
-                "sourcePath": "train/rl/qwen3_235b/qwen3_235B_32k_longseq_rl_train_optimization.md"
+                "sourcePath": "train/rl/qwen3_235b/qwen3_235B_32k_longseq_rl_train_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "bf16"
+                ],
+                "parallelism": [
+                  "data-parallel",
+                  "tensor-parallel",
+                  "pipeline-parallel",
+                  "context-parallel",
+                  "expert-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "parallelism",
+                  "npugraph"
+                ],
+                "hardware": [
+                  "atlas-a3"
+                ],
+                "frameworks": [
+                  "cann-recipes",
+                  "megatron"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -249,51 +554,138 @@
                 "file": "gaussian_splatting_alpha_blending_optimization.md",
                 "title": "NPU 3DGS Ascend C Alpha Blending 算子优化",
                 "sidebarTitle": "混合算子性能优化",
-                "tags": [
-                  "3D Vision"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/embodied/3d_vision/gaussian_splatting/figure/pipeline.jpeg",
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_alpha_blending_optimization.md"
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_alpha_blending_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "ascendc"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/3d_vision/gaussian_splatting/gaussian_splatting_load_balance_optimization.md",
+                  "embodied/3d_vision/gaussian_splatting/gaussian_splatting_precise_intersection_optimization.md"
+                ]
               },
               {
                 "file": "gaussian_splatting_culling_optimization.md",
                 "title": "视锥剔除优化",
                 "sidebarTitle": "三维视锥剔除",
-                "tags": [
-                  "3D Vision",
-                  "Culling"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/embodied/3d_vision/gaussian_splatting/figure/gaussian_filter_tiling.png",
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_culling_optimization.md"
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_culling_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "ascendc"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/3d_vision/gaussian_splatting/gaussian_splatting_alpha_blending_optimization.md"
+                ]
               },
               {
                 "file": "gaussian_splatting_load_balance_optimization.md",
                 "title": "NPU 3DGS Ascend C Alpha Blending算子负载均衡策略",
                 "sidebarTitle": "混合算子负载均衡",
-                "tags": [
-                  "3D Vision",
-                  "Load Balance"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/embodied/3d_vision/gaussian_splatting/figure/gaussian_tile_origin.png",
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_load_balance_optimization.md"
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_load_balance_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "ascendc"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/3d_vision/gaussian_splatting/gaussian_splatting_alpha_blending_optimization.md"
+                ]
               },
               {
                 "file": "gaussian_splatting_precise_intersection_optimization.md",
                 "title": "NPU 3DGS Ascend C Precise Intersection算子优化",
                 "sidebarTitle": "精确相交算子优化",
-                "tags": [
-                  "3D Vision"
-                ],
                 "coverImage": "content/assets/cann-recipes-docs/embodied/3d_vision/gaussian_splatting/figure/gs_algorithm.png",
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_precise_intersection_optimization.md"
+                "sourcePath": "embodied/3d_vision/gaussian_splatting/gaussian_splatting_precise_intersection_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "ascendc"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/3d_vision/gaussian_splatting/gaussian_splatting_alpha_blending_optimization.md"
+                ]
               }
             ]
           },
@@ -305,13 +697,32 @@
                 "file": "Hunyuan3D_optimization.md",
                 "title": "NPU Hunyuan3D 模型推理优化实践",
                 "sidebarTitle": "三维生成推理优化",
-                "tags": [
-                  "3D Vision"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/hunyuan3d/Hunyuan3D_optimization.md"
+                "sourcePath": "embodied/3d_vision/hunyuan3d/Hunyuan3D_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "npugraph"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           },
@@ -323,26 +734,71 @@
                 "file": "vggt_accurancy_evaluation.md",
                 "title": "VGGT精度测量",
                 "sidebarTitle": "视觉模型精度评测",
-                "tags": [
-                  "Evaluation",
-                  "3D Vision"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/vggt/vggt_accurancy_evaluation.md"
+                "sourcePath": "embodied/3d_vision/vggt/vggt_accurancy_evaluation.md",
+                "translations": {},
+                "quantization": [
+                  "bf16",
+                  "w8a8"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/3d_vision/vggt/vggt_optimization.md"
+                ]
               },
               {
                 "file": "vggt_optimization.md",
                 "title": "NPU VGGT 模型推理优化实践",
                 "sidebarTitle": "视觉模型推理优化",
-                "tags": [
-                  "3D Vision"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/3d_vision/vggt/vggt_optimization.md"
+                "sourcePath": "embodied/3d_vision/vggt/vggt_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "bf16",
+                  "w8a8"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "atlas-a2"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/3d_vision/vggt/vggt_accurancy_evaluation.md"
+                ]
               }
             ]
           }
@@ -359,13 +815,32 @@
                 "file": "gr00t_n1_6_optimization.md",
                 "title": "GR00T N1.6机器人VLA大模型推理昇腾迁移-性能优化说明",
                 "sidebarTitle": "机器人VLA推理优化",
-                "tags": [
-                  "Manipulation"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/manipulation/gr00t_n1_6/gr00t_n1_6_optimization.md"
+                "sourcePath": "embodied/manipulation/gr00t_n1_6/gr00t_n1_6_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           },
@@ -377,27 +852,70 @@
                 "file": "pi0_infer_with_om_optimization.md",
                 "title": "Pi0 OM 推理 Debug 经验",
                 "sidebarTitle": "OM推理问题排查",
-                "tags": [
-                  "Inference",
-                  "Manipulation"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/manipulation/pi0/pi0_infer_with_om_optimization.md"
+                "sourcePath": "embodied/manipulation/pi0/pi0_infer_with_om_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes",
+                  "onnx"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/manipulation/pi0/pi0_infer_with_torch_optimization.md"
+                ]
               },
               {
                 "file": "pi0_infer_with_torch_optimization.md",
                 "title": "pi0机器人VLA大模型推理昇腾迁移-性能优化说明",
                 "sidebarTitle": "VLA推理迁移与优化",
-                "tags": [
-                  "Inference",
-                  "Manipulation"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/manipulation/pi0/pi0_infer_with_torch_optimization.md"
+                "sourcePath": "embodied/manipulation/pi0/pi0_infer_with_torch_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                },
+                "relatedReports": [
+                  "embodied/manipulation/pi0/pi0_infer_with_om_optimization.md"
+                ]
               }
             ]
           }
@@ -414,13 +932,32 @@
                 "file": "alpamayo_r1_optimization.md",
                 "title": "Alpamayo-R1 智驾VLA模型推理昇腾迁移-性能优化说明",
                 "sidebarTitle": "智驾VLA推理迁移优化",
-                "tags": [
-                  "Navigation"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/navigation/alpamayo_r1/alpamayo_r1_optimization.md"
+                "sourcePath": "embodied/navigation/alpamayo_r1/alpamayo_r1_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "none"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "none"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -437,13 +974,33 @@
                 "file": "cosmos_optimization.md",
                 "title": "Cosmos 昇腾 NPU 多卡并行优化说明",
                 "sidebarTitle": "世界模型多卡并行",
-                "tags": [
-                  "World Model"
-                ],
                 "coverImage": null,
                 "sourceRepo": "cann-recipes-embodied-ai",
                 "sourceRepoUrl": "https://gitcode.com/cann/cann-recipes-embodied-ai",
-                "sourcePath": "embodied/world_model/cosmos/cosmos_optimization.md"
+                "sourcePath": "embodied/world_model/cosmos/cosmos_optimization.md",
+                "translations": {},
+                "quantization": [
+                  "none"
+                ],
+                "parallelism": [
+                  "context-parallel"
+                ],
+                "operator": [
+                  "none"
+                ],
+                "cannFeatures": [
+                  "parallelism"
+                ],
+                "hardware": [
+                  "none"
+                ],
+                "frameworks": [
+                  "cann-recipes",
+                  "megatron"
+                ],
+                "cover": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -462,49 +1019,141 @@
         "file": "multi_stream_principles.md",
         "title": "NPU 多流原理",
         "sidebarTitle": "多流并行原理",
-        "tags": [
-          "Multi Stream"
-        ],
         "coverImage": null,
         "sourceRepo": "cann-recipes-docs",
         "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
-        "sourcePath": "cann_features/multi_stream_principles.md"
+        "sourcePath": "cann_features/multi_stream_principles.md",
+        "translations": {},
+        "quantization": [
+          "none"
+        ],
+        "parallelism": [
+          "none"
+        ],
+        "operator": [
+          "none"
+        ],
+        "cannFeatures": [
+          "multi-stream"
+        ],
+        "hardware": [
+          "none"
+        ],
+        "frameworks": [
+          "cann-recipes"
+        ],
+        "cover": {
+          "type": "auto"
+        },
+        "relatedReports": [
+          "cann_features/prefetch_principles.md",
+          "cann_features/npu_graph_optimization.md"
+        ]
       },
       {
         "file": "npu_graph_optimization.md",
         "title": "NPU 图模式优化及其在 cann-recipes-infer 框架下的使能",
         "sidebarTitle": "图模式优化与使能",
-        "tags": [
-          "Graph"
-        ],
         "coverImage": null,
         "sourceRepo": "cann-recipes-docs",
         "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
-        "sourcePath": "cann_features/npu_graph_optimization.md"
+        "sourcePath": "cann_features/npu_graph_optimization.md",
+        "translations": {},
+        "quantization": [
+          "none"
+        ],
+        "parallelism": [
+          "none"
+        ],
+        "operator": [
+          "none"
+        ],
+        "cannFeatures": [
+          "npugraph"
+        ],
+        "hardware": [
+          "none"
+        ],
+        "frameworks": [
+          "cann-recipes"
+        ],
+        "cover": {
+          "type": "auto"
+        },
+        "relatedReports": [
+          "cann_features/super_kernel.md",
+          "cann_features/multi_stream_principles.md"
+        ]
       },
       {
         "file": "prefetch_principles.md",
         "title": "NPU Prefetch 原理",
         "sidebarTitle": "数据预取原理",
-        "tags": [
-          "Prefetch"
-        ],
         "coverImage": null,
         "sourceRepo": "cann-recipes-docs",
         "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
-        "sourcePath": "cann_features/prefetch_principles.md"
+        "sourcePath": "cann_features/prefetch_principles.md",
+        "translations": {},
+        "quantization": [
+          "none"
+        ],
+        "parallelism": [
+          "none"
+        ],
+        "operator": [
+          "none"
+        ],
+        "cannFeatures": [
+          "prefetch"
+        ],
+        "hardware": [
+          "none"
+        ],
+        "frameworks": [
+          "cann-recipes"
+        ],
+        "cover": {
+          "type": "auto"
+        },
+        "relatedReports": [
+          "cann_features/multi_stream_principles.md",
+          "cann_features/npu_graph_optimization.md"
+        ]
       },
       {
         "file": "super_kernel.md",
         "title": "SuperKernel",
         "sidebarTitle": "SuperKernel优化原理",
-        "tags": [
-          "Super Kernel"
-        ],
         "coverImage": "content/assets/cann-recipes-docs/models/longcat-flash/figures/superkernel.png",
         "sourceRepo": "cann-recipes-docs",
         "sourceRepoUrl": "https://gitcode.com/tian-ccs/cann-recipes-docs",
-        "sourcePath": "cann_features/super_kernel.md"
+        "sourcePath": "cann_features/super_kernel.md",
+        "translations": {},
+        "quantization": [
+          "none"
+        ],
+        "parallelism": [
+          "none"
+        ],
+        "operator": [
+          "none"
+        ],
+        "cannFeatures": [
+          "superkernel"
+        ],
+        "hardware": [
+          "none"
+        ],
+        "frameworks": [
+          "cann-recipes"
+        ],
+        "cover": {
+          "type": "auto"
+        },
+        "relatedReports": [
+          "cann_features/npu_graph_optimization.md",
+          "infer/llm/deepseek_r1/deepseek_r1_decode_optimization.md"
+        ]
       }
     ]
   }

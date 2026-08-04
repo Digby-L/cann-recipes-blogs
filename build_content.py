@@ -33,6 +33,7 @@ GITCODE_RAW = f"https://gitcode.com/{NS}"
 # unlike the web-api files endpoint which caps binaries at ~8 KB (is_limited).
 GITCODE_RAW_CDN = f"https://raw.gitcode.com/{NS}"
 PREFETCH_REPORTS = os.environ.get("PREFETCH_REPORTS") == "1"
+REFRESH_REPORTS_ONLY = os.environ.get("REFRESH_REPORTS_ONLY") == "1"
 DOCS_SNAPSHOT_DIR = os.path.abspath(os.environ["DOCS_SNAPSHOT_DIR"]) if os.environ.get("DOCS_SNAPSHOT_DIR") else None
 REPO_SNAPSHOT_DIRS = {
     repo: os.path.abspath(os.environ[env_name])
@@ -99,28 +100,16 @@ IMAGE_SOURCE_FALLBACKS = {
     ),
 }
 
-TAG_RULES = [
-    ("Prefill", ("prefill",)),
-    ("Decode", ("decode",)),
-    ("RL", ("_rl_", "rl_train")),
-    ("Pretrain", ("pre_train", "pretrain")),
-    ("Inference", ("inference", "_infer_")),
-    ("Operator", ("operator", "ascendc", "pypto", "tilelang", "autofuse", "_mhc_")),
-    ("Communication", ("shmem", "communication")),
-    ("Evaluation", ("evaluation", "accurancy", "accuracy")),
-    ("3D Vision", ("gaussian", "hunyuan3d", "vggt", "3d")),
-    ("Image Generation", ("hunyuan_image",)),
-    ("Recommendation", ("hstu",)),
-    ("Manipulation", ("gr00t", "pi0")),
-    ("Navigation", ("alpamayo",)),
-    ("World Model", ("cosmos",)),
-    ("Load Balance", ("load_balance",)),
-    ("Culling", ("culling",)),
-    ("Graph", ("graph",)),
-    ("Prefetch", ("prefetch",)),
-    ("Multi Stream", ("multi_stream",)),
-    ("Super Kernel", ("super_kernel",)),
-]
+STATIC_METADATA_FIELDS = (
+    "quantization",
+    "parallelism",
+    "operator",
+    "cannFeatures",
+    "hardware",
+    "frameworks",
+    "cover",
+    "relatedReports",
+)
 
 
 def extract_first_image(markdown_content):
@@ -181,9 +170,7 @@ def extract_search_text(markdown_content):
 
 
 def report_entry(category, model_key, repo, branch, doc_dir, report_file):
-    """Build tags and a remote cover URL without persisting report content."""
-    normalized = report_file.lower()
-    tags = [tag for tag, needles in TAG_RULES if any(needle in normalized for needle in needles)]
+    """Build report metadata and a remote cover URL without persisting report content."""
     file_path = f"{doc_dir}/{report_file}" if doc_dir else report_file
     markdown = fetch_file(repo, branch, file_path)
     title = extract_document_title(markdown or "", report_file)
@@ -195,6 +182,7 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
         "category": category,
         "model": model_key,
         "file": report_file,
+        "language": "zh",
         "sourcePath": file_path,
         "text": extract_search_text(markdown or ""),
     })
@@ -207,9 +195,74 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
         report_dir = os.path.join(REPORT_CACHE_DIR, safe_category, safe_model)
         os.makedirs(report_dir, exist_ok=True)
         report_path = os.path.join(report_dir, report_file.replace(".md", ".json"))
-        images = cache_report_images(markdown, repo, branch, doc_dir)
+        if REFRESH_REPORTS_ONLY:
+            try:
+                with open(report_path, "r", encoding="utf-8") as report_input:
+                    images = json.load(report_input).get("images", {})
+            except (OSError, json.JSONDecodeError) as error:
+                raise RuntimeError(
+                    f"Cannot refresh report text without its cached image map: {report_path}"
+                ) from error
+        else:
+            images = cache_report_images(markdown, repo, branch, doc_dir)
         with open(report_path, "w", encoding="utf-8") as report_output:
             json.dump({"markdown": markdown, "images": images}, report_output, ensure_ascii=False)
+
+    # English documents mirror the Chinese filename under a sibling en/
+    # directory, for example cann_features/en/multi_stream_principles.md.
+    english_doc_dir = f"{doc_dir}/en" if doc_dir else "en"
+    english_path = f"{english_doc_dir}/{report_file}"
+    english_snapshot = snapshot_file_path(repo, english_path)
+    english_markdown = (
+        fetch_file(repo, branch, english_path)
+        if not DOCS_SNAPSHOT_DIR or english_snapshot
+        else None
+    )
+    translations = {}
+    if english_markdown:
+        english_metadata = extract_document_metadata(english_markdown)
+        english_title = extract_document_title(english_markdown, report_file)
+        english_sidebar_title = english_metadata.get("sidebarTitle")
+        if not isinstance(english_sidebar_title, str) or not english_sidebar_title.strip():
+            english_sidebar_title = english_title
+        translations["en"] = {
+            "title": english_title,
+            "sidebarTitle": english_sidebar_title.strip(),
+            "sourcePath": english_path,
+        }
+        SEARCH_INDEX.append({
+            "category": category,
+            "model": model_key,
+            "file": report_file,
+            "language": "en",
+            "sourcePath": english_path,
+            "text": extract_search_text(english_markdown),
+        })
+        if PREFETCH_REPORTS:
+            english_report_dir = os.path.join(report_dir, "en")
+            os.makedirs(english_report_dir, exist_ok=True)
+            english_report_path = os.path.join(
+                english_report_dir, report_file.replace(".md", ".json")
+            )
+            if REFRESH_REPORTS_ONLY:
+                try:
+                    with open(english_report_path, "r", encoding="utf-8") as report_input:
+                        english_images = json.load(report_input).get("images", {})
+                except (OSError, json.JSONDecodeError) as error:
+                    raise RuntimeError(
+                        "Cannot refresh English report text without its cached image map: "
+                        f"{english_report_path}"
+                    ) from error
+            else:
+                english_images = cache_report_images(
+                    english_markdown, repo, branch, english_doc_dir
+                )
+            with open(english_report_path, "w", encoding="utf-8") as report_output:
+                json.dump(
+                    {"markdown": english_markdown, "images": english_images},
+                    report_output,
+                    ensure_ascii=False,
+                )
     image_src = extract_first_image(markdown) if markdown else None
     cover_image = None
     if image_src:
@@ -221,16 +274,20 @@ def report_entry(category, model_key, repo, branch, doc_dir, report_file):
             resolved = resolve_path(doc_dir, urllib.parse.unquote(image_src.split("?", 1)[0]))
             cover_image = f"{GITCODE_RAW_CDN}/{repo}/raw/{branch}/{resolved}"
     source_repo, source_repo_url = SOURCE_REPOS[category]
-    return {
+    entry = {
         "file": report_file,
         "title": title,
         "sidebarTitle": sidebar_title.strip(),
-        "tags": tags,
         "coverImage": cover_image,
         "sourceRepo": source_repo,
         "sourceRepoUrl": source_repo_url,
         "sourcePath": file_path,
+        "translations": translations,
     }
+    # Keep document-owned metadata in the manifest for filtering, report
+    # attributes, cover selection, and related-report navigation.
+    entry.update({field: metadata.get(field) for field in STATIC_METADATA_FIELDS if field in metadata})
+    return entry
 
 
 def api_request(url):

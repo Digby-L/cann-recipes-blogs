@@ -36,24 +36,33 @@ jobs:
 
           manifest = json.loads(Path("content/index.json").read_text(encoding="utf-8"))
           expected = 0
+          expected_language_versions = 0
           for category in manifest.values():
-              if category.get("flat"):
-                  expected += len(category.get("reports", []))
-              else:
-                  expected += sum(
-                      len(model.get("reports", []))
-                      for subcategory in category.get("subcategories", [])
-                      for model in subcategory.get("models", [])
-                  )
+            if category.get("flat"):
+              category_reports = category.get("reports", [])
+            else:
+              category_reports = [
+                  report
+                  for subcategory in category.get("subcategories", [])
+                  for model in subcategory.get("models", [])
+                  for report in model.get("reports", [])
+              ]
+            expected += len(category_reports)
+            expected_language_versions += sum(
+                1 + len(report.get("translations", {}))
+                for report in category_reports
+            )
           generated = len(list(Path("content/reports").rglob("*.json")))
-          if expected == 0 or generated != expected:
-              raise SystemExit(f"Invalid report cache: expected {expected}, generated {generated}")
-          print(f"Validated {generated} cached reports")
+          if expected == 0 or generated != expected_language_versions:
+            raise SystemExit(
+                f"Invalid report cache: expected {expected_language_versions} language versions, generated {generated}"
+            )
+          print(f"Validated {generated} cached report language versions")
 
           search_index = json.loads(Path("content/search-index.json").read_text(encoding="utf-8"))
-          if len(search_index) != expected or any(not item.get("text") for item in search_index):
+          if len(search_index) != expected_language_versions or any(not item.get("text") for item in search_index):
               raise SystemExit(
-                  f"Invalid search index: expected {expected}, generated {len(search_index)}"
+                  f"Invalid search index: expected {expected_language_versions}, generated {len(search_index)}"
               )
           print(f"Validated {len(search_index)} full-text search entries")
 
