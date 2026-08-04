@@ -1,0 +1,3459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CANN RECIPES BLOGS</title>
+  <script>
+    // Keep relative content/assets stable when the visible URL is a deep route.
+    const isGitHubPages = location.hostname.endsWith('.github.io');
+    const githubProject = isGitHubPages
+      ? location.pathname.split('/').filter(Boolean)[0]
+      : '';
+    const localSitePrefix = (!isGitHubPages && location.pathname.split('/').filter(Boolean)[0] === 'site')
+      ? '/site/'
+      : '/';
+    window.SITE_BASE_PATH = githubProject ? `/${githubProject}/` : localSitePrefix;
+    window.DOCS_BASE_PATH = window.SITE_BASE_PATH === '/site/' ? '/' : window.SITE_BASE_PATH;
+    const redirectedRoute = sessionStorage.getItem('spaRedirectRoute');
+    if (redirectedRoute) {
+      sessionStorage.removeItem('spaRedirectRoute');
+      if (redirectedRoute.startsWith(window.SITE_BASE_PATH)) {
+        history.replaceState({}, '', redirectedRoute);
+      }
+    }
+    const siteBase = document.createElement('base');
+    siteBase.href = window.SITE_BASE_PATH;
+    document.head.appendChild(siteBase);
+  </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    // Apply the saved theme BEFORE render to avoid a light-mode flash.
+    // Dark styling is driven by html.dark CSS overrides in the <style> block
+    // below, so no Tailwind darkMode config is needed.
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script type="module">
+    // Mermaid diagrams. Loaded as an ESM module and exposed on window so
+    // enhanceCodeBlocks() can render ```mermaid``` fences into SVG on demand.
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+    window.mermaid = mermaid;
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'beige-light': '#f7f9fc',
+            'coffee-brown': '#191c1e',
+            'tech-accent': '#695282',
+            'glass-bg': 'rgba(255, 255, 255, 0.7)',
+            'primary': '#695282',
+            'accent-purple': '#6b5284',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(157, 132, 183, 0.1);
+      box-shadow: 0 8px 32px rgba(107, 82, 132, 0.06);
+    }
+    .glass-sidebar {
+      background: rgba(247, 249, 252, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(107, 82, 132, 0.08);
+    }
+    .logo-gradient {
+      background: linear-gradient(135deg, #6b5284 0%, #4a5fa8 100%);
+    }
+    .fused-gradient {
+      background: linear-gradient(135deg, #e0e7ff 0%, #efdbff 100%);
+    }
+    .glacier-btn {
+      background: linear-gradient(135deg, rgba(224, 231, 255, 0.35) 0%, rgba(196, 181, 253, 0.25) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(107, 82, 132, 0.12);
+      color: #695282;
+      box-shadow: 0 4px 16px rgba(107, 82, 132, 0.05);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .glacier-btn:hover {
+      background: linear-gradient(135deg, rgba(224, 231, 255, 0.5) 0%, rgba(196, 181, 253, 0.4) 100%);
+      border-color: rgba(107, 82, 132, 0.22);
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(107, 82, 132, 0.1);
+    }
+    .glacier-btn:active { transform: scale(0.95); }
+    html.dark .glacier-btn {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border-color: rgba(196, 181, 253, 0.2);
+      color: #c4b5fd;
+    }
+    html.dark .glacier-btn:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0.18) 100%);
+      border-color: rgba(196, 181, 253, 0.4);
+    }
+    details[open] > summary svg.chevron {
+      transform: rotate(180deg);
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    .sidebar-hidden {
+      width: 0 !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      opacity: 0;
+      pointer-events: none;
+      flex-shrink: 1 !important;
+      border-right: none !important;
+    }
+    .content-expanded #homeView {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+    .content-expanded #reportView > div {
+      max-width: 80rem !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    .content-expanded #categoryView > div {
+      max-width: 80rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #categoryView.search-results-view > div { max-width: 80rem; }
+    .search-result-card {
+      flex-shrink: 0;
+      height: 16rem;
+      min-height: 16rem;
+      max-height: 16rem;
+    }
+    .search-result-cover {
+      width: 16rem;
+      height: 16rem;
+      min-height: 16rem;
+      max-height: 16rem;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.45);
+    }
+    .search-result-cover img { width: 100%; height: 100%; object-fit: contain; }
+    .search-result-body { height: 16rem; overflow: hidden; }
+    .search-result-meta {
+      min-height: 1.5rem;
+      max-height: 1.5rem;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .report-cover-image { object-fit: contain; background: rgba(255,255,255,0.5); }
+    .cover-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.75rem;
+      text-align: center;
+      color: #533d6b;
+      background: linear-gradient(135deg, #e0e7ff 0%, #efdbff 100%);
+    }
+    .cover-placeholder.cover-train { color: #245B48; background: linear-gradient(135deg, #dcfce7 0%, #e0e7ff 100%); }
+    .cover-placeholder.cover-embodied { color: #315C78; background: linear-gradient(135deg, #dbeafe 0%, #efdbff 100%); }
+    .cover-placeholder.cover-features { color: #4c1d95; background: linear-gradient(135deg, #efdbff 0%, #e0e7ff 100%); }
+    .search-result-title {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+      min-height: 4.35rem;
+      flex-shrink: 0;
+    }
+    .search-result-description {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+    }
+    .repository-link {
+      border: 1px solid transparent;
+    }
+    .repository-link:hover {
+      border-color: rgba(107, 82, 132, 0.16);
+      background: rgba(107, 82, 132, 0.06);
+    }
+    .repository-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      color: #695282;
+      background: rgba(107, 82, 132, 0.1);
+    }
+    .scope-filter-panel {
+      width: min(22rem, calc(100vw - 2rem));
+      max-height: min(28rem, calc(100vh - 7rem));
+      overflow: hidden;
+    }
+    .scope-filter-panel:not(.hidden) {
+      display: flex;
+      flex-direction: column;
+    }
+    .scope-filter-scroll {
+      overflow-y: auto;
+      min-height: 0;
+      padding-right: 0.25rem;
+    }
+    .scope-filter-scroll::-webkit-scrollbar { width: 6px; }
+    .scope-filter-scroll::-webkit-scrollbar-track { background: rgba(107,82,132,0.06); border-radius: 999px; }
+    .scope-filter-scroll::-webkit-scrollbar-thumb { background: rgba(107,82,132,0.3); border-radius: 999px; }
+    .scope-filter-scroll::-webkit-scrollbar-thumb:hover { background: rgba(107,82,132,0.5); }
+    .scope-filter-footer {
+      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.96));
+    }
+    html.dark .scope-filter-footer { background: linear-gradient(180deg, rgba(42,33,30,0.86), rgba(42,33,30,0.98)); }
+    html.dark .scope-filter-panel { background: rgba(42,33,30,0.98); }
+    .feedback-option {
+      background: linear-gradient(135deg, rgba(253, 230, 138, 0.12) 0%, rgba(191, 219, 254, 0.18) 50%, rgba(196, 181, 253, 0.12) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(165, 180, 252, 0.1);
+      box-shadow: 0 4px 16px rgba(107, 82, 132, 0.03);
+      transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+    }
+    .feedback-option:hover {
+      background: linear-gradient(135deg, rgba(253, 230, 138, 0.2) 0%, rgba(191, 219, 254, 0.28) 50%, rgba(196, 181, 253, 0.2) 100%);
+      border-color: rgba(165, 180, 252, 0.22);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(107, 82, 132, 0.08);
+    }
+    html.dark .feedback-option { background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(107,82,132,0.1) 100%); border-color: rgba(165,180,252,0.15); }
+    html.dark .feedback-option:hover { background: linear-gradient(135deg, rgba(99,102,241,0.22) 0%, rgba(107,82,132,0.18) 100%); border-color: rgba(165,180,252,0.35); }
+    html.dark #feedbackModal > div { background: rgba(15,23,42,0.95) !important; border-color: rgba(165,180,252,0.15) !important; }
+    @media (max-width: 640px) {
+      #categoryView.search-results-view { padding-left: 1rem; padding-right: 1rem; }
+      .search-result-card { flex-direction: column; height: auto; min-height: 0; max-height: none; }
+      .search-result-cover { width: 100%; height: auto; min-height: 0; max-height: none; aspect-ratio: 16 / 9; }
+      .search-result-body { width: 100%; height: 16rem; flex: none; }
+    }
+    #sidebar {
+      transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Custom scrollbar */
+    .overflow-y-auto::-webkit-scrollbar {
+      width: 6px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: rgba(107, 82, 132, 0.3);
+      border-radius: 3px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 82, 132, 0.5);
+    }
+    /* Report markdown content styles */
+    .report-markdown h1, .report-markdown h2, .report-markdown h3, .report-markdown h4 { color: #191c1e; font-weight: 700; line-height: 1.3; }
+    .report-markdown { font-size: var(--report-font-size, 16px); }
+    .report-markdown h1 { font-size: 1.875em; margin: 2rem 0 1rem; }
+    .report-markdown h2 { font-size: 1.5em; margin: 1.75rem 0 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+    .report-markdown h3 { font-size: 1.25em; margin: 1.5rem 0 0.5rem; }
+    .report-markdown h4 { font-size: 1.125em; margin: 1.25rem 0 0.5rem; }
+    .report-markdown p { color: #475569; line-height: 1.8; margin-bottom: 1rem; }
+    .report-markdown ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+    .report-markdown ol { list-style: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
+    .report-markdown li { color: #475569; line-height: 1.75; margin-bottom: 0.25rem; }
+    .report-markdown pre { background: #282c34; color: #abb2bf; padding: 1.25rem; border-radius: 0.75rem; margin: 1.25rem 0; overflow-x: auto; font-size: 0.875em; line-height: 1.625; position: relative; }
+    .report-markdown code { background: #f1f5f9; color: #1e293b; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.875em; font-family: ui-monospace, monospace; }
+    .report-markdown pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    .report-markdown pre code.hljs { background: none; padding: 0; }
+    .code-block-wrapper { position: relative; }
+    .code-copy-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(255,255,255,0.15); color: #abb2bf; border: none; padding: 0.3rem 0.6rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem; transition: background 0.2s, color 0.2s; z-index: 10; }
+    .code-copy-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
+    .code-copy-btn.copied { background: rgba(72, 187, 120, 0.3); color: #48bb78; }
+    .report-markdown img { max-width: 100%; border-radius: 0.75rem; margin: 1.25rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: block; }
+    .mermaid-diagram { margin: 1.25rem 0; padding: 1rem; background: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow-x: auto; text-align: center; }
+    .mermaid-diagram svg { max-width: 100%; height: auto; }
+    .report-markdown a { color: #695282; }
+    .report-markdown a:hover { text-decoration: underline; color: #826b9c; }
+    .report-markdown blockquote { border-left: 4px solid #826b9c; padding: 0.5rem 1rem; color: #64748b; font-style: italic; margin: 1rem 0; background: rgba(107,82,132,0.04); border-radius: 0 0.5rem 0.5rem 0; }
+    .report-markdown hr { border-color: #e2e8f0; margin: 1.75rem 0; }
+    .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9em; }
+    .table-scroll-wrapper {
+      width: 100%;
+      max-width: 100%;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-inline: contain;
+      border-radius: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-scroll-wrapper table {
+      width: max-content;
+      min-width: 100%;
+      max-width: none;
+      margin: 0;
+    }
+    .table-scroll-wrapper::-webkit-scrollbar { height: 8px; }
+    .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(107,82,132,0.06); border-radius: 999px; }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(107,82,132,0.35); border-radius: 999px; }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(107,82,132,0.6); }
+    .report-markdown th { background: #f1f5f9; font-weight: 600; color: #191c1e; padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #e2e8f0; }
+    .report-markdown td { padding: 0.75rem 1rem; color: #475569; border-bottom: 1px solid #e2e8f0; }
+    .report-markdown tr:hover td { background: #f8fafc; }
+    .report-markdown strong { color: #1e293b; font-weight: 600; }
+    .report-markdown em { font-style: italic; }
+
+    /* ============ Reading progress bar ============ */
+    #readingProgress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, #4a5fa8, #6b5284); z-index: 60; transition: width .1s linear; }
+
+    /* ============ Table of Contents (report TOC) ============ */
+    /* Flex layout: centered article column + TOC column side by side. */
+    .report-layout { display: flex; justify-content: center; gap: 2.5rem; align-items: flex-start; }
+    .report-main { flex: 1 1 auto; max-width: 56rem; min-width: 0; }
+    #reportTitle {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    #reportBreadcrumb > * {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .toc-inner { overflow-y: auto; padding: 1rem 1rem 1rem 0.75rem; border-left: 2px solid rgba(107,82,132,0.15); }
+    .toc-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .toc-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #191c1e; margin-bottom: 0.75rem; }
+    .toc-header .toc-title { margin-bottom: 0; }
+    .toc-close { display: none; }
+    .toc-list { display: flex; flex-direction: column; gap: 0.1rem; }
+    .toc-link { display: block; padding: 0.3rem 0.6rem; font-size: 0.8rem; line-height: 1.35; color: #64748b; border-radius: 0.4rem; border-left: 2px solid transparent; margin-left: -0.6rem; cursor: pointer; transition: color .15s, background .15s, border-color .15s; text-decoration: none; }
+    .toc-link:hover { color: #695282; background: rgba(107,82,132,0.06); }
+    .toc-link.toc-h3 { padding-left: 1.4rem; font-size: 0.76rem; }
+    .toc-link.toc-active { color: #695282; font-weight: 600; border-left-color: #826b9c; background: rgba(107,82,132,0.08); }
+    /* Keep enough room for the left sidebar, article, gap, and TOC column. */
+    @media (min-width: 1600px) {
+      #sidebar { width: clamp(18rem, 18vw, 22rem); }
+      #reportView { padding-left: clamp(1.5rem, 2.5vw, 4rem); padding-right: clamp(1.5rem, 2.5vw, 4rem); }
+      .report-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(13rem, 16vw, 18rem); gap: clamp(1.5rem, 2.5vw, 2.5rem); width: min(100%, 110rem); margin: 0 auto; }
+      .report-main { max-width: none; width: 100%; min-width: 0; }
+      #tocPanel.toc-available { display: block; width: 100%; position: sticky; top: 1.5rem; align-self: flex-start; min-width: 0; }
+      #tocPanel.toc-available .toc-inner { max-height: calc(100vh - 3rem); }
+    }
+    /* Constrained screens: use a drawer instead of squeezing the TOC off-screen. */
+    @media (max-width: 1599px) {
+      #tocPanel { position: fixed; top: 0; right: 0; bottom: 0; width: min(20rem, 88vw); z-index: 110; background: var(--toc-drawer-bg, rgba(247,249,252,0.98)); box-shadow: -8px 0 24px rgba(0,0,0,0.12); padding-top: 1rem; transform: translateX(100%); transition: transform .25s ease; }
+      #tocPanel.toc-open { display: block; transform: translateX(0); }
+      #tocPanel .toc-inner { max-height: 100vh; border-left: none; }
+      #tocToggle.toc-available { display: flex; right: 2rem !important; bottom: 10.5rem !important; z-index: 90; }
+      .toc-close { display: inline-flex; }
+    }
+
+    /* ============ Dark mode (Deep Violet Slate) — html.dark overrides ============
+       Palette: bg #0f172a, card #1e293b, text #e2e8f0, accent #c4b5fd (lavender).
+       Light mode is untouched; these rules only apply under html.dark. */
+    html.dark body,
+    html.dark .bg-beige-light { background-color: #0f172a; }
+    html.dark { color-scheme: dark; }
+
+    /* Text colors */
+    html.dark .text-coffee-brown,
+    html.dark .text-slate-900 { color: #e2e8f0; }
+    html.dark .text-tech-accent { color: #c4b5fd; }
+    html.dark .text-slate-600 { color: #D6CDC5; }
+    html.dark .text-slate-500 { color: #B3A9A0; }
+    html.dark .text-slate-400 { color: #968B82; }
+    html.dark .text-slate-300 { color: #7E736A; }
+    html.dark .repository-icon { color: #e2e8f0; background: rgba(99,102,241,0.15); }
+    html.dark .text-tech-accent .material-symbols-outlined, html.dark .material-symbols-outlined.text-tech-accent { color: #e2e8f0; }
+    html.dark .repository-link:hover { border-color: rgba(165,180,252,0.2); background: rgba(99,102,241,0.08); }
+    html.dark .report-markdown a { color: #a5b4fc; }
+    html.dark .report-markdown a:hover { color: #c4b5fd; }
+
+    /* Cover placeholders dark */
+    html.dark .cover-placeholder { color: #c4b5fd; background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.1)); }
+    html.dark .cover-placeholder.cover-train { color: #93c5fd; background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.1)); }
+    html.dark .cover-placeholder.cover-embodied { color: #a5b4fc; background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(59,130,246,0.08)); }
+    html.dark .cover-placeholder.cover-features { color: #c4b5fd; background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.1)); }
+
+    /* Override inline style colors in dark mode */
+    html.dark [style*="color:#6b5284"], html.dark [style*="color:#4a5fa8"], html.dark [style*="color:#5b21b6"], html.dark [style*="color:#92400e"], html.dark [style*="color:#695282"] { color: #c4b5fd !important; }
+
+    /* Glass surfaces */
+    html.dark .glass-card { background: rgba(30, 41, 59, 0.72); border-color: rgba(165,180,252,0.1); }
+    html.dark .glass-sidebar { background: rgba(15, 23, 42, 0.85); border-right-color: rgba(165,180,252,0.08); }
+
+    /* White-ish backgrounds -> dark surfaces */
+    html.dark .bg-white { background-color: #1e293b; }
+    html.dark .bg-white\/60 { background-color: rgba(30, 41, 59, 0.6); }
+    html.dark .bg-white\/50 { background-color: rgba(255,255,255,0.06); }
+    html.dark .bg-white\/40 { background-color: rgba(255,255,255,0.05); }
+    html.dark .bg-white\/30 { background-color: rgba(255,255,255,0.04); }
+    html.dark .bg-slate-100 { background-color: #1e293b; }
+    html.dark .hover\:bg-white\/40:hover,
+    html.dark .hover\:bg-white\/50:hover { background-color: rgba(255,255,255,0.08); }
+
+    /* Borders / rings */
+    html.dark .border-black\/5 { border-color: rgba(165,180,252,0.1); }
+    html.dark .ring-black\/5 { --tw-ring-color: rgba(165,180,252,0.1); }
+    html.dark .border-white\/40 { border-color: rgba(165,180,252,0.15); }
+
+    /* Search input */
+    html.dark #searchInput { background-color: rgba(30,41,59,0.7); color: #e2e8f0; }
+    html.dark #searchInput::placeholder { color: #968B82; }
+    #reportSearchBar { width: min(34rem, calc(100vw - 2rem)); }
+    #reportSearchDragHandle { cursor: grab; touch-action: none; user-select: none; }
+    #reportSearchDragHandle:active { cursor: grabbing; }
+    .report-search-hit { background: #EDE4FF; color: inherit; border-radius: 0.18rem; padding: 0 0.08rem; }
+    .report-search-hit.current { background: #695282; color: #fff; box-shadow: 0 0 0 2px rgba(107,82,132,0.2); }
+    html.dark .report-search-hit { background: #4C3C60; color: #F2ECFA; }
+    html.dark .report-search-hit.current { background: #826B9C; color: #fff; }
+
+    /* Markdown report body */
+    html.dark .report-markdown { color: #e2e8f0; }
+    html.dark .report-markdown h1,
+    html.dark .report-markdown h2,
+    html.dark .report-markdown h3,
+    html.dark .report-markdown h4,
+    html.dark .report-markdown h5,
+    html.dark .report-markdown h6 { color: #f1f5f9; }
+    html.dark .report-markdown h2 { border-bottom-color: rgba(165,180,252,0.15); }
+    html.dark .report-markdown p,
+    html.dark .report-markdown li { color: #cbd5e1; }
+    html.dark .report-markdown code { background: #1e293b; color: #e2e8f0; }
+    html.dark .report-markdown table { border: 1px solid rgba(165,180,252,0.15); border-radius: 0.5rem; overflow: hidden; }
+    html.dark .report-markdown th { background: rgba(30,41,59,0.8); color: #f1f5f9; border-bottom: 2px solid #826b9c; }
+    html.dark .report-markdown td { color: #e2e8f0; border-bottom-color: rgba(165,180,252,0.1); }
+    html.dark .report-markdown tbody tr:nth-child(even) td { background: rgba(15,23,42,0.5); }
+    html.dark .report-markdown tr:hover td { background: rgba(30,41,59,0.6); }
+    html.dark .report-markdown strong { color: #f1f5f9; }
+    html.dark .report-markdown blockquote { color: #94a3b8; border-left-color: #6b5284; }
+    html.dark .report-markdown hr { border-color: rgba(165,180,252,0.1); }
+    /* Mermaid diagrams keep a light canvas for diagram legibility */
+
+    /* Ambient gradient hiding in dark mode */
+    html.dark .dark-hide { opacity: 0; }
+    html.dark body::before { content: ''; position: fixed; inset: 0; z-index: -10; background: linear-gradient(135deg, rgba(99,102,241,0.03) 0%, rgba(139,92,246,0.02) 50%, rgba(59,130,246,0.02) 100%); pointer-events: none; }
+
+    /* Theme toggle icon: show sun in dark, moon in light */
+    #themeIcon::after { content: 'dark_mode'; }
+    html.dark #themeIcon::after { content: 'light_mode'; }
+
+    /* TOC dark mode */
+    html.dark .toc-inner { border-left-color: rgba(99,102,241,0.25); }
+    html.dark .toc-title { color: #e2e8f0; }
+    html.dark .toc-link { color: #94a3b8; }
+    html.dark .toc-link:hover { color: #c4b5fd; background: rgba(99,102,241,0.12); }
+    html.dark .toc-link.toc-active { color: #c4b5fd; border-left-color: #c4b5fd; background: rgba(99,102,241,0.15); }
+    html.dark #tocPanel { --toc-drawer-bg: rgba(15,23,42,0.98); }
+  </style>
+</head>
+<body class="bg-beige-light text-slate-900 font-sans min-h-screen flex relative overflow-x-hidden">
+
+<!-- Reading progress bar (visible only in report view; updated on scroll) -->
+<div id="readingProgress" class="hidden"></div>
+
+<!-- Ambient gradient background blobs -->
+<div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark-hide">
+  <div class="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full opacity-50" style="background: radial-gradient(circle, rgba(196,181,253,0.6) 0%, transparent 65%);"></div>
+  <div class="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full opacity-45" style="background: radial-gradient(circle, rgba(191,219,254,0.7) 0%, transparent 65%);"></div>
+  <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] rounded-full opacity-35" style="background: radial-gradient(circle, rgba(252,211,225,0.6) 0%, transparent 65%);"></div>
+  <div class="absolute bottom-1/4 -left-20 w-[450px] h-[450px] rounded-full opacity-40" style="background: radial-gradient(circle, rgba(167,214,255,0.6) 0%, transparent 65%);"></div>
+  <div class="absolute -bottom-40 -right-40 w-[900px] h-[900px] opacity-50" style="background: radial-gradient(ellipse at 60% 60%, rgba(196,181,253,0.45) 0%, rgba(252,211,225,0.35) 20%, rgba(191,219,254,0.3) 40%, rgba(253,230,138,0.2) 60%, transparent 85%); filter: blur(80px);"></div>
+</div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="relative w-72 glass-sidebar h-screen sticky top-0 flex-shrink-0 z-50 flex flex-col p-6 transition-all duration-300">
+  <div class="mb-8 px-2 flex items-center">
+    <h1 class="font-bold tracking-tight flex items-center gap-2">
+      <img src="cann_logo.png" alt="CANN" class="w-10 h-10 rounded-xl shrink-0 object-cover bg-white p-1">
+      <span class="text-coffee-brown text-sm font-bold whitespace-nowrap">CANN RECIPES BLOGS</span>
+    </h1>
+  </div>
+
+  <button onclick="toggleSidebar()" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-lg z-10">
+    <span class="material-symbols-outlined">chevron_left</span>
+  </button>
+
+  <nav class="flex-grow space-y-1 overflow-y-auto">
+    <!-- Home -->
+    <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
+      <span class="material-symbols-outlined">home</span>
+      <span data-i18n="home">Home</span>
+    </a>
+
+    <!-- Categories with expandable models.
+         This tree is rendered dynamically by renderSidebar() on load, which
+         replaces this container's innerHTML from repoModels / content/index.json.
+         The placeholder below only shows briefly before JS runs — do NOT
+         hand-maintain a model list here (it drifts from the remote naming). -->
+    <div class="mt-4 space-y-1">
+      <div class="px-4 py-3 text-sm text-slate-400">Loading…</div>
+    </div>
+  </nav>
+
+  <div class="mt-auto pt-4">
+    <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl glacier-btn font-semibold transition-colors">
+      <span class="material-symbols-outlined">description</span>
+      <span class="flex-1 text-sm" data-i18n="browseDocsRepo">Browse Docs Repo</span>
+      <span class="material-symbols-outlined text-sm">open_in_new</span>
+    </a>
+    <div class="flex items-center gap-3 p-2 mt-4 pt-4 border-t border-black/5">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(196,181,253,0.4), rgba(252,211,225,0.35), rgba(191,219,254,0.4));">
+        <span class="material-symbols-outlined text-tech-accent">person</span>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-coffee-brown">CANN Team</p>
+        <p class="text-xs text-slate-500">Tech Blog</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Collapsed Sidebar Toggle Button (hidden by default) -->
+<button id="sidebarToggle" onclick="toggleSidebar()" class="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-lg hidden">
+  <span class="material-symbols-outlined">chevron_right</span>
+</button>
+
+<!-- Main Content -->
+<div id="mainContent" class="flex-grow flex flex-col min-w-0 transition-all duration-300">
+  <!-- Top Bar -->
+  <header class="h-20 flex items-center gap-6 px-10 bg-transparent">
+    <div class="flex flex-1 max-w-3xl items-center gap-2 min-w-0">
+      <div class="relative flex-1 min-w-0">
+        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+          <span class="material-symbols-outlined">search</span>
+        </span>
+        <input id="searchInput" oninput="filterContent()" onkeydown="if(event.key==='Enter'){event.preventDefault();filterContent(true);}" class="w-full pl-11 pr-4 py-2.5 bg-white/60 border-0 ring-1 ring-black/5 rounded-2xl focus:ring-2 focus:ring-tech-accent/20 focus:bg-white transition-all text-sm outline-none" placeholder="Search tech reports..." type="text"/>
+      </div>
+      <div class="relative shrink-0">
+        <button id="scopeFilterButton" onclick="toggleScopeFilter(event)" title="Filter by content area" aria-label="Filter reports by content area" aria-expanded="false" class="h-10 px-3 glass-card rounded-xl flex items-center gap-2 text-sm font-semibold text-coffee-brown hover:text-tech-accent transition-colors">
+          <span class="material-symbols-outlined text-lg">account_tree</span>
+          <span class="hidden sm:inline" data-i18n="filters">Filters</span>
+          <span id="scopeFilterBadge" class="hidden min-w-5 h-5 px-1 rounded-full bg-tech-accent text-white text-[10px] items-center justify-center">1</span>
+        </button>
+        <div id="scopeFilterPanel" onclick="event.stopPropagation()" class="scope-filter-panel hidden absolute right-0 top-full mt-2 z-[70] glass-card rounded-2xl shadow-xl border border-white/50">
+          <div class="flex items-center justify-between gap-3 p-4 pb-3">
+            <div>
+              <p class="text-sm font-bold text-coffee-brown" data-i18n="filterTitle">Filter content area</p>
+              <p class="text-xs text-slate-400 mt-0.5" data-i18n="filterHint">Select areas, then narrow by subcategory</p>
+            </div>
+            <button type="button" onclick="closeScopeFilter(event)" title="Close filters" aria-label="Close filters" class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:bg-black/5 hover:text-coffee-brown transition-colors">
+              <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
+          <div class="scope-filter-scroll px-4 pb-3">
+            <div id="scopeCategoryOptions" class="grid grid-cols-2 gap-2"></div>
+            <div id="scopeSubcategorySection" class="hidden mt-4 border-t border-black/5 pt-4">
+              <p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500" data-i18n="subcategories">Subcategories</p>
+              <div id="scopeSubcategoryOptions" class="flex flex-wrap gap-2"></div>
+            </div>
+            <div class="mt-4 border-t border-black/10 pt-4">
+              <p class="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500" data-i18n="metadataFilters">Technical attributes</p>
+              <div id="metadataFilterOptions" class="space-y-4"></div>
+            </div>
+          </div>
+          <div class="scope-filter-footer flex items-center justify-end gap-2 border-t border-black/10 p-4">
+            <button type="button" onclick="clearScopeFilter(event)" class="h-9 px-3 rounded-lg text-xs font-semibold text-slate-500 hover:bg-black/5 hover:text-tech-accent transition-colors" data-i18n="clear">Clear</button>
+            <button type="button" onclick="applyScopeFilter(event)" class="h-9 px-4 rounded-lg bg-tech-accent text-xs font-bold text-white shadow-sm hover:opacity-90 transition-opacity" data-i18n="applyFilters">Search</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button id="languageToggle" type="button" onclick="toggleLanguage()" title="切换到中文" aria-label="Switch interface language" class="ml-auto shrink-0 h-10 min-w-12 px-3 glass-card rounded-xl flex items-center justify-center text-xs font-bold text-coffee-brown hover:text-tech-accent transition-all shadow-sm">中文</button>
+    <button onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="shrink-0 w-10 h-10 glass-card rounded-full flex items-center justify-center text-coffee-brown hover:text-tech-accent transition-all shadow-sm">
+      <span id="themeIcon" class="material-symbols-outlined"></span>
+    </button>
+  </header>
+
+  <!-- Home View -->
+  <main id="homeView" class="flex-grow px-10 py-4 flex gap-10">
+    <section class="flex-grow space-y-8">
+      <!-- Recent Reports -->
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-2xl font-bold text-coffee-brown" data-i18n="recentReports">Recent Reports</h2>
+      </div>
+
+      <div class="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+        <!-- Card 1 -->
+        <!-- Card 1 -->
+        <article onclick="showReport('Infer', 'Model-A', 'Optimization Techniques')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Infer</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Optimization Techniques for Model Inference</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Exploring advanced optimization strategies for efficient model inference.
+            </p>
+            <span class="text-xs text-slate-400">March 15, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article onclick="showReport('Train', 'TrainModel-X', 'Training Guide')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Train</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Complete Training Guide for TrainModel-X</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              A comprehensive guide to training large-scale models with best practices.
+            </p>
+            <span class="text-xs text-slate-400">March 12, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article onclick="showReport('Embodie_AI', 'Robot-Alpha', 'Robot Systems')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Embodied</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Robot-Alpha: Advanced Robotic Systems</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Building intelligent robotic systems with embodied AI for real-world applications.
+            </p>
+            <span class="text-xs text-slate-400">March 10, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article onclick="showReport('Spatial Intelligence', 'SpatialNet', 'Spatial Mapping')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Spatial</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">SpatialNet: Spatial Mapping & Navigation</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Deep learning approaches for 3D spatial understanding and autonomous navigation.
+            </p>
+            <span class="text-xs text-slate-400">March 8, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article onclick="showReport('Infer', 'Model-B', 'Inference Pipeline')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Infer</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Model-B Inference Pipeline Architecture</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Designing scalable inference pipelines for production-ready ML models.
+            </p>
+            <span class="text-xs text-slate-400">March 5, 2024</span>
+          </div>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+          <div class="w-48 h-32 shrink-0 overflow-hidden">
+            <img alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"/>
+          </div>
+          <div class="p-4 flex flex-col justify-center">
+            <div class="flex gap-2 mb-2">
+              <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Train</span>
+            </div>
+            <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">Distributed Training Best Practices</h3>
+            <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">
+              Strategies for efficient distributed training across multiple GPUs and nodes.
+            </p>
+            <span class="text-xs text-slate-400">March 3, 2024</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Sidebar Widgets -->
+    <aside class="w-56 flex-shrink-0 space-y-6">
+      <div class="glass-card rounded-3xl p-6">
+        <h4 class="text-sm font-bold text-coffee-brown mb-4 uppercase tracking-wider" data-i18n="repositories">Repositories</h4>
+        <div class="space-y-2">
+          <a href="https://gitcode.com/cann/cann-recipes-infer" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">memory</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold text-tech-accent">Infer</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+          <a href="https://gitcode.com/cann/cann-recipes-train" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">model_training</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold text-tech-accent">Train</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+          <a href="https://gitcode.com/cann/cann-recipes-embodied-ai" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">smart_toy</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold leading-snug text-tech-accent">Embodie_AI</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+          <a href="https://gitcode.com/tian-ccs/cann-recipes-docs" target="_blank" rel="noopener" class="repository-link flex items-center gap-3 p-2 rounded-lg transition-colors">
+            <span class="repository-icon"><span class="material-symbols-outlined text-base">description</span></span>
+            <span class="min-w-0 flex-1 text-sm font-semibold text-tech-accent">Docs</span>
+            <span class="material-symbols-outlined text-sm shrink-0 text-slate-400">open_in_new</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Category View (hidden by default) — used for drill-down levels:
+       subcategory grid, model grid, and report list. -->
+  <main id="categoryView" class="hidden flex-grow px-10 py-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Dynamic breadcrumb, rendered by renderCrumb() per drill-down level -->
+      <nav id="categoryBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
+
+      <h2 id="categoryHeader" class="text-3xl font-bold text-coffee-brown mb-4" data-i18n="techReports">Tech Reports</h2>
+
+      <div id="activeFilterBar" class="hidden mb-5 items-center justify-between gap-4 rounded-xl border border-tech-accent/15 bg-tech-accent/5 px-4 py-3">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="material-symbols-outlined text-tech-accent text-lg">filter_alt</span>
+          <span class="text-sm text-slate-600" data-i18n="activeFilter">Active filter:</span>
+          <span id="activeFilterScopes" class="text-sm font-semibold text-tech-accent"></span>
+        </div>
+        <button onclick="clearScopeFilter(event)" class="shrink-0 text-xs font-semibold text-tech-accent hover:underline" data-i18n="clearFilter">Clear filter</button>
+      </div>
+
+      <div id="categoryReports" class="flex flex-col gap-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+        <!-- Drill-down cards are dynamically loaded here (one per row) -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Route Not Found View -->
+  <main id="notFoundView" class="hidden flex-grow px-6 sm:px-10 py-8 sm:py-16">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+          <span class="material-symbols-outlined text-5xl">draft</span>
+        </div>
+        <div class="min-w-0 pt-1">
+          <p class="text-sm font-bold tracking-[0.22em] text-slate-500">404</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold text-coffee-brown leading-tight">Page not found</h1>
+          <p class="mt-5 text-lg text-slate-500 leading-relaxed">
+            <code id="notFoundPath" class="inline-block max-w-full break-all rounded-md bg-slate-100 px-2 py-1 text-base text-slate-600"></code>
+            does not match any document or category.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <button onclick="showHome()" class="group min-h-44 text-left border border-slate-200 bg-white/40 p-7 rounded-lg hover:border-tech-accent/50 hover:bg-white/70 transition-colors">
+          <span class="flex items-center gap-3 text-xl font-bold text-coffee-brown group-hover:text-tech-accent transition-colors">
+            <span class="material-symbols-outlined text-tech-accent">home</span>
+            Return home
+          </span>
+          <span class="block mt-4 text-base text-slate-500 leading-relaxed">Go back to the report index and browse all available categories.</span>
+        </button>
+        <a id="notFoundFeedback" href="https://gitcode.com/tian-ccs/cann-recipes-docs/issues/new" target="_blank" rel="noopener" class="group min-h-44 border border-slate-200 bg-white/40 p-7 rounded-lg hover:border-tech-accent/50 hover:bg-white/70 transition-colors">
+          <span class="flex items-center gap-3 text-xl font-bold text-coffee-brown group-hover:text-tech-accent transition-colors">
+            <span class="material-symbols-outlined text-tech-accent">rate_review</span>
+            Report a problem
+            <span class="material-symbols-outlined text-base ml-auto text-slate-400">open_in_new</span>
+          </span>
+          <span class="block mt-4 text-base text-slate-500 leading-relaxed">Open a pre-filled Issue in the Docs repository so maintainers can investigate the missing route.</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Report View (hidden by default) -->
+  <main id="reportView" class="hidden flex-grow px-10 py-4">
+    <!-- Narrow-screen floating toggle for the TOC drawer -->
+    <button id="tocToggle" onclick="toggleTocPanel()" title="目录" aria-label="Toggle table of contents" class="hidden fixed right-4 bottom-6 z-40 w-12 h-12 rounded-full glacier-btn flex items-center justify-center text-tech-accent shadow-lg">
+      <span class="material-symbols-outlined">toc</span>
+    </button>
+    <button id="feedbackFloatingButton" onclick="openFeedbackModal()" title="Feedback" aria-label="Send feedback about this report" class="fixed right-24 bottom-8 z-40 w-12 h-12 rounded-full glacier-btn flex items-center justify-center text-tech-accent shadow-lg transition-colors">
+      <span class="material-symbols-outlined">feedback</span>
+    </button>
+    <div id="reportSearchBar" class="hidden fixed top-24 right-4 sm:right-8 z-[80] glass-card rounded-xl border border-white/60 p-2 shadow-2xl" role="search" aria-label="Find in document">
+      <div class="flex items-center gap-1.5">
+        <button id="reportSearchDragHandle" type="button" title="Drag search bar" aria-label="Drag search bar" onpointerdown="startReportSearchDrag(event)" class="w-8 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:bg-black/5 hover:text-coffee-brown transition-colors"><span class="material-symbols-outlined text-xl">drag_indicator</span></button>
+        <span class="material-symbols-outlined text-lg text-slate-400 pl-1">search</span>
+        <input id="reportSearchInput" type="search" autocomplete="off" placeholder="Find in this document" oninput="runReportSearch(this.value)" onkeydown="handleReportSearchKeydown(event)" class="min-w-0 flex-1 border-0 bg-transparent px-1 py-2 text-sm text-coffee-brown outline-none focus:ring-0">
+        <span id="reportSearchCount" class="min-w-14 text-center text-xs tabular-nums text-slate-400" aria-live="polite">0 / 0</span>
+        <button onclick="moveReportSearch(-1)" title="Previous match" aria-label="Previous match" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-500 hover:bg-tech-accent/10 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-xl">keyboard_arrow_up</span></button>
+        <button onclick="moveReportSearch(1)" title="Next match" aria-label="Next match" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-500 hover:bg-tech-accent/10 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-xl">keyboard_arrow_down</span></button>
+        <button onclick="closeReportSearch()" title="Close search" aria-label="Close document search" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-500 hover:bg-black/5 hover:text-coffee-brown transition-colors"><span class="material-symbols-outlined text-xl">close</span></button>
+      </div>
+    </div>
+    <!-- Flex layout: centered article column + sticky TOC column (no overlap) -->
+    <div class="report-layout">
+      <div class="report-main">
+      <!-- Breadcrumb (dynamic, rendered by showReport via renderReportCrumb) -->
+      <nav id="reportBreadcrumb" class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6"></nav>
+
+      <article class="glass-card rounded-3xl p-8 md:p-12 fade-in">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <span id="reportCategory" class="px-3 py-1 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">Category</span>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <div class="inline-flex h-9 items-stretch overflow-hidden rounded-lg border border-black/5 bg-white/50" role="group" aria-label="Document font size">
+              <button id="reportFontDecrease" type="button" onclick="adjustReportFontSize(-1)" class="w-9 border-r border-black/5 text-xs font-bold text-slate-500 hover:bg-black/5 hover:text-tech-accent disabled:cursor-not-allowed disabled:opacity-35" title="Decrease document font size" aria-label="Decrease document font size">A-</button>
+              <button id="reportFontSizeLabel" type="button" onclick="resetReportFontSize()" class="min-w-12 px-2 text-[11px] font-semibold tabular-nums text-slate-500 hover:bg-black/5 hover:text-tech-accent" title="Reset document font size" aria-label="Reset document font size">16px</button>
+              <button id="reportFontIncrease" type="button" onclick="adjustReportFontSize(1)" class="w-9 border-l border-black/5 text-sm font-bold text-slate-500 hover:bg-black/5 hover:text-tech-accent disabled:cursor-not-allowed disabled:opacity-35" title="Increase document font size" aria-label="Increase document font size">A+</button>
+            </div>
+            <button id="reportSearchButton" onclick="openReportSearch()" class="inline-flex h-9 items-center gap-2 rounded-lg border border-black/5 bg-white/50 px-3 text-xs font-semibold text-slate-500 hover:border-tech-accent/20 hover:text-tech-accent transition-colors"><span class="material-symbols-outlined text-base">search</span><span class="hidden sm:inline">Find in document</span></button>
+          </div>
+        </div>
+
+        <h1 id="reportTitle" class="text-4xl lg:text-5xl font-extrabold text-coffee-brown leading-tight mt-6 mb-6">
+          Report Title
+        </h1>
+
+        <div class="flex items-center gap-6 pb-8 border-b border-tech-accent/10">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(196,181,253,0.4), rgba(252,211,225,0.35), rgba(191,219,254,0.4));">
+              <span class="material-symbols-outlined text-tech-accent">person</span>
+            </div>
+            <div>
+              <p class="font-bold text-slate-900">CANN Team</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-sm text-slate-500">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-base">calendar_today</span>
+              <span id="reportDate">Loading...</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-base">schedule</span>
+              <span id="reportReadingTime">1 min read</span>
+            </span>
+          </div>
+        </div>
+
+        <div id="reportContent" class="mt-8">
+          <!-- Dynamic content loaded here -->
+        </div>
+      </article>
+      <section id="reportFeedback" class="mt-6 border-t border-tech-accent/15 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="min-w-0">
+          <h2 class="text-base font-bold text-coffee-brown" data-i18n="feedbackTitle">Questions or feedback?</h2>
+          <p class="text-sm text-slate-500 mt-1" data-i18n="feedbackHint">Open a pre-filled Issue in the source repository.</p>
+        </div>
+        <button onclick="openFeedbackModal()" class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glacier-btn text-sm font-semibold transition-colors">
+          <span class="material-symbols-outlined text-lg">rate_review</span>
+          <span data-i18n="feedback">Feedback</span>
+        </button>
+      </section>
+      <!-- Prev / Next navigation within the same category (rendered by renderReportNav) -->
+      <nav id="reportNav" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"></nav>
+      </div>
+      <!-- TOC column (sticky on wide screens; slide-in drawer on narrow) -->
+      <aside id="tocPanel" class="hidden">
+        <div class="toc-inner">
+          <div class="toc-header">
+          <div class="toc-title"><span class="material-symbols-outlined text-base">toc</span><span data-i18n="toc">Contents</span></div>
+            <button type="button" onclick="toggleTocPanel()" class="toc-close w-9 h-9 items-center justify-center rounded-lg text-slate-500 hover:bg-black/5 hover:text-tech-accent" title="Close table of contents" aria-label="Close table of contents"><span class="material-symbols-outlined text-xl">close</span></button>
+          </div>
+          <nav id="tocList" class="toc-list"></nav>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div id="feedbackModal" class="hidden fixed inset-0 z-[100] items-center justify-center bg-black/35 p-4" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle" onclick="if(event.target===this) closeFeedbackModal()">
+    <div class="w-full max-w-2xl rounded-2xl p-6 shadow-2xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(245,240,255,0.88) 100%); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(107,82,132,0.06);">
+      <div class="flex items-start justify-between gap-4 mb-5">
+        <div>
+          <h2 id="feedbackModalTitle" class="text-xl font-bold text-coffee-brown" data-i18n="sendFeedback">Send feedback</h2>
+          <p id="feedbackRepoLabel" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <button onclick="closeFeedbackModal()" title="Close" aria-label="Close feedback dialog" class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 hover:bg-black/5 hover:text-coffee-brown transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="openIssue('correction')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">edit_note</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="contentCorrection">Content correction</span><span class="block text-xs text-slate-500 mt-1" data-i18n="contentCorrectionHint">Typos, incorrect data, or code errors</span></span></button>
+        <button onclick="openIssue('bug')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">bug_report</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="bugReport">Bug report</span><span class="block text-xs text-slate-500 mt-1" data-i18n="bugReportHint">Rendering, image, or broken-link issues</span></span></button>
+        <button onclick="openIssue('suggestion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">lightbulb</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="featureSuggestion">Feature suggestion</span><span class="block text-xs text-slate-500 mt-1" data-i18n="featureSuggestionHint">Ideas to improve the content or experience</span></span></button>
+        <button onclick="openIssue('discussion')" class="feedback-option rounded-xl p-4 text-left flex gap-3"><span class="material-symbols-outlined text-tech-accent">forum</span><span><span class="block text-sm font-bold text-coffee-brown" data-i18n="technicalDiscussion">Technical discussion</span><span class="block text-xs text-slate-500 mt-1" data-i18n="technicalDiscussionHint">Questions about the report's approach</span></span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="px-10 py-8 border-t border-black/5 mt-12 flex justify-between items-center text-slate-400 text-xs">
+    <div>© 2024 CANN Recipes Blog. All rights reserved.</div>
+    <div class="flex gap-6">
+      <a class="hover:text-tech-accent transition-colors cursor-pointer">Privacy Policy</a>
+      <a class="hover:text-tech-accent transition-colors cursor-pointer">Terms of Service</a>
+      <a class="hover:text-tech-accent transition-colors cursor-pointer">RSS Feed</a>
+    </div>
+  </footer>
+</div>
+
+<!-- Floating Navigation Buttons -->
+<div class="fixed bottom-8 right-8 flex flex-col gap-3 z-[100]">
+  <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-12 h-12 glacier-btn rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg group" title="Back to Top">
+    <span class="material-symbols-outlined">keyboard_arrow_up</span>
+  </button>
+  <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="w-12 h-12 glacier-btn rounded-full flex items-center justify-center text-slate-600 hover:text-tech-accent transition-all hover:scale-110 shadow-lg group" title="Go to Bottom">
+    <span class="material-symbols-outlined">keyboard_arrow_down</span>
+  </button>
+</div>
+
+<script>
+  // Configure marked.js: open links in new tab
+  (() => {
+    const r = new marked.Renderer();
+    r.link = (href, title, text) =>
+      `<a href="${href}"${title ? ` title="${title}"` : ''} target="_blank" rel="noopener">${text}</a>`;
+    marked.setOptions({ renderer: r, breaks: true, gfm: true });
+  })();
+
+  const i18n = {
+    en: {
+      home: 'Home', repositories: 'Repositories', browseDocsRepo: 'Browse Docs Repo', filters: 'Filters',
+      filterTitle: 'Filter content area', filterHint: 'Select areas, then narrow by subcategory', subcategories: 'Subcategories', metadataFilters: 'Technical attributes', clear: 'Clear', applyFilters: 'Search',
+      recentReports: 'Recent Reports', techReports: 'Tech Reports',
+      activeFilter: 'Active filter:', clearFilter: 'Clear filter',
+      feedbackTitle: 'Questions or feedback?', feedbackHint: 'Open a pre-filled Issue in the source repository.',
+      feedback: 'Feedback', toc: 'Contents', searchPlaceholder: 'Search tech reports...',
+      readTime: (minutes) => `${minutes} min read`,
+      sendFeedback: 'Send feedback', issueDestination: 'Issue destination:',
+      contentCorrection: 'Content correction', contentCorrectionHint: 'Typos, incorrect data, or code errors',
+      bugReport: 'Bug report', bugReportHint: 'Rendering, image, or broken-link issues',
+      featureSuggestion: 'Feature suggestion', featureSuggestionHint: 'Ideas to improve the content or experience',
+      technicalDiscussion: 'Technical discussion', technicalDiscussionHint: "Questions about the report's approach",
+      languageButton: '中文', languageTitle: '切换到中文', loading: 'Loading content...',
+      englishUnavailable: 'This document does not have an English version yet. The Chinese version is shown below.',
+      loadFailed: 'Could not load content directly.', sourceUnavailable: 'GitCode is temporarily unavailable. You can open the source document directly.',
+      openGitCode: 'Open in GitCode', noReport: 'Report not available.'
+    },
+    zh: {
+      home: '首页', repositories: '仓库', browseDocsRepo: '浏览文档仓库', filters: '筛选',
+      filterTitle: '筛选内容范围', filterHint: '先选大类，再按子类缩小范围', subcategories: '子类', metadataFilters: '技术属性', clear: '清除', applyFilters: '搜索',
+      recentReports: '最新文档', techReports: '技术文档',
+      activeFilter: '当前筛选：', clearFilter: '清除筛选',
+      feedbackTitle: '有疑问或建议？', feedbackHint: '前往源仓库提交预填充的 Issue。',
+      feedback: '反馈', toc: '目录', searchPlaceholder: '搜索技术文档...',
+      readTime: (minutes) => `预计阅读 ${minutes} 分钟`,
+      sendFeedback: '提交反馈', issueDestination: 'Issue 提交仓库：',
+      contentCorrection: '内容纠错', contentCorrectionHint: '错别字、数据错误或代码问题',
+      bugReport: '问题报告', bugReportHint: '渲染、图片或链接失效问题',
+      featureSuggestion: '功能建议', featureSuggestionHint: '改进内容或阅读体验的建议',
+      technicalDiscussion: '技术讨论', technicalDiscussionHint: '针对文档技术方案提出问题或讨论',
+      languageButton: 'EN', languageTitle: 'Switch to English', loading: '正在加载文档...',
+      englishUnavailable: '该文档暂未提供英文版本，以下继续显示中文内容。',
+      loadFailed: '无法直接加载文档内容。', sourceUnavailable: 'GitCode 暂时不可用，可直接打开源文档。',
+      openGitCode: '在 GitCode 中打开', noReport: '暂无可用文档。'
+    }
+  };
+  let currentLanguage = localStorage.getItem('uiLanguage') === 'zh' ? 'zh' : 'en';
+  let currentReportView = null;
+
+  function t(key) {
+    return i18n[currentLanguage]?.[key] || i18n.en[key] || key;
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = currentLanguage === 'zh' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      element.textContent = t(element.dataset.i18n);
+    });
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = t('searchPlaceholder');
+    const toggle = document.getElementById('languageToggle');
+    if (toggle) {
+      toggle.textContent = t('languageButton');
+      toggle.title = t('languageTitle');
+      toggle.setAttribute('aria-label', t('languageTitle'));
+    }
+    const feedbackRepoLabel = document.getElementById('feedbackRepoLabel');
+    if (feedbackRepoLabel && currentFeedbackReport) {
+      feedbackRepoLabel.textContent = `${t('issueDestination')} ${currentFeedbackReport.sourceRepo}`;
+    }
+  }
+
+  async function setLanguage(language) {
+    if (!i18n[language]) return;
+    currentLanguage = language;
+    localStorage.setItem('uiLanguage', language);
+    applyLanguage();
+    renderSidebar();
+    updateHomePage();
+    updateScopeFilterUI();
+    if (currentReportView) {
+      const { category, model, file } = currentReportView;
+      const report = findReport(category, model, file);
+      await showReport(category, model, reportTitle(report), file, false);
+    } else {
+      await restoreViewFromPath();
+    }
+  }
+
+  function toggleLanguage() {
+    setLanguage(currentLanguage === 'en' ? 'zh' : 'en');
+  }
+
+  // Repo configuration per category. This is only a FALLBACK — the real config
+  // (ns, repo, branch, basePath, flat) is loaded from content/index.json by
+  // loadModelsFromManifest() so build_content.py stays the single source of
+  // truth. Source: GitCode tian-ccs/cann-recipes-docs (4-level layout:
+  // Category > Subcategory > Model > Report; "CANN Features" is a flat 2-level
+  // exception whose reports sit directly under basePath).
+  let repoConfig = {
+    "Infer":                 { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "infer" },
+    "Train":                 { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "train" },
+    "Embodie_AI":            { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "embodied" },
+    "CANN Features":         { ns: "tian-ccs", repo: "cann-recipes-docs", branch: "main", basePath: "cann_features", flat: true }
+  };
+
+  // Content source switch — auto-detected by environment:
+  // Report bodies are always loaded on demand from GitCode. Only lightweight
+  // report metadata (paths and titles) lives in content/index.json.
+
+  // Local proxy server URL (optional, for development)
+  const proxyBase = 'http://localhost:8081';
+  function localProxyUrl(ns, repo, branch, filePath) {
+    return `${proxyBase}/?ns=${encodeURIComponent(ns)}&repo=${encodeURIComponent(repo)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
+  }
+  // Raw GitCode URL (blob-style; used for building human-facing links)
+  function rawGitCodeUrl(ns, repo, branch, filePath) {
+    return `https://gitcode.com/${ns}/${repo}/raw/${branch}/${filePath}`;
+  }
+
+  function sameOriginContentUrl(filePath) {
+    const encodedPath = String(filePath || '')
+      .split('/')
+      .map(part => encodeURIComponent(part))
+      .join('/');
+    return `${window.DOCS_BASE_PATH || '/'}${encodedPath}`;
+  }
+
+  // Decide the <img> src chain for a repo-relative image path.
+  //   primary  — raw.gitcode.com serves the full image bytes (image/png etc.)
+  //              with no auth/headers and permissive access for <img> loads.
+  //   onerror  — fall back to the local proxy (8081) if the CDN host is
+  //              unreachable. NOTE: the web-api files endpoint truncates binary
+  //              files to ~8 KB (is_limited), so it is a last resort only.
+  // The plain gitcode.com/.../raw/... URL returns an HTML challenge page for
+  // images, so it is intentionally NOT used here.
+  function imageSrc(ns, repo, branch, filePath) {
+    if (repo === 'cann-recipes-docs') {
+      const primary = sameOriginContentUrl(filePath);
+      const raw = `https://raw.gitcode.com/${ns}/${repo}/raw/${branch}/${filePath}`;
+      const onerror = ` onerror="this.onerror=null;this.src='${raw}'"`;
+      return { primary, raw, proxy: raw, onerror };
+    }
+    const primary = `https://raw.gitcode.com/${ns}/${repo}/raw/${branch}/${filePath}`;
+    const raw = primary;
+    const proxy = localProxyUrl(ns, repo, branch, filePath);
+    const onerror = ` onerror="this.onerror=null;this.src='${proxy}'"`;
+    return { primary, raw, proxy, onerror };
+  }
+
+  // Multiple CORS proxies for reliability
+  const corsProxies = [
+    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+
+  // Try fetching a URL through multiple CORS proxies
+  async function fetchWithCorsProxy(url, options = {}) {
+    // Try direct fetch first (may work for some URLs)
+    try {
+      const resp = await fetch(url, { ...options, mode: 'cors' });
+      if (resp.ok) return resp;
+    } catch (e) { /* CORS blocked, try proxies */ }
+
+    // Try each CORS proxy
+    for (const makeProxyUrl of corsProxies) {
+      try {
+        const proxyUrl = makeProxyUrl(url);
+        console.log('Trying CORS proxy:', proxyUrl);
+        const resp = await fetch(proxyUrl);
+        if (resp.ok) return resp;
+      } catch (e) {
+        console.warn('CORS proxy failed:', e.message);
+      }
+    }
+    return null;
+  }
+
+  // Fetch latest commit date for a file from GitCode API (with pre-fetched fallback)
+  async function fetchLatestCommitDate(ns, repo, branch, filePath) {
+    // Try pre-fetched manifest first
+    const manifest = await loadManifest();
+    if (manifest) {
+      for (const [cat, catData] of Object.entries(manifest)) {
+        const reports = catData.reports || catData;
+        if (!Array.isArray(reports)) continue;
+        for (const r of reports) {
+          const rf = reportFile(r);
+          if (r.commitDate && filePath.endsWith(rf)) {
+            console.log('Using pre-fetched commit date:', r.commitDate);
+            return r.commitDate;
+          }
+        }
+      }
+    }
+
+    const repoId = `${ns}%2F${repo}`;
+    const commitsUrl = `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/commits?ref_name=${encodeURIComponent(branch)}&path=${encodeURIComponent(filePath)}&per_page=1`;
+    console.log('Fetching commit date:', commitsUrl);
+    try {
+      const resp = await fetchWithCorsProxy(commitsUrl);
+      if (resp) {
+        const data = await resp.json();
+        // API may return a list or an object with a "content" array
+        const commits = Array.isArray(data) ? data : (data.content || []);
+        if (Array.isArray(commits) && commits.length > 0) {
+          const dateStr = commits[0].committed_date || commits[0].authored_date || commits[0].created_at;
+          if (dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch commit date:', e);
+    }
+    return null;
+  }
+
+  // Model data - hardcoded fallback, updated from manifest if available.
+  // Kept in sync with content/index.json (remote uses underscore naming, e.g.
+  // deepseek_r1). Regenerate from the manifest after running build_content.py.
+  // Each model carries a `subcategory` field so the sidebar can regroup them
+  // into the 4-level tree; docPath is relative to the category's basePath.
+  // Flat categories (CANN Features) use one synthetic model (subcategory:null,
+  // docPath:"") holding the reports that sit directly under basePath.
+  let repoModels = {
+    "Infer": [
+      {"name": "deepseek_r1", "subcategory": "llm", "docPath": "llm/deepseek_r1", "reports": ["deepseek_r1_decode_optimization.md", "deepseek_r1_prefill_optimization.md"]},
+      {"name": "deepseek_v4", "subcategory": "llm", "docPath": "llm/deepseek_v4", "reports": ["deepseek_v4_ascendc_operator_guide.md", "deepseek_v4_autofuse_guide.md", "deepseek_v4_inference_guide.md", "deepseek_v4_mHC_guide.md", "deepseek_v4_pypto_operator_guide.md", "deepseek_v4_shmem_guide.md", "deepseek_v4_tilelang_operator_guide.md"]},
+      {"name": "hunyuan_image_3_0", "subcategory": "multimodal", "docPath": "multimodal/hunyuan_image_3_0", "reports": ["hunyuan_image_3_optimization.md"]},
+      {"name": "hstu", "subcategory": "recommendation", "docPath": "recommendation/hstu", "reports": ["hstu_optimization.md"]}
+    ],
+    "Train": [
+      {"name": "deepseek_v3_2", "subcategory": "pretrain", "docPath": "pretrain/deepseek_v3_2", "reports": ["deepseek-v32_pre_train_optimization.md"]},
+      {"name": "qwen3_235b", "subcategory": "rl", "docPath": "rl/qwen3_235b", "reports": ["qwen3_235B_32k_longseq_rl_train_optimization.md"]}
+    ],
+    "Embodie_AI": [
+      {"name": "gaussian_splatting", "subcategory": "3d_vision", "docPath": "3d_vision/gaussian_splatting", "reports": ["gaussian_splatting_alpha_blending_optimization.md", "gaussian_splatting_culling_optimization.md", "gaussian_splatting_load_balance_optimization.md", "gaussian_splatting_precise_intersection_optimization.md"]},
+      {"name": "hunyuan3d", "subcategory": "3d_vision", "docPath": "3d_vision/hunyuan3d", "reports": ["Hunyuan3D_optimization.md"]},
+      {"name": "vggt", "subcategory": "3d_vision", "docPath": "3d_vision/vggt", "reports": ["vggt_accurancy_evaluation.md", "vggt_optimization.md"]},
+      {"name": "gr00t_n1_6", "subcategory": "manipulation", "docPath": "manipulation/gr00t_n1_6", "reports": ["gr00t_n1_6_optimization.md"]},
+      {"name": "pi0", "subcategory": "manipulation", "docPath": "manipulation/pi0", "reports": ["pi0_infer_with_om_optimization.md", "pi0_infer_with_torch_optimization.md"]},
+      {"name": "alpamayo_r1", "subcategory": "navigation", "docPath": "navigation/alpamayo_r1", "reports": ["alpamayo_r1_optimization.md"]},
+      {"name": "cosmos", "subcategory": "world_model", "docPath": "world_model/cosmos", "reports": ["cosmos_optimization.md"]}
+    ],
+    "CANN Features": [
+      {"name": "CANN Features", "subcategory": null, "docPath": "", "reports": ["multi_stream_principles.md", "npu_graph_optimization.md", "prefetch_principles.md", "super_kernel.md"]}
+    ]
+  };
+
+  // Load the 4-level manifest (content/index.json) into repoConfig + repoModels.
+  // Manifest shape per category:
+  //   { ns, repo, branch, basePath,
+  //     subcategories: [ { name, models: [ { name, docPath, reports } ] } ] }
+  //   OR flat 2-level: { ns, repo, branch, basePath, flat:true, reports:[...] }
+  // We flatten each category's models into repoModels[category] (each carrying a
+  // `subcategory` field) so downstream lookups by model name stay unchanged; the
+  // sidebar regroups them via getSubcategories().
+  async function loadModelsFromManifest() {
+    const manifest = await loadManifest();
+    if (!manifest || Object.keys(manifest).length === 0) return false;
+    metadataFilterOptions = { ...fallbackMetadataFilterOptions, ...(manifest._metadataEnums || {}) };
+    metadataLabels = mergeMetadataLabels(fallbackMetadataLabels, manifest._metadataLabels || {});
+
+    const freshConfig = {};
+    for (const [category, catData] of Object.entries(manifest)) {
+      if (category.startsWith('_')) continue;
+      // Config (ns/repo/branch/basePath/flat) — manifest is the source of truth.
+      freshConfig[category] = {
+        ns: catData.ns || 'tian-ccs',
+        repo: catData.repo,
+        branch: catData.branch || 'main',
+        basePath: catData.basePath || '',
+        flat: !!catData.flat
+      };
+
+      if (catData.flat) {
+        // 2-level: reports sit directly under basePath (one synthetic model).
+        repoModels[category] = [{
+          name: category,
+          subcategory: null,
+          docPath: '',
+          reports: catData.reports || []
+        }];
+      } else {
+        // 4-level: flatten subcategories > models, tagging each with subcategory.
+        const flat = [];
+        for (const sub of (catData.subcategories || [])) {
+          for (const m of (sub.models || [])) {
+            flat.push({
+              name: m.name,
+              subcategory: sub.name,
+              docPath: m.docPath,
+              reports: m.reports || []
+            });
+          }
+        }
+        if (flat.length > 0) repoModels[category] = flat;
+      }
+    }
+    // Replace config wholesale so removed categories don't linger.
+    if (Object.keys(freshConfig).length > 0) repoConfig = freshConfig;
+
+    console.log('Loaded manifest:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length} models`));
+    return true;
+  }
+
+  // Group a category's flat model list back into subcategories for the sidebar.
+  // Returns null for flat categories (caller renders reports directly).
+  function getSubcategories(category) {
+    if ((repoConfig[category] || {}).flat) return null;
+    const models = (actualRepoModels[category] || repoModels[category] || []);
+    const order = [];
+    const bySub = {};
+    for (const m of models) {
+      const sub = m.subcategory || 'other';
+      if (!bySub[sub]) { bySub[sub] = []; order.push(sub); }
+      bySub[sub].push(m);
+    }
+    return order.map(name => ({ name, models: bySub[name] }));
+  }
+
+  // Reference kept for compatibility
+  let actualRepoModels = repoModels;
+
+  // Generate GitCode URL for a report
+  function getReportUrl(category, model, reportFile) {
+    const config = repoConfig[category];
+    // Try actualRepoModels first, fallback to repoModels
+    const modelsSource = actualRepoModels[category] || repoModels[category];
+    const modelData = modelsSource.find(m => m.name === model);
+    if (!modelData || !reportFile) return null;
+    const report = findReport(category, model, reportFile);
+    const translatedPath = reportLanguageVariant(report)?.sourcePath;
+    const docPath = modelData.docPath || '';
+    // Handle empty docPath (flat structure) and optional language variants.
+    const fullPath = translatedPath || (docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`);
+    return `https://gitcode.com/${config.ns}/${config.repo}/blob/${config.branch}/${fullPath}`;
+  }
+
+  // Build a GitCode API URL for a given repo file path (returns JSON with base64 content)
+  function apiUrl(ns, repo, branch, filePath) {
+    const repoId = `${ns}%2F${repo}`;
+    return `https://web-api.gitcode.com/api/v2/projects/${repoId}/repository/files` +
+      `?repoId=${encodeURIComponent(repoId)}` +
+      `&ref=${encodeURIComponent(branch)}` +
+      `&file_path=${encodeURIComponent(filePath)}` +
+      `&ref_replace_web=${encodeURIComponent(branch)}`;
+  }
+
+  // Resolve a path that may contain ".." segments
+  function resolvePath(baseDir, relativeSrc) {
+    // Normalise: join baseDir + src, then collapse ".." and "."
+    const parts = (baseDir.replace(/\/$/, '') + '/' + relativeSrc).split('/');
+    const out = [];
+    for (const p of parts) {
+      if (p === '..') out.pop();
+      else if (p && p !== '.') out.push(p);
+    }
+    return out.join('/');
+  }
+
+  // Pre-fetched content manifest (loaded once)
+  let prefetchedManifest = null;
+  async function loadManifest() {
+    if (prefetchedManifest !== null) return prefetchedManifest;
+    try {
+      const resp = await fetch('content/index.json', { cache: 'no-store' });
+      if (resp.ok) {
+        prefetchedManifest = await resp.json();
+        console.log('Loaded report metadata manifest');
+        return prefetchedManifest;
+      }
+    } catch (e) { /* not available */ }
+    prefetchedManifest = {};
+    return prefetchedManifest;
+  }
+
+  let fullTextSearchIndex = null;
+  let fullTextSearchIndexPromise = null;
+  async function loadFullTextSearchIndex() {
+    if (fullTextSearchIndex !== null) return fullTextSearchIndex;
+    if (!fullTextSearchIndexPromise) {
+      fullTextSearchIndexPromise = (async () => {
+        try {
+          const response = await fetch('content/search-index.json');
+          if (response.ok) {
+            const entries = await response.json();
+            fullTextSearchIndex = new Map(entries.map(entry => [
+              `${entry.category}\u0000${entry.model}\u0000${entry.file}\u0000${entry.language || 'zh'}`,
+              entry.text || ''
+            ]));
+            return fullTextSearchIndex;
+          }
+        } catch (error) {
+          console.warn('Full-text search index unavailable:', error.message);
+        }
+        fullTextSearchIndex = new Map();
+        return fullTextSearchIndex;
+      })();
+      try {
+        return await fullTextSearchIndexPromise;
+      } finally {
+        fullTextSearchIndexPromise = null;
+      }
+    }
+    return fullTextSearchIndexPromise;
+  }
+
+  function getPrefetchedReportPath(category, model, reportFile, language = currentLanguage) {
+    const safeCategory = category.replace(/ /g, '_');
+    const safeModel = model.replace(/ /g, '_');
+    const languageDir = language === 'en' ? 'en/' : '';
+    return `content/reports/${safeCategory}/${safeModel}/${languageDir}${reportFile.replace(/\.md$/i, '.json')}`;
+  }
+
+  // Fetch file content. In the merged repository, report bodies are the
+  // checked-in Markdown files, so same-origin paths are the primary source.
+  // The old cache/proxy/GitCode path is retained as a fallback.
+  async function fetchReportContent(category, model, reportFile) {
+    console.log('fetchReportContent', { category, model, reportFile });
+    const config    = repoConfig[category];
+    const modelsSource = actualRepoModels[category] || repoModels[category];
+    const modelData = modelsSource.find(m => m.name === model);
+    console.log('modelData', modelData, 'source:', actualRepoModels[category] ? 'actual' : 'hardcoded');
+    if (!modelData || !reportFile) return null;
+
+    const report = findReport(category, model, reportFile);
+    const variant = reportLanguageVariant(report);
+    const docPath = modelData.docPath || '';
+    const defaultPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+    const filePath = variant?.sourcePath || defaultPath;
+    const baseDir = filePath.includes('/') ? filePath.slice(0, filePath.lastIndexOf('/')) : '';
+    const contentLanguage = variant ? currentLanguage : 'zh';
+    console.log('fetchReportContent details:', { config, modelData, docPath, filePath, baseDir });
+
+    try {
+      const localMarkdownUrl = sameOriginContentUrl(filePath);
+      const response = await fetch(localMarkdownUrl, { cache: 'no-store' });
+      if (response.ok) {
+        const content = await response.text();
+        if (content && !content.trimStart().startsWith('<!DOCTYPE') && !content.trimStart().startsWith('<html')) {
+          console.log('Loaded from same-origin Markdown:', localMarkdownUrl, content.length);
+          return renderMarkdown(content, config.ns, config.repo, config.branch, baseDir);
+        }
+      }
+    } catch (error) {
+      console.warn('Same-origin Markdown unavailable:', error.message);
+    }
+
+    try {
+      const cacheUrl = getPrefetchedReportPath(category, model, reportFile, contentLanguage);
+      const cachedResponse = await fetch(cacheUrl);
+      if (cachedResponse.ok) {
+        const cachedReport = await cachedResponse.json();
+        if (cachedReport.markdown) {
+          console.log('Loaded from static report cache:', cacheUrl);
+          return renderMarkdown(
+            cachedReport.markdown, config.ns, config.repo, config.branch, baseDir, cachedReport.images || {}
+          );
+        }
+      }
+    } catch (error) {
+      console.warn('Static report cache unavailable:', error.message);
+    }
+
+    // Fallback 1: Try local proxy (optional, for development). It streams the
+    // remote response and does not persist report content.
+    try {
+      const localUrl = localProxyUrl(config.ns, config.repo, config.branch, filePath);
+      const response = await fetch(localUrl);
+      if (response.ok) {
+        const content = await response.text();
+        console.log('Loaded via local proxy:', content.length);
+        return renderMarkdown(content, config.ns, config.repo, config.branch, baseDir);
+      }
+    } catch (e) { /* local proxy not running, continue */ }
+
+    // Fallback 2: Try GitCode API (returns JSON with base64 content)
+    const api = apiUrl(config.ns, config.repo, config.branch, filePath);
+    console.log('Trying GitCode API:', api);
+    const apiResp = await fetchWithCorsProxy(api);
+    if (apiResp) {
+      try {
+        const json = await apiResp.json();
+        if (json.content) {
+          const content = atob(json.content);
+          console.log('Loaded via GitCode API:', content.length);
+          return renderMarkdown(content, config.ns, config.repo, config.branch, baseDir);
+        }
+      } catch (e) {
+        console.warn('API parse error:', e);
+      }
+    }
+
+    // Fallback 3: Try raw GitCode URL
+    const rawUrl = rawGitCodeUrl(config.ns, config.repo, config.branch, filePath);
+    console.log('Trying raw GitCode URL:', rawUrl);
+    const rawResp = await fetchWithCorsProxy(rawUrl);
+    if (rawResp) {
+      const text = await rawResp.text();
+      // Check if we got actual markdown (not an HTML page)
+      if (text && !text.trimStart().startsWith('<!DOCTYPE') && !text.trimStart().startsWith('<html')) {
+        console.log('Loaded via raw URL:', text.length);
+        return renderMarkdown(text, config.ns, config.repo, config.branch, baseDir);
+      }
+    }
+
+    console.warn('All fetch attempts failed for:', filePath);
+    return null;
+  }
+
+
+  // Render markdown using marked.js; resolve relative images through the proxy
+  function renderMarkdown(md, ns = 'tian-ccs', repo = '', branch = 'main', baseDir = '', images = {}) {
+    console.log('renderMarkdown', { ns, repo, branch, baseDir, mdLength: md.length });
+    // Strip YAML front matter if present
+    md = md.replace(/^---[\s\S]*?---\n/, '');
+
+    // Remove HTML comments
+    md = md.replace(/<!--[\s\S]*?-->/g, '');
+
+    // Remove script, style, iframe tags (including their content)
+    md = md.replace(/<script\b[\s\S]*?<\/script>/gi, '');
+    md = md.replace(/<style\b[\s\S]*?<\/style>/gi, '');
+    md = md.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, '');
+
+    // The report shell already displays the document H1 as its page title.
+    // Remove only the first Markdown H1 from the body to avoid duplication.
+    md = md.replace(/^[ \t]{0,3}#[ \t]+.+?[ \t]*#*[ \t]*\r?$/m, '');
+
+    // Some source reports indent standalone images by four spaces. Markdown
+    // treats those lines as code blocks, so normalize image-only lines first.
+    md = md.replace(/^[ \t]{4,}(<img\b[^>]*>)[ \t]*$/gim, '$1');
+    md = md.replace(/^[ \t]{4,}(!\[[^\]]*\]\([^\n]+\))[ \t]*$/gm, '$1');
+
+    const cachedImageUrl = (src) => {
+      if (!src) return null;
+      return images[src] || images[decodeURIComponentSafe(src)] || null;
+    };
+
+    // Extract LaTeX math BEFORE markdown parsing so marked doesn't mangle
+    // backslashes / underscores / ampersands inside formulas. Each match is
+    // replaced with an inert token and restored (rendered via KaTeX) after parse.
+    const mathStore = [];
+    const stashMath = (tex, display) => {
+      const token = `@@MATH${mathStore.length}@@`;
+      mathStore.push({ tex: tex.trim(), display });
+      return token;
+    };
+    // Block math first ($$...$$ and \[...\]), then inline ($...$ and \(...\)).
+    md = md.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) => stashMath(tex, true));
+    md = md.replace(/\\\[([\s\S]+?)\\\]/g, (m, tex) => stashMath(tex, true));
+    md = md.replace(/\\\(([\s\S]+?)\\\)/g, (m, tex) => stashMath(tex, false));
+    // Inline $...$: not preceded/followed by $, no newline inside (avoids $5 currency spans).
+    md = md.replace(/(?<!\$)\$(?!\$)((?:\\.|[^$\n])+?)\$(?!\$)/g, (m, tex) => stashMath(tex, false));
+
+    // Rewrite HTML <img> tags with relative src. Primary src goes through the
+    // local proxy (8081), which serves the image bytes with correct CORS/type;
+    // direct raw GitCode URLs return an HTML page for images, so they only work
+    // as an onerror fallback. See imageSrc() for the full chain.
+    if (repo && baseDir) {
+      md = md.replace(/<img\b([^>]*?)\bsrc\s*=\s*(["'])(.*?)\2([^>]*?)\/?>/gi, (match, before, quote, src, after) => {
+        try {
+          const cached = cachedImageUrl(src);
+          if (cached) return `<img${before}src="${cached}"${after} loading="lazy">`;
+          if (/^(?:https?:\/\/|data:)/i.test(src)) return match;
+          const resolved = resolvePath(baseDir, src);
+          const { primary, onerror } = imageSrc(ns, repo, branch, resolved);
+          console.log('HTML img rewrite:', { src, resolved, primary });
+          return `<img${before}src="${primary}"${after} loading="lazy"${onerror}>`;
+        } catch (e) {
+          console.warn('HTML img rewrite failed:', e.message, { src, baseDir });
+          return match;
+        }
+      });
+    }
+
+    // Remove other unwanted HTML tags but keep their content (strip tags only)
+    // Note: we no longer strip <img> since we want to preserve rewritten img tags
+    md = md.replace(/<\/?(div|span|p|br|hr|section|article|nav|header|footer|aside|main|figure|figcaption)[^>]*>/gi, '');
+
+    // Re-write relative markdown image src through the local proxy (see imageSrc)
+    if (repo && baseDir) {
+      md = md.replace(/!\[([^\]]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+["'][^"']*["'])?\s*\)/g, (match, alt, angleSrc, plainSrc) => {
+        try {
+          const src = angleSrc || plainSrc;
+          const cached = cachedImageUrl(src);
+          if (cached) return `<img src="${cached}" alt="${alt}" loading="lazy">`;
+          if (/^(?:https?:\/\/|data:)/i.test(src)) return match;
+          const resolved = resolvePath(baseDir, src);
+          const { primary, onerror } = imageSrc(ns, repo, branch, resolved);
+          console.log('Image rewrite:', { alt, src, resolved, primary });
+          return `<img src="${primary}" alt="${alt}" loading="lazy"${onerror}>`;
+        } catch (e) {
+          console.warn('Image rewrite failed:', e.message, { src, baseDir });
+          return match;
+        }
+      });
+    }
+
+    // Rewrite relative .md links to GitCode blob URLs
+    if (repo && baseDir) {
+      md = md.replace(/\[([^\]]*)\]\((?!https?:\/\/|#)([^)]+\.md)\)/g, (match, text, href) => {
+        try {
+          const resolved = resolvePath(baseDir, href);
+          const blobUrl = `https://gitcode.com/${ns}/${repo}/blob/${branch}/${resolved}`;
+          console.log('Link rewrite:', { text, href, resolved, blobUrl });
+          return `[${text}](${blobUrl})`;
+        } catch (e) {
+          console.warn('Link rewrite failed:', e.message, { href, baseDir });
+          return match;
+        }
+      });
+    }
+
+    // Generate slug from heading text (matches marked default + common TOC generators)
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .replace(/<[^>]*>/g, '')           // strip HTML tags
+        .replace(/[^\w\s\u4e00-\u9fff-]/g, '') // keep word chars, spaces, Chinese chars, hyphens
+        .replace(/\s+/g, '-')              // spaces to hyphens
+        .replace(/-+/g, '-')               // collapse multiple hyphens
+        .replace(/^-|-$/g, '');            // trim leading/trailing hyphens
+    }
+
+    // Use marked with safe options
+    try {
+      const renderer = new marked.Renderer();
+      const headingIds = {};
+      renderer.heading = (text, level) => {
+        let slug = slugify(text);
+        // Handle duplicate headings by appending a counter
+        if (headingIds[slug] !== undefined) {
+          headingIds[slug]++;
+          slug = slug + '-' + headingIds[slug];
+        } else {
+          headingIds[slug] = 0;
+        }
+        return `<h${level} id="${slug}">${text}</h${level}>\n`;
+      };
+      renderer.link = (href, title, text) => {
+        const isInternal = href.startsWith('#');
+        const target = isInternal ? '' : ' target="_blank" rel="noopener"';
+        return `<a href="${href}"${title ? ` title="${title}"` : ''}${target}>${text}</a>`;
+      };
+      renderer.image = (href, title, text) => {
+        let imgSrc = cachedImageUrl(href) || href;
+        let onerror = '';
+        // Absolute gitcode raw URLs (plain host) return an HTML page, not image
+        // bytes, so route them through the CDN/proxy chain. Matches both
+        // gitcode.com and raw.gitcode.com with any namespace.
+        const m = href.match(/^https?:\/\/(?:raw\.)?gitcode\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)$/);
+        if (!cachedImageUrl(href) && m) {
+          const [, mns, r, b, p] = m;
+          const chain = imageSrc(mns, r, b, p);
+          imgSrc = chain.primary;
+          onerror = chain.onerror;
+        }
+        return `<img src="${imgSrc}" alt="${text}"${title ? ` title="${title}"` : ''}${onerror} loading="lazy">`;
+      };
+
+      let parsed = marked.parse(md, {
+        renderer,
+        breaks: true,
+        gfm: true,
+        sanitize: false, // We already cleaned HTML
+        silent: false,
+        headerIds: false, // We handle IDs ourselves in the heading renderer
+        headerPrefix: ''
+      });
+
+      // Restore stashed math, rendering each via KaTeX. Tokens may have been
+      // wrapped in <p> by marked; unwrap block math from its paragraph.
+      if (mathStore.length) {
+        parsed = parsed.replace(/@@MATH(\d+)@@/g, (m, i) => {
+          const item = mathStore[Number(i)];
+          if (!item) return m;
+          try {
+            return katex.renderToString(item.tex, {
+              displayMode: item.display,
+              throwOnError: false,
+              output: 'html',
+            });
+          } catch (e) {
+            console.warn('KaTeX render failed:', e.message);
+            return `<code>${item.display ? '$$' : '$'}${item.tex}${item.display ? '$$' : '$'}</code>`;
+          }
+        });
+        // A block formula alone in a paragraph: <p><span class="katex-display">…</span></p>
+        parsed = parsed.replace(/<p>(\s*<span class="katex-display">[\s\S]*?<\/span>\s*)<\/p>/g, '$1');
+      }
+
+      return `<div class="report-markdown">${parsed}</div>`;
+    } catch (error) {
+      console.error('Marked parsing error:', error);
+      return `<div class="report-markdown"><pre class="bg-red-50 p-4 rounded">Markdown parsing error: ${error.message}</pre></div>`;
+    }
+  }
+
+  // Render markdown with pre-fetched base64 images (no CORS needed)
+  function renderMarkdownWithImages(md, ns, repo, branch, baseDir, images) {
+    // First: render markdown to HTML normally (images become <img src="relative"> or <img src="rawUrl">)
+    const html = renderMarkdown(md, ns, repo, branch, baseDir);
+
+    // Then: post-process the rendered HTML to replace image src with pre-fetched base64 data URIs
+    if (!images || Object.keys(images).length === 0) return html;
+
+    // Build a lookup: resolve all possible src variations to data URIs so the
+    // rendered <img> src (now the local-proxy URL) maps back to inline base64.
+    const srcMap = {};
+    for (const [relPath, dataUri] of Object.entries(images)) {
+      srcMap[relPath] = dataUri;
+      if (repo && baseDir) {
+        try {
+          const resolved = resolvePath(baseDir, relPath);
+          const chain = imageSrc(ns, repo, branch, resolved);
+          // Map every variant imageSrc() can emit: CDN (primary) and proxy fallback.
+          srcMap[chain.primary] = dataUri;
+          srcMap[chain.proxy] = dataUri;
+        } catch (e) {}
+      }
+    }
+
+    // Replace all <img src="..."> in the rendered HTML with base64 data URIs
+    return html.replace(/<img\b([^>]*)\bsrc\s*=\s*"([^"]+)"([^>]*)>/gi, (match, before, src, after) => {
+      if (srcMap[src]) {
+        // Remove any onerror handler since we have the image data inline
+        const cleanBefore = before.replace(/\s*onerror\s*=\s*"[^"]*"/gi, '');
+        const cleanAfter = after.replace(/\s*onerror\s*=\s*"[^"]*"/gi, '');
+        return `<img${cleanBefore}src="${srcMap[src]}"${cleanAfter}>`;
+      }
+      return match;
+    });
+  }
+
+  // Get repo URL for a category
+  function getRepoUrl(category) {
+    const c = repoConfig[category];
+    return `https://gitcode.com/${c.ns}/${c.repo}`;
+  }
+
+  // Minimal HTML / JS string escaping for dynamic sidebar generation
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escJs(s) {
+    return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  }
+
+  function categoryGradient(category) {
+    const isDark = document.documentElement.classList.contains('dark');
+    const cat = (category || '').toLowerCase();
+    if (isDark) {
+      if (cat.includes('infer')) return 'background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.12));color:#c4b5fd;';
+      if (cat.includes('train')) return 'background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.12));color:#93c5fd;';
+      if (cat.includes('embodied')) return 'background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(59,130,246,0.1));color:#a5b4fc;';
+      if (cat.includes('cann') || cat.includes('feature')) return 'background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.1));color:#c4b5fd;';
+      return 'background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.1));color:#a5b4fc;';
+    }
+    if (cat.includes('infer')) return 'background: linear-gradient(135deg, rgba(239,219,255,0.4), rgba(252,211,225,0.3));color:#6b5284;';
+    if (cat.includes('train')) return 'background: linear-gradient(135deg, rgba(191,219,254,0.4), rgba(252,211,225,0.3));color:#4a5fa8;';
+    if (cat.includes('embodied')) return 'background: linear-gradient(135deg, rgba(253,230,138,0.35), rgba(252,211,225,0.3));color:#92400e;';
+    if (cat.includes('cann') || cat.includes('feature')) return 'background: linear-gradient(135deg, rgba(196,181,253,0.35), rgba(191,219,254,0.3));color:#5b21b6;';
+    return 'background: linear-gradient(135deg, rgba(224,231,255,0.4), rgba(239,219,255,0.3));color:#695282;';
+  }
+
+  // Re-render the sidebar <nav> from the current repoModels data.
+  // Prefer the document's H1 title; retain the filename as a legacy fallback.
+  function reportTitle(report) {
+    const translation = reportLanguageVariant(report);
+    if (translation?.title) return translation.title;
+    if (report && typeof report === 'object' && report.title) return report.title;
+    const filename = typeof report === 'string' ? report : (report && report.file ? report.file : '');
+    return filename.replace(/\.md$/i, '');
+  }
+
+  function reportSidebarTitle(report) {
+    const translation = reportLanguageVariant(report);
+    if (translation?.sidebarTitle) return translation.sidebarTitle;
+    if (report && typeof report === 'object' && report.sidebarTitle) return report.sidebarTitle;
+    return reportTitle(report);
+  }
+
+  function reportLanguageVariant(report, language = currentLanguage) {
+    if (!report || typeof report !== 'object' || language === 'zh') return null;
+    return report.translations?.[language] || null;
+  }
+
+  function findReport(category, model, file) {
+    const modelData = (actualRepoModels[category] || repoModels[category] || [])
+      .find(item => item.name === model);
+    return modelData?.reports?.find(item => reportFile(item) === file) || null;
+  }
+
+  // Get the filename string. Object support keeps older manifests compatible.
+  function reportFile(r) {
+    return typeof r === 'string' ? r : (r && r.file ? r.file : '');
+  }
+
+  function decodeURIComponentSafe(value) {
+    try { return decodeURIComponent(value); } catch (e) { return value; }
+  }
+
+  function reportCover(report) {
+    return report && typeof report === 'object' ? (report.coverImage || '') : '';
+  }
+
+  function coverMeta(category) {
+    if (category === 'Train') return { css: 'cover-train', icon: 'model_training' };
+    if (category === 'Embodie_AI') return { css: 'cover-embodied', icon: 'smart_toy' };
+    if (category === 'CANN Features') return { css: 'cover-features', icon: 'tune' };
+    return { css: 'cover-infer', icon: 'memory' };
+  }
+
+  function coverImageSource(cover) {
+    if (/^(?:https?:\/\/|data:|content\/)/i.test(cover)) return cover;
+    return sameOriginContentUrl(cover);
+  }
+
+  function handleCoverImageError(image) {
+    if (image.dataset.retried !== 'true') {
+      image.dataset.retried = 'true';
+      const separator = image.dataset.original.includes('?') ? '&' : '?';
+      image.src = `${image.dataset.original}${separator}cover_retry=${Date.now()}`;
+      return;
+    }
+    image.classList.add('hidden');
+    image.nextElementSibling?.classList.remove('hidden');
+  }
+
+  function renderReportCover(report, category, model, wrapperClass) {
+    const cover = reportCover(report);
+    const coverSrc = cover ? coverImageSource(cover) : '';
+    const meta = coverMeta(category);
+    const fallback = `<div class="cover-placeholder ${meta.css} ${cover ? 'hidden' : ''}">
+      <span class="material-symbols-outlined text-2xl">${meta.icon}</span>
+      <span class="text-[10px] font-bold leading-tight break-words">${escHtml(formatModelName(model))}</span>
+    </div>`;
+    return `<div class="${wrapperClass} overflow-hidden flex items-center justify-center">
+      ${cover ? `<img src="${escHtml(coverSrc)}" data-original="${escHtml(coverSrc)}" alt="${escHtml(reportTitle(report))}" loading="lazy" referrerpolicy="no-referrer" class="report-cover-image w-full h-full transition-transform duration-500 group-hover:scale-105" onerror="handleCoverImageError(this)">` : ''}
+      ${fallback}
+    </div>`;
+  }
+
+  // Format a model name (underscore-separated) into a readable label.
+  function formatModelName(name) {
+    return name.replace(/[_-]/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  function renderSidebar() {
+    const icons = {
+      "Infer": "memory",
+      "Train": "model_training",
+      "Embodie_AI": "smart_toy",
+      "Spatial Intelligence": "language",
+      "CANN Features": "tune",
+    };
+    const chevron = '<svg class="chevron w-4 h-4 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>';
+
+    // Render one model as an always-expandable folder so the 4-level hierarchy
+    // (Category > Subcategory > Model > Report) stays visible even when a model
+    // has a single report — the report name still shows as its own leaf.
+    function renderModel(category, model) {
+      const sub = 'flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 transition-all text-xs text-slate-500 cursor-pointer';
+      const reportLink = (r) =>
+        `<a title="${escHtml(reportTitle(r))}" onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportSidebarTitle(r))}</a>`;
+      const body = model.reports.length
+        ? model.reports.map(reportLink).join('')
+        : `<a onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(model.name)}','')" class="${sub}"><span class="material-symbols-outlined text-xs">article</span>${escHtml(model.name)}</a>`;
+      const jumpModel = model.subcategory
+        ? ` onclick="showModel('${escJs(category)}','${escJs(model.subcategory)}','${escJs(model.name)}')"`
+        : '';
+      return `<details class="group"><summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm text-slate-600"><span class="material-symbols-outlined text-xs">deployed_code</span><span${jumpModel} class="flex-1">${escHtml(model.name)}</span>${chevron}</summary><div class="ml-4 mt-1 space-y-1">${body}</div></details>`;
+    }
+
+    let html = `
+      <a onclick="showHome()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 text-tech-accent font-semibold shadow-sm cursor-pointer">
+        <span class="material-symbols-outlined">home</span>
+        ${escHtml(t('home'))}
+      </a>
+      <div class="mt-4 space-y-1">
+    `;
+
+    const bigChevron = '<svg class="chevron w-5 h-5 text-slate-400 transition-transform ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>';
+    let first = true;
+    for (const [category, models] of Object.entries(repoModels)) {
+      const icon    = icons[category] || 'folder';
+      const open    = first ? ' open' : ''; first = false;
+
+      // Clicking the label navigates to the drill-down view; the <summary>
+      // still toggles expansion (onclick doesn't preventDefault).
+      html += `<details${open} class="group"><summary class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/40 transition-all cursor-pointer list-none"><span class="material-symbols-outlined text-slate-500">${icon}</span><span onclick="showCategory('${escJs(category)}')" class="text-slate-600 font-medium flex-1">${escHtml(category)}</span>${bigChevron}</summary><div class="ml-8 mt-1 space-y-1">`;
+
+      const subs = getSubcategories(category);
+      if (subs === null) {
+        // Flat category: reports sit directly under the category (no sub/model).
+        for (const model of models) for (const report of model.reports) {
+          html += `<a title="${escHtml(reportTitle(report))}" onclick="showModelReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(report))}','${escJs(reportFile(report))}')" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all text-sm text-slate-600 cursor-pointer"><span class="material-symbols-outlined text-xs">article</span>${escHtml(reportSidebarTitle(report))}</a>`;
+        }
+      } else {
+        // 4-level: Subcategory <details> wrapping Model <details>/links.
+        for (const scat of subs) {
+          html += `<details class="group"><summary class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/40 transition-all cursor-pointer list-none text-sm font-medium text-slate-600"><span class="material-symbols-outlined text-xs">category</span><span onclick="showSubcategory('${escJs(category)}','${escJs(scat.name)}')" class="flex-1">${escHtml(scat.name)}</span>${chevron}</summary><div class="ml-4 mt-1 space-y-1">`;
+          for (const model of scat.models) html += renderModel(category, model);
+          html += `</div></details>`;
+        }
+      }
+
+      html += `</div></details>`;
+    }
+
+    html += `</div>`;
+    document.querySelector('#sidebar nav').innerHTML = html;
+  }
+
+  // Update homepage with real reports from repos
+  function updateHomePage() {
+    console.log('Updating homepage with real reports...');
+    // Always use hardcoded repoModels for homepage to ensure consistency
+    const source = repoModels;
+    console.log('Using data source:', source === repoModels ? 'hardcoded repoModels' : 'actualRepoModels');
+
+    // Collect all reports
+    const allReports = [];
+    for (const [category, models] of Object.entries(source)) {
+      console.log(`Category ${category}: ${models.length} models`);
+      for (const model of models) {
+        console.log(`  Model ${model.name}: ${model.reports.length} reports, docPath: ${model.docPath}`);
+        for (const r of model.reports) {
+          const rf = reportFile(r);
+          const rt = reportTitle(r);
+          allReports.push({
+            category,
+            model: model.name,
+            reportFile: rf,
+            reportTitle: rt,
+            report: r,
+            docPath: model.docPath
+          });
+        }
+      }
+    }
+
+    console.log(`Found ${allReports.length} total reports`);
+
+    // Update Recent Reports section (show first 6 reports)
+    const recentReportsContainer = document.querySelector('#homeView .space-y-4');
+    if (recentReportsContainer && allReports.length > 0) {
+      let html = '';
+      const reportsToShow = allReports.slice(0, 6); // Show first 6 reports
+
+      reportsToShow.forEach((report, index) => {
+        const shortCategory = report.category.split(' ')[0]; // Get first word for badge
+        html += `
+          <article onclick="showReport('${report.category}', '${report.model}', '${report.reportTitle}', '${report.reportFile}')" class="glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            ${renderReportCover(report.report, report.category, report.model, 'w-48 h-32 shrink-0')}
+            <div class="p-4 flex flex-col justify-center">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${shortCategory}</span>
+              </div>
+              <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors line-clamp-1">${report.reportTitle}</h3>
+              <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-2">Technical report for ${report.model} in ${report.category}.</p>
+              <span class="text-xs text-slate-400">${report.model}</span>
+            </div>
+          </article>
+        `;
+      });
+
+      recentReportsContainer.innerHTML = html;
+    }
+
+  }
+
+
+  // ---- Document font size --------------------------------------------------
+  const REPORT_FONT_MIN = 14;
+  const REPORT_FONT_MAX = 22;
+  const REPORT_FONT_DEFAULT = 16;
+  let reportFontSize = REPORT_FONT_DEFAULT;
+
+  function clampReportFontSize(value) {
+    return Math.min(REPORT_FONT_MAX, Math.max(REPORT_FONT_MIN, value));
+  }
+
+  function applyReportFontSize(value, persist = true) {
+    reportFontSize = clampReportFontSize(Number.isFinite(value) ? value : REPORT_FONT_DEFAULT);
+    document.documentElement.style.setProperty('--report-font-size', `${reportFontSize}px`);
+    const label = document.getElementById('reportFontSizeLabel');
+    const decrease = document.getElementById('reportFontDecrease');
+    const increase = document.getElementById('reportFontIncrease');
+    if (label) label.textContent = `${reportFontSize}px`;
+    if (decrease) decrease.disabled = reportFontSize <= REPORT_FONT_MIN;
+    if (increase) increase.disabled = reportFontSize >= REPORT_FONT_MAX;
+    if (persist) localStorage.setItem('reportFontSize', String(reportFontSize));
+  }
+
+  function adjustReportFontSize(direction) {
+    applyReportFontSize(reportFontSize + (direction < 0 ? -1 : 1));
+  }
+
+  function resetReportFontSize() {
+    applyReportFontSize(REPORT_FONT_DEFAULT);
+  }
+
+  function initializeReportFontSize() {
+    const stored = Number.parseInt(localStorage.getItem('reportFontSize') || '', 10);
+    applyReportFontSize(Number.isFinite(stored) ? stored : REPORT_FONT_DEFAULT, false);
+  }
+
+  // Estimate reading time from the rendered report instead of using a fixed
+  // placeholder. Chinese text is counted by characters; Latin text by words;
+  // code receives a slower per-line reading allowance.
+  function updateReportReadingTime() {
+    const content = document.getElementById('reportContent');
+    const output = document.getElementById('reportReadingTime');
+    if (!content || !output) return;
+    const clone = content.cloneNode(true);
+    clone.querySelectorAll('script, style, .mermaid').forEach(node => node.remove());
+    const text = clone.textContent || '';
+    const cjk = (text.match(/[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g) || []).length;
+    const latinWords = (text.replace(/[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g, ' ')
+      .match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g) || []).length;
+    const codeLines = [...content.querySelectorAll('pre code')]
+      .reduce((total, code) => total + (code.textContent || '').split(/\r?\n/).filter(line => line.trim()).length, 0);
+    const minutes = Math.max(1, Math.ceil(cjk / 380 + latinWords / 210 + codeLines / 45));
+    output.textContent = typeof t('readTime') === 'function' ? t('readTime')(minutes) : `${minutes} min read`;
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', async () => {
+    applyLanguage();
+    // Load models from pre-fetched manifest (dynamic discovery)
+    const loaded = await loadModelsFromManifest();
+    console.log('Manifest loaded:', loaded, 'models:', Object.keys(repoModels).map(k => `${k}: ${repoModels[k].length}`));
+
+    renderSidebar();
+    updateHomePage();
+    updateScopeFilterUI();
+    initializeReportFontSize();
+    await restoreViewFromPath();
+
+    document.addEventListener('click', (event) => {
+      const panel = document.getElementById('scopeFilterPanel');
+      const button = document.getElementById('scopeFilterButton');
+      if (panel && !panel.contains(event.target) && !button?.contains(event.target)) {
+        panel.classList.add('hidden');
+        button?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      const reportVisible = !document.getElementById('reportView')?.classList.contains('hidden');
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f' && reportVisible) {
+        event.preventDefault();
+        openReportSearch();
+        return;
+      }
+      if (event.key === 'Escape') {
+        if (!document.getElementById('reportSearchBar')?.classList.contains('hidden')) {
+          closeReportSearch();
+          return;
+        }
+        document.getElementById('scopeFilterPanel')?.classList.add('hidden');
+        document.getElementById('scopeFilterButton')?.setAttribute('aria-expanded', 'false');
+        closeFeedbackModal();
+      }
+    });
+
+    // Handle anchor link clicks within report content
+    document.getElementById('reportContent')?.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (link && link.getAttribute('href')?.startsWith('#')) {
+        e.preventDefault();
+        const id = link.getAttribute('href').substring(1);
+        const target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
+
+    window.addEventListener('popstate', () => restoreViewFromPath());
+    window.addEventListener('resize', clampReportSearchBar);
+  });
+
+  // ---- Find in document ----------------------------------------------------
+  let reportSearchHits = [];
+  let reportSearchIndex = -1;
+  let reportSearchDrag = null;
+
+  function reportSearchBounds(left, top) {
+    const bar = document.getElementById('reportSearchBar');
+    if (!bar) return { left, top };
+    const margin = 8;
+    return {
+      left: Math.min(Math.max(margin, left), Math.max(margin, window.innerWidth - bar.offsetWidth - margin)),
+      top: Math.min(Math.max(margin, top), Math.max(margin, window.innerHeight - bar.offsetHeight - margin)),
+    };
+  }
+
+  function positionReportSearchBar(left, top) {
+    const bar = document.getElementById('reportSearchBar');
+    if (!bar) return;
+    const bounded = reportSearchBounds(left, top);
+    bar.style.left = `${bounded.left}px`;
+    bar.style.top = `${bounded.top}px`;
+    bar.style.right = 'auto';
+  }
+
+  function startReportSearchDrag(event) {
+    if (event.button !== 0 && event.pointerType !== 'touch') return;
+    const bar = document.getElementById('reportSearchBar');
+    const handle = event.currentTarget;
+    if (!bar || !handle) return;
+    const rect = bar.getBoundingClientRect();
+    reportSearchDrag = { pointerId: event.pointerId, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
+    handle.setPointerCapture(event.pointerId);
+    handle.addEventListener('pointermove', moveReportSearchDrag);
+    handle.addEventListener('pointerup', endReportSearchDrag);
+    handle.addEventListener('pointercancel', endReportSearchDrag);
+    event.preventDefault();
+  }
+
+  function moveReportSearchDrag(event) {
+    if (!reportSearchDrag || event.pointerId !== reportSearchDrag.pointerId) return;
+    positionReportSearchBar(event.clientX - reportSearchDrag.offsetX, event.clientY - reportSearchDrag.offsetY);
+  }
+
+  function endReportSearchDrag(event) {
+    if (!reportSearchDrag || event.pointerId !== reportSearchDrag.pointerId) return;
+    const handle = event.currentTarget;
+    if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+    handle.removeEventListener('pointermove', moveReportSearchDrag);
+    handle.removeEventListener('pointerup', endReportSearchDrag);
+    handle.removeEventListener('pointercancel', endReportSearchDrag);
+    reportSearchDrag = null;
+  }
+
+  function clampReportSearchBar() {
+    const bar = document.getElementById('reportSearchBar');
+    if (!bar || bar.classList.contains('hidden')) return;
+    const rect = bar.getBoundingClientRect();
+    positionReportSearchBar(rect.left, rect.top);
+  }
+
+  function clearReportSearchHighlights() {
+    const parents = new Set();
+    document.querySelectorAll('#reportContent mark.report-search-hit').forEach(mark => {
+      const parent = mark.parentNode;
+      parents.add(parent);
+      mark.replaceWith(document.createTextNode(mark.textContent));
+    });
+    parents.forEach(parent => parent?.normalize());
+    reportSearchHits = [];
+    reportSearchIndex = -1;
+  }
+
+  function updateReportSearchCount() {
+    const count = document.getElementById('reportSearchCount');
+    if (count) count.textContent = reportSearchHits.length ? `${reportSearchIndex + 1} / ${reportSearchHits.length}` : '0 / 0';
+  }
+
+  function activateReportSearchHit(index, scroll = true) {
+    if (!reportSearchHits.length) { updateReportSearchCount(); return; }
+    reportSearchHits[reportSearchIndex]?.classList.remove('current');
+    reportSearchIndex = (index + reportSearchHits.length) % reportSearchHits.length;
+    const current = reportSearchHits[reportSearchIndex];
+    current.classList.add('current');
+    updateReportSearchCount();
+    if (scroll) current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function runReportSearch(rawQuery) {
+    clearReportSearchHighlights();
+    const query = rawQuery.trim();
+    if (!query) { updateReportSearchCount(); return; }
+    const expression = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const content = document.getElementById('reportContent');
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if (!parent || parent.closest('script, style, mark.report-search-hit')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const node of nodes) {
+      const value = node.nodeValue;
+      expression.lastIndex = 0;
+      if (!expression.test(value)) continue;
+      expression.lastIndex = 0;
+      const fragment = document.createDocumentFragment();
+      let cursor = 0;
+      for (const match of value.matchAll(expression)) {
+        fragment.append(document.createTextNode(value.slice(cursor, match.index)));
+        const mark = document.createElement('mark');
+        mark.className = 'report-search-hit';
+        mark.textContent = match[0];
+        fragment.append(mark);
+        reportSearchHits.push(mark);
+        cursor = match.index + match[0].length;
+      }
+      fragment.append(document.createTextNode(value.slice(cursor)));
+      node.replaceWith(fragment);
+    }
+    if (reportSearchHits.length) activateReportSearchHit(0, false);
+    else updateReportSearchCount();
+  }
+
+  function moveReportSearch(direction) {
+    if (!reportSearchHits.length) {
+      runReportSearch(document.getElementById('reportSearchInput')?.value || '');
+      if (!reportSearchHits.length) return;
+    }
+    activateReportSearchHit(reportSearchIndex + direction);
+  }
+
+  function handleReportSearchKeydown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      moveReportSearch(event.shiftKey ? -1 : 1);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      closeReportSearch();
+    }
+  }
+
+  function openReportSearch() {
+    const bar = document.getElementById('reportSearchBar');
+    const input = document.getElementById('reportSearchInput');
+    bar?.classList.remove('hidden');
+    requestAnimationFrame(clampReportSearchBar);
+    requestAnimationFrame(() => { input?.focus(); input?.select(); });
+  }
+
+  function closeReportSearch(restoreFocus = true) {
+    clearReportSearchHighlights();
+    document.getElementById('reportSearchBar')?.classList.add('hidden');
+    const input = document.getElementById('reportSearchInput');
+    if (input) input.value = '';
+    updateReportSearchCount();
+    if (restoreFocus) document.getElementById('reportSearchButton')?.focus();
+  }
+
+  // ---- Report Table of Contents (TOC) --------------------------------------
+  let tocHeadings = [];        // [{ id, el }] in document order
+  let tocLinks = {};           // id -> <a> element
+  let tocScrollHandler = null; // window scroll listener (for cleanup)
+  let tocActiveId = null;
+
+  // Build the TOC from h2/h3 in the rendered report. Called after content loads.
+  function buildTOC() {
+    const content = document.getElementById('reportContent');
+    const panel = document.getElementById('tocPanel');
+    const toggle = document.getElementById('tocToggle');
+    const list = document.getElementById('tocList');
+    clearTOC(); // reset any previous report's TOC/listener
+
+    const heads = Array.from(content.querySelectorAll('h2, h3')).filter(h => h.id);
+    if (heads.length < 2) { return; } // not worth a TOC for 0-1 headings
+
+    tocHeadings = heads.map(h => ({ id: h.id, el: h }));
+    list.innerHTML = heads.map(h =>
+      `<a class="toc-link ${h.tagName === 'H3' ? 'toc-h3' : ''}" data-id="${escHtml(h.id)}" onclick="scrollToHeading('${escJs(h.id)}')">${escHtml(h.textContent)}</a>`
+    ).join('');
+
+    tocLinks = {};
+    list.querySelectorAll('.toc-link').forEach(a => { tocLinks[a.dataset.id] = a; });
+
+    // Reveal panel (wide) / floating button (narrow) — media queries decide which.
+    panel.classList.add('toc-available');
+    toggle.classList.add('toc-available');
+
+    // Scroll-spy: highlight the heading nearest the top of the viewport.
+    tocScrollHandler = () => requestAnimationFrame(updateTocActive);
+    window.addEventListener('scroll', tocScrollHandler, { passive: true });
+    updateTocActive();
+  }
+
+  // Highlight the TOC entry for the section currently at/above the viewport top.
+  function updateTocActive() {
+    if (!tocHeadings.length) return;
+    const offset = 120; // account for sticky-ish top spacing
+    let current = tocHeadings[0].id;
+    for (const h of tocHeadings) {
+      if (h.el.getBoundingClientRect().top <= offset) current = h.id;
+      else break;
+    }
+    // Bottom-of-page guard: short trailing sections never reach the offset line,
+    // so when the page is scrolled to (or within 2px of) the bottom, force the
+    // last heading active — otherwise clicking the last TOC item never lights up.
+    const scrollBottom = window.innerHeight + window.scrollY;
+    const docHeight = document.documentElement.scrollHeight;
+    if (scrollBottom >= docHeight - 2) current = tocHeadings[tocHeadings.length - 1].id;
+
+    if (current === tocActiveId) return;
+    if (tocActiveId && tocLinks[tocActiveId]) tocLinks[tocActiveId].classList.remove('toc-active');
+    if (tocLinks[current]) tocLinks[current].classList.add('toc-active');
+    tocActiveId = current;
+  }
+
+  // Smooth-scroll to a heading and (on narrow screens) close the drawer.
+  function scrollToHeading(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('tocPanel').classList.remove('toc-open');
+  }
+
+  // Narrow-screen drawer toggle.
+  function toggleTocPanel() {
+    document.getElementById('tocPanel').classList.toggle('toc-open');
+  }
+
+  // Tear down the TOC when leaving a report (or before building a new one).
+  function clearTOC() {
+    if (tocScrollHandler) { window.removeEventListener('scroll', tocScrollHandler); tocScrollHandler = null; }
+    tocHeadings = []; tocLinks = {}; tocActiveId = null;
+    const panel = document.getElementById('tocPanel');
+    const toggle = document.getElementById('tocToggle');
+    const list = document.getElementById('tocList');
+    if (panel) panel.classList.remove('toc-available', 'toc-open');
+    if (toggle) toggle.classList.remove('toc-available');
+    if (list) list.innerHTML = '';
+  }
+
+  // ---- Prev / Next report navigation (req 3.1.5) ---------------------------
+  // Flatten a category's reports into one ordered sequence (model order as in
+  // repoModels, reports in listed order), find the current one, and render
+  // prev/next buttons at the report bottom. Boundaries hide the missing side.
+  function renderReportNav(category, model, reportFileParam) {
+    const nav = document.getElementById('reportNav');
+    if (!nav) return;
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    // Build flat list of {model, report, title} — normalise via helpers.
+    const seq = [];
+    for (const m of models) {
+      for (const r of (m.reports || [])) seq.push({ model: m.name, reportFile: reportFile(r), reportTitle: reportTitle(r) });
+    }
+    const idx = seq.findIndex(x => x.model === model && x.reportFile === reportFileParam);
+    if (idx === -1 || seq.length < 2) { nav.classList.add('hidden'); nav.innerHTML = ''; return; }
+
+    const prev = idx > 0 ? seq[idx - 1] : null;
+    const next = idx < seq.length - 1 ? seq[idx + 1] : null;
+
+    const card = (item, dir) => {
+      if (!item) return '<span></span>'; // keep grid column so next stays right-aligned
+      const t = item.reportTitle;
+      const isPrev = dir === 'prev';
+      return `
+        <a onclick="showReport('${escJs(category)}','${escJs(item.model)}','${escJs(t)}','${escJs(item.reportFile)}')"
+           class="glass-card rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5 group ${isPrev ? '' : 'sm:text-right sm:flex-row-reverse'}">
+          <span class="material-symbols-outlined text-tech-accent shrink-0">${isPrev ? 'arrow_back' : 'arrow_forward'}</span>
+          <span class="min-w-0">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">${isPrev ? '上一篇' : '下一篇'}</span>
+            <span class="block text-sm font-semibold text-coffee-brown group-hover:text-tech-accent transition-colors line-clamp-1">${escHtml(t)}</span>
+          </span>
+        </a>`;
+    };
+
+    nav.innerHTML = card(prev, 'prev') + card(next, 'next');
+    nav.classList.remove('hidden');
+  }
+
+  // ---- Reading progress bar (req 3.1.6) ------------------------------------
+  let progressHandler = null; // window scroll listener (for cleanup)
+
+  function updateReadingProgress() {
+    const bar = document.getElementById('readingProgress');
+    if (!bar) return;
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    const pct = scrollable > 0 ? Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100)) : 0;
+    bar.style.width = pct + '%';
+  }
+
+  // Show the progress bar and start tracking scroll (called when a report opens).
+  function showReadingProgress() {
+    const bar = document.getElementById('readingProgress');
+    if (!bar) return;
+    bar.classList.remove('hidden');
+    if (!progressHandler) {
+      progressHandler = () => requestAnimationFrame(updateReadingProgress);
+      window.addEventListener('scroll', progressHandler, { passive: true });
+    }
+    updateReadingProgress();
+  }
+
+  // Hide the progress bar and stop tracking (called when leaving report view).
+  function hideReadingProgress() {
+    const bar = document.getElementById('readingProgress');
+    if (bar) { bar.classList.add('hidden'); bar.style.width = '0'; }
+    if (progressHandler) { window.removeEventListener('scroll', progressHandler); progressHandler = null; }
+  }
+
+  // Toggle light/dark theme. Persists to localStorage; the early <head> script
+  // re-applies it on load. Styling is driven by html.dark CSS overrides.
+  function toggleTheme() {
+    const dark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    // Re-render any already-shown mermaid diagrams for the new theme.
+    if (window.mermaid) {
+      try { window.mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' }); } catch (e) {}
+    }
+  }
+
+  let sidebarVisible = true;
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    sidebarVisible = !sidebarVisible;
+
+    if (sidebarVisible) {
+      sidebar.classList.remove('sidebar-hidden');
+      toggleBtn.classList.add('hidden');
+      mainContent.classList.remove('content-expanded');
+    } else {
+      sidebar.classList.add('sidebar-hidden');
+      toggleBtn.classList.remove('hidden');
+      mainContent.classList.add('content-expanded');
+    }
+  }
+
+  function routePath(parts = []) {
+    const suffix = parts.map(part => encodeURIComponent(part)).join('/');
+    return window.SITE_BASE_PATH + suffix;
+  }
+
+  function updateRoute(parts, replace = false) {
+    const target = routePath(parts);
+    if (location.pathname === target) return;
+    history[replace ? 'replaceState' : 'pushState']({}, '', target);
+  }
+
+  function reportSlug(file) {
+    return file.replace(/\.md$/i, '');
+  }
+
+  async function restoreViewFromPath() {
+    const relative = location.pathname.startsWith(window.SITE_BASE_PATH)
+      ? location.pathname.slice(window.SITE_BASE_PATH.length)
+      : '';
+    const parts = relative.split('/').filter(Boolean).map(part => {
+      try { return decodeURIComponent(part); } catch (e) { return part; }
+    });
+    if (!parts.length) { showHome(false); return; }
+
+    const category = Object.keys(repoConfig).find(name => name === parts[0]);
+    if (!category) { showNotFound(); return; }
+    const config = repoConfig[category] || {};
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    if (config.flat) {
+      if (parts.length === 1) { showCategory(category, false); return; }
+      const model = models[0];
+      const report = model?.reports?.find(item => reportSlug(reportFile(item)) === parts[1]);
+      if (report) {
+        await showReport(category, model.name, reportTitle(report), reportFile(report), false);
+        return;
+      }
+    } else {
+      const subcategory = parts[1];
+      const modelName = parts[2];
+      if (parts.length === 1) { showCategory(category, false); return; }
+      if (parts.length === 2 && getSubcategories(category)?.some(item => item.name === subcategory)) {
+        showSubcategory(category, subcategory, false); return;
+      }
+      const model = models.find(item => item.name === modelName && item.subcategory === subcategory);
+      if (model && parts.length === 3) { showModel(category, subcategory, modelName, false); return; }
+      const report = model?.reports?.find(item => reportSlug(reportFile(item)) === parts[3]);
+      if (report && parts.length === 4) {
+        await showReport(category, modelName, reportTitle(report), reportFile(report), false);
+        return;
+      }
+    }
+    showNotFound();
+  }
+
+  function showNotFound() {
+    closeFeedbackModal();
+    currentFeedbackReport = null;
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.remove('hidden');
+    clearTOC();
+    hideReadingProgress();
+
+    const requestedPath = location.pathname + location.search + location.hash;
+    document.getElementById('notFoundPath').textContent = requestedPath;
+    const title = `[Docs site] Page not found: ${location.pathname}`;
+    const body = [
+      '## Missing page',
+      '',
+      `- Path: ${requestedPath}`,
+      `- Full URL: ${location.href}`,
+      `- Browser: ${navigator.userAgent}`,
+      '',
+      '## Expected result',
+      '',
+      '<!-- Describe which document or category you expected to open. -->',
+    ].join('\n');
+    const params = new URLSearchParams();
+    params.set('title', title);
+    params.set('body', body);
+    params.set('issue[title]', title);
+    params.set('issue[description]', body);
+    document.getElementById('notFoundFeedback').href =
+      `https://gitcode.com/tian-ccs/cann-recipes-docs/issues/new?${params.toString()}`;
+  }
+
+  function showHome(updateHistory = true) {
+    if (updateHistory) updateRoute([]);
+    closeFeedbackModal();
+    currentFeedbackReport = null;
+    currentReportView = null;
+    document.getElementById('categoryView').classList.remove('search-results-view');
+    document.getElementById('homeView').classList.remove('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
+    clearTOC();
+    hideReadingProgress();
+    const filterBar = document.getElementById('activeFilterBar');
+    if (filterBar) { filterBar.classList.add('hidden'); filterBar.classList.remove('flex'); }
+    // Sidebar visibility is user-controlled via the toggle button only.
+  }
+
+  // ---- Directory drill-down (Phase 3) --------------------------------------
+  // categoryView is reused for three levels: subcategory grid, model grid, and
+  // report list. Each level renders a dynamic breadcrumb + a card grid.
+
+  // Switch the main area to the (reused) categoryView container.
+  function openCategoryView() {
+    closeFeedbackModal();
+    currentFeedbackReport = null;
+    currentReportView = null;
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.remove('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
+    clearTOC();
+    hideReadingProgress();
+    // Sidebar visibility is user-controlled via the toggle button only —
+    // navigation must not collapse/expand it.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Render a breadcrumb into `targetId` from an array of {label, onclick?}
+  // crumbs. A crumb without onclick is the current (non-clickable) level.
+  function renderCrumbInto(targetId, crumbs) {
+    const sep = '<span class="material-symbols-outlined text-xs">chevron_right</span>';
+    const home = `<a onclick="showHome()" class="hover:text-tech-accent transition-colors cursor-pointer flex items-center gap-1"><span class="material-symbols-outlined text-base">home</span>${escHtml(t('home'))}</a>`;
+    const parts = crumbs.map(c => c.onclick
+      ? `<a onclick="${c.onclick}" class="hover:text-tech-accent transition-colors cursor-pointer">${escHtml(c.label)}</a>`
+      : `<span class="text-slate-900 font-medium">${escHtml(c.label)}</span>`);
+    document.getElementById(targetId).innerHTML = [home, ...parts].join(sep);
+  }
+  const renderCrumb = (crumbs) => renderCrumbInto('categoryBreadcrumb', crumbs);
+  const renderReportCrumb = (crumbs) => renderCrumbInto('reportBreadcrumb', crumbs);
+
+  // A generic clickable drill-down card. `meta` is the small uppercase tag line.
+  function drillCard(onclick, icon, title, meta, desc, coverContext = null) {
+    return `
+      <article onclick="${onclick}" class="glass-card rounded-2xl p-5 flex items-start gap-4 group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+        ${coverContext
+          ? renderReportCover(coverContext.report, coverContext.category, coverContext.model, 'w-28 h-20 shrink-0 rounded-xl')
+          : `<div class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center" style="${categoryGradient(meta)}"><span class="material-symbols-outlined">${icon}</span></div>`}
+        <div class="min-w-0">
+          ${meta ? `<div class="text-[10px] font-bold uppercase tracking-wider text-tech-accent mb-1">${escHtml(meta)}</div>` : ''}
+          <h3 class="text-base font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(title)}</h3>
+          <p class="text-slate-500 text-xs leading-relaxed line-clamp-2">${escHtml(desc)}</p>
+        </div>
+      </article>`;
+  }
+
+  // Level 1: category -> subcategory grid (or report list for flat categories).
+  function showCategory(category, updateHistory = true) {
+    if (updateHistory) updateRoute([category]);
+    document.getElementById('categoryView').classList.remove('search-results-view');
+    openCategoryView();
+    document.getElementById('categoryHeader').textContent = category;
+
+    const cfg = repoConfig[category] || {};
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    const grid = document.getElementById('categoryReports');
+
+    // Flat category (e.g. CANN Features): no sub/model layer — list reports.
+    if (cfg.flat) {
+      renderCrumb([{ label: category }]);
+      const model = models[0];
+      const reports = model ? model.reports : [];
+      grid.innerHTML = reports.length
+        ? reports.map(r => drillCard(
+            `showReport('${escJs(category)}','${escJs(model.name)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
+            'article', reportTitle(r), category, `Technical report in ${category}.`,
+            { report: r, category, model: model.name })).join('')
+        : '<p class="text-slate-500">No reports available yet.</p>';
+      return;
+    }
+
+    renderCrumb([{ label: category }]);
+    const subs = getSubcategories(category) || [];
+    grid.innerHTML = subs.length
+      ? subs.map(s => {
+          const n = s.models.length;
+          return drillCard(
+            `showSubcategory('${escJs(category)}','${escJs(s.name)}')`,
+            'category', s.name, category, `${n} model${n === 1 ? '' : 's'}`);
+        }).join('')
+      : '<p class="text-slate-500">No subcategories available yet.</p>';
+  }
+
+  // Level 2: subcategory -> model grid.
+  function showSubcategory(category, subName, updateHistory = true) {
+    if (updateHistory) updateRoute([category, subName]);
+    document.getElementById('categoryView').classList.remove('search-results-view');
+    openCategoryView();
+    document.getElementById('categoryHeader').textContent = subName;
+    renderCrumb([
+      { label: category, onclick: `showCategory('${escJs(category)}')` },
+      { label: subName },
+    ]);
+
+    const subs = getSubcategories(category) || [];
+    const sub = subs.find(s => s.name === subName);
+    const models = sub ? sub.models : [];
+    const grid = document.getElementById('categoryReports');
+    grid.innerHTML = models.length
+      ? models.map(m => {
+          const n = m.reports.length;
+          return drillCard(
+            `showModel('${escJs(category)}','${escJs(subName)}','${escJs(m.name)}')`,
+            'deployed_code', m.name, subName, `${n} report${n === 1 ? '' : 's'}`);
+        }).join('')
+      : '<p class="text-slate-500">No models available yet.</p>';
+  }
+
+  // Level 3: model -> report list.
+  function showModel(category, subName, modelName, updateHistory = true) {
+    if (updateHistory) updateRoute([category, subName, modelName]);
+    document.getElementById('categoryView').classList.remove('search-results-view');
+    openCategoryView();
+    document.getElementById('categoryHeader').textContent = modelName;
+    renderCrumb([
+      { label: category, onclick: `showCategory('${escJs(category)}')` },
+      { label: subName, onclick: `showSubcategory('${escJs(category)}','${escJs(subName)}')` },
+      { label: modelName },
+    ]);
+
+    const models = actualRepoModels[category] || repoModels[category] || [];
+    const model = models.find(m => m.name === modelName && (m.subcategory || '') === subName);
+    const reports = model ? model.reports : [];
+    const grid = document.getElementById('categoryReports');
+    grid.innerHTML = reports.length
+      ? reports.map(r => drillCard(
+          `showReport('${escJs(category)}','${escJs(modelName)}','${escJs(reportTitle(r))}','${escJs(reportFile(r))}')`,
+          'article', reportTitle(r), modelName, `Technical report for ${modelName}.`,
+          { report: r, category, model: modelName })).join('')
+      : '<p class="text-slate-500">No reports available yet.</p>';
+  }
+
+  // Show report directly from model name in sidebar
+  function showModelReport(category, model, title, reportFile) {
+    showReport(category, model, title, reportFile);
+  }
+
+  const sourceRepoFallback = {
+    'Infer': { sourceRepo: 'cann-recipes-infer', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-infer' },
+    'Train': { sourceRepo: 'cann-recipes-train', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-train' },
+    'Embodie_AI': { sourceRepo: 'cann-recipes-embodied-ai', sourceRepoUrl: 'https://gitcode.com/cann/cann-recipes-embodied-ai' },
+    'CANN Features': { sourceRepo: 'cann-recipes-docs', sourceRepoUrl: 'https://gitcode.com/tian-ccs/cann-recipes-docs' },
+  };
+  let currentFeedbackReport = null;
+
+  function feedbackReportData(category, model, title, file) {
+    const modelData = (actualRepoModels[category] || repoModels[category] || []).find(item => item.name === model);
+    const report = modelData?.reports?.find(item => reportFile(item) === file) || {};
+    const fallback = sourceRepoFallback[category] || sourceRepoFallback['CANN Features'];
+    const config = repoConfig[category] || {};
+    const docPath = modelData?.docPath || '';
+    return {
+      title,
+      file,
+      category,
+      sourceRepo: report.sourceRepo || fallback.sourceRepo,
+      sourceRepoUrl: report.sourceRepoUrl || fallback.sourceRepoUrl,
+      sourcePath: report.sourcePath || [config.basePath, docPath, file].filter(Boolean).join('/'),
+    };
+  }
+
+  function openFeedbackModal() {
+    if (!currentFeedbackReport) return;
+    const modal = document.getElementById('feedbackModal');
+    const repoLabel = document.getElementById('feedbackRepoLabel');
+    if (repoLabel) repoLabel.textContent = `${t('issueDestination')} ${currentFeedbackReport.sourceRepo}`;
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    modal?.querySelector('.feedback-option')?.focus();
+  }
+
+  function closeFeedbackModal() {
+    const modal = document.getElementById('feedbackModal');
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  function issueTemplate(type, report) {
+    const related = `## Related report\n\n- Report title: ${report.title}\n- Report path: ${report.sourcePath}\n- Reading URL: ${location.href}\n`;
+    const templates = {
+      correction: `${related}\n## Problem description\n\n<!-- Describe the typo, incorrect data, or code issue -->\n\n## Suggested correction\n\n<!-- Provide the proposed correction -->`,
+      bug: `${related}\n## Bug description\n\n<!-- Describe what went wrong -->\n\n## Steps to reproduce\n\n1.\n2.\n3.\n\n## Expected behavior\n\n<!-- Describe the expected result -->\n\n## Environment\n\n- Browser:\n- Operating system:`,
+      suggestion: `## Related report\n\n- Report title: ${report.title}\n- Reading URL: ${location.href}\n\n## Feature description\n\n<!-- Describe the feature or improvement -->\n\n## Use case\n\n<!-- Explain when this would be useful -->`,
+      discussion: `${related}\n## Discussion topic\n\n<!-- Describe the technical question -->\n\n## Your perspective\n\n<!-- Share your understanding or proposed approach -->`,
+    };
+    return templates[type] || templates.discussion;
+  }
+
+  function openIssue(type) {
+    if (!currentFeedbackReport) return;
+    const labels = {
+      correction: '[内容纠错]', bug: '[Bug]', suggestion: '[建议]', discussion: '[讨论]',
+    };
+    const issueTitle = `${labels[type] || '[讨论]'} ${currentFeedbackReport.title}`;
+    const body = issueTemplate(type, currentFeedbackReport);
+    const params = new URLSearchParams();
+    // GitCode deployments have used both native and GitLab-compatible names.
+    params.set('title', issueTitle);
+    params.set('body', body);
+    params.set('issue[title]', issueTitle);
+    params.set('issue[description]', body);
+    const issueUrl = `${currentFeedbackReport.sourceRepoUrl}/issues/new?${params.toString()}`;
+    closeFeedbackModal();
+    const issueWindow = window.open(issueUrl, '_blank', 'noopener,noreferrer');
+    if (issueWindow) issueWindow.opener = null;
+  }
+
+  async function showReport(category, model, title, reportFile = '', updateHistory = true) {
+    console.log('showReport', { category, model, title, reportFile });
+    const selectedReport = reportFile ? findReport(category, model, reportFile) : null;
+    title = selectedReport ? reportTitle(selectedReport) : title;
+    currentReportView = reportFile ? { category, model, file: reportFile } : null;
+    closeReportSearch(false);
+    if (updateHistory && reportFile) {
+      const modelData = (actualRepoModels[category] || repoModels[category] || []).find(item => item.name === model);
+      const parts = (repoConfig[category] || {}).flat
+        ? [category, reportSlug(reportFile)]
+        : [category, modelData?.subcategory || '', model, reportSlug(reportFile)];
+      updateRoute(parts.filter(Boolean));
+    }
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('reportView').classList.remove('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
+
+    // Sidebar visibility is user-controlled via the toggle button only.
+
+    // Update breadcrumb: Home > Category > [Subcategory > Model >] Report.
+    // Intermediate crumbs are clickable to drill back up; flat categories skip
+    // the subcategory/model levels.
+    const cfg0 = repoConfig[category] || {};
+    const mdata = (actualRepoModels[category] || repoModels[category] || []).find(m => m.name === model);
+    const crumbs = [{ label: category, onclick: `showCategory('${escJs(category)}')` }];
+    if (!cfg0.flat && mdata && mdata.subcategory) {
+      crumbs.push({ label: mdata.subcategory, onclick: `showSubcategory('${escJs(category)}','${escJs(mdata.subcategory)}')` });
+      crumbs.push({ label: model, onclick: `showModel('${escJs(category)}','${escJs(mdata.subcategory)}','${escJs(model)}')` });
+    }
+    crumbs.push({ label: title });
+    renderReportCrumb(crumbs);
+    const catEl = document.getElementById('reportCategory');
+    catEl.textContent = category;
+    catEl.setAttribute('style', categoryGradient(category));
+    document.getElementById('reportTitle').textContent = title;
+    currentFeedbackReport = reportFile ? feedbackReportData(category, model, title, reportFile) : null;
+    document.getElementById('reportFeedback')?.classList.toggle('hidden', !currentFeedbackReport);
+    document.getElementById('feedbackFloatingButton')?.classList.toggle('hidden', !currentFeedbackReport);
+
+    // Show loading for date initially
+    document.getElementById('reportDate').textContent = 'Loading...';
+
+    // Fetch and display latest commit date
+    if (reportFile) {
+      const config = repoConfig[category];
+      const modelsSource = actualRepoModels[category] || repoModels[category];
+      const modelData = modelsSource.find(m => m.name === model);
+      if (config && modelData) {
+        const docPath = modelData.docPath || '';
+        const defaultPath = docPath ? `${config.basePath}/${docPath}/${reportFile}` : `${config.basePath}/${reportFile}`;
+        const filePath = reportLanguageVariant(selectedReport)?.sourcePath || defaultPath;
+        fetchLatestCommitDate(config.ns, config.repo, config.branch, filePath).then(date => {
+          document.getElementById('reportDate').textContent = date || 'N/A';
+        });
+      }
+    } else {
+      document.getElementById('reportDate').textContent = 'N/A';
+    }
+
+    // Load content via proxy
+    const reportContent = document.getElementById('reportContent');
+
+    // Show loading state
+    reportContent.innerHTML = `
+      <div class="flex items-center justify-center py-12">
+        <span class="material-symbols-outlined text-4xl text-tech-accent animate-spin">sync</span>
+        <span class="ml-3 text-slate-500">${t('loading')}</span>
+      </div>
+    `;
+    // Reset prev/next nav + progress bar; both re-show only on successful load.
+    const reportNav = document.getElementById('reportNav');
+    if (reportNav) { reportNav.classList.add('hidden'); reportNav.innerHTML = ''; }
+    hideReadingProgress();
+
+    if (reportFile) {
+      const url = getReportUrl(category, model, reportFile);
+      if (url) {
+        const content = await fetchReportContent(category, model, reportFile);
+        if (content) {
+          reportContent.innerHTML = content;
+          if (currentLanguage === 'en' && !reportLanguageVariant(selectedReport)) {
+            reportContent.insertAdjacentHTML('afterbegin', `
+              <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+                ${escHtml(t('englishUnavailable'))}
+              </div>
+            `);
+          }
+          enhanceCodeBlocks(reportContent);
+          enhanceReportTables(reportContent);
+          updateReportReadingTime();
+          buildTOC();
+          renderReportNav(category, model, reportFile);
+          showReadingProgress();
+        } else {
+          // Fallback to link if fetch failed
+          reportContent.innerHTML = `
+            <div class="text-center py-12 glass-card rounded-2xl">
+              <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
+              <p class="text-slate-500 mb-2">${t('loadFailed')}</p>
+              <p class="text-slate-400 text-sm mb-4">${t('sourceUnavailable')}</p>
+              <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 glacier-btn rounded-xl transition-colors">
+                <span>${t('openGitCode')}</span>
+                <span class="material-symbols-outlined text-sm">open_in_new</span>
+              </a>
+            </div>
+          `;
+        }
+      } else {
+        reportContent.innerHTML = `<p class="text-slate-500">${t('noReport')}</p>`;
+      }
+    } else {
+      // No report file - show message or link to repo
+      const repoUrl = getRepoUrl(category);
+      reportContent.innerHTML = `
+        <div class="text-center py-12">
+          <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">description</span>
+          <p class="text-slate-500 mb-4">No tech report available for this model yet.</p>
+          <a href="${repoUrl}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 glacier-btn rounded-xl transition-colors">
+            <span>Browse in GitCode</span>
+            <span class="material-symbols-outlined text-sm">open_in_new</span>
+          </a>
+        </div>
+      `;
+    }
+
+    // Sidebar visibility is user-controlled via the toggle button only.
+
+    // Scroll to top
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // Track last search term to allow re-triggering the same search
+  let lastSearchTerm = '';
+  const selectedCategories = new Set();
+  const selectedSubcategories = new Set();
+  const baseMetadataFilterFields = [
+    'quantization', 'parallelism', 'operator', 'cannFeatures', 'hardware', 'frameworks'
+  ];
+  const scopedMetadataFilterFields = [
+    { category: 'Infer', subcategory: 'llm', field: 'llmSpeculativeInference' },
+    { category: 'Infer', subcategory: 'multimodal', field: 'multimodalDitCache' },
+  ];
+  const metadataFilterFields = [
+    ...baseMetadataFilterFields,
+    ...scopedMetadataFilterFields.map(item => item.field)
+  ];
+  const fallbackMetadataFilterOptions = {
+    quantization: ['bf16', 'int8', 'int4', 'float8', 'fp8', 'mxfp8', 'hif8', 'mxfp4', 'none'],
+    parallelism: ['data-parallel', 'tensor-parallel', 'pipeline-parallel', 'context-parallel', 'sequence-parallel', 'expert-parallel', 'zero', 'none'],
+    operator: ['ascendc', 'tilelang', 'pypto', 'autofuse', 'none'],
+    cannFeatures: ['multi-stream', 'superkernel', 'prefetch', 'npugraph', 'none'],
+    hardware: ['atlas-a2', 'atlas-a3', 'ascend-950', 'none'],
+    frameworks: ['cann-recipes', 'mindspore', 'torchtitan', 'megatron', 'onnx', 'atb', 'none'],
+    llmSpeculativeInference: ['mtp', 'dspark', 'dflash', 'none'],
+    multimodalDitCache: ['dit-block-cache', 'attention-cache', 'feature-cache', 'teacache', 'magcache', 'none'],
+  };
+  let metadataFilterOptions = fallbackMetadataFilterOptions;
+  const selectedMetadataFilters = new Map(
+    metadataFilterFields.map(field => [field, new Set()])
+  );
+  const appliedCategories = new Set();
+  const appliedSubcategories = new Set();
+  const appliedMetadataFilters = new Map(
+    metadataFilterFields.map(field => [field, new Set()])
+  );
+  const metadataFilterLabels = {
+    quantization: { en: 'Quantization', zh: '量化' },
+    parallelism: { en: 'Parallelism', zh: '并行切分' },
+    operator: { en: 'Operator', zh: '算子方式' },
+    cannFeatures: { en: 'CANN Features', zh: 'CANN 特性' },
+    hardware: { en: 'Hardware', zh: '硬件' },
+    frameworks: { en: 'Frameworks', zh: '框架' },
+    llmSpeculativeInference: { en: 'Speculative inference', zh: '投机推理' },
+    multimodalDitCache: { en: 'DiT Cache', zh: 'DiT Cache' },
+  };
+  const metadataValueLabels = {
+    'data-parallel': { en: 'Data parallel', zh: '数据并行' },
+    'tensor-parallel': { en: 'Tensor parallel', zh: '张量并行' },
+    'pipeline-parallel': { en: 'Pipeline parallel', zh: '流水并行' },
+    'context-parallel': { en: 'Context parallel', zh: '上下文并行' },
+    'sequence-parallel': { en: 'Sequence parallel', zh: '序列并行' },
+    'expert-parallel': { en: 'Expert parallel', zh: '专家并行' },
+    'multi-stream': { en: 'MultiStream', zh: '多流并行' },
+    superkernel: { en: 'SuperKernel', zh: '超级内核' },
+    quantization: { en: 'Quantization', zh: '量化' },
+    parallelism: { en: 'Parallelism', zh: '并行执行' },
+    prefetch: { en: 'Prefetch', zh: '数据预取' },
+    npugraph: { en: 'NPUGraph', zh: '图模式' },
+    ascendc: { en: 'AscendC', zh: 'AscendC' },
+    tilelang: { en: 'TileLang', zh: 'TileLang' },
+    pypto: { en: 'PyPTO', zh: 'PyPTO' },
+    autofuse: { en: 'AutoFuse', zh: 'AutoFuse' },
+    'atlas-a2': { en: 'Atlas A2', zh: 'Atlas A2' },
+    'atlas-a3': { en: 'Atlas A3', zh: 'Atlas A3' },
+    'ascend-950': { en: 'Ascend 950', zh: 'Ascend 950' },
+    'cann-recipes': { en: 'CANN Recipes', zh: 'CANN Recipes' },
+    mindspore: { en: 'MindSpore', zh: 'MindSpore' },
+    torchtitan: { en: 'TorchTitan', zh: 'TorchTitan' },
+    megatron: { en: 'Megatron', zh: 'Megatron' },
+    onnx: { en: 'ONNX', zh: 'ONNX' },
+    atb: { en: 'ATB', zh: 'ATB' },
+    mtp: { en: 'MTP', zh: 'MTP' },
+    dspark: { en: 'DSpark', zh: 'DSpark' },
+    dflash: { en: 'DFlash', zh: 'DFlash' },
+    'dit-block-cache': { en: 'DiT Block Cache', zh: 'DiT Block Cache' },
+    'attention-cache': { en: 'Attention Cache', zh: 'Attention Cache' },
+    'feature-cache': { en: 'Feature Cache', zh: 'Feature Cache' },
+    teacache: { en: 'TeaCache', zh: 'TeaCache' },
+    magcache: { en: 'MagCache', zh: 'MagCache' },
+  };
+  const fallbackMetadataValueLabels = {
+    quantization: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.quantization.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      none: { en: 'None', zh: '未涉及量化' },
+    },
+    parallelism: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.parallelism.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      zero: { en: 'ZeRO', zh: 'ZeRO' },
+      none: { en: 'None', zh: '不涉及并行切分' },
+    },
+    operator: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.operator.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      none: { en: 'None', zh: '不涉及算子方式' },
+    },
+    cannFeatures: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.cannFeatures.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      'multi-stream': { en: 'MultiStream', zh: '多流' },
+      superkernel: { en: 'superKernel', zh: 'superKernel' },
+      prefetch: { en: 'Prefetch', zh: '预取' },
+      none: { en: 'None', zh: '无适用 CANN 特性' },
+    },
+    hardware: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.hardware.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      none: { en: 'None', zh: '未指定硬件' },
+    },
+    frameworks: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.frameworks.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      none: { en: 'None', zh: '未指定框架' },
+    },
+    llmSpeculativeInference: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.llmSpeculativeInference.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      none: { en: 'None', zh: '未涉及投机推理' },
+    },
+    multimodalDitCache: {
+      ...Object.fromEntries(fallbackMetadataFilterOptions.multimodalDitCache.map(value => [value, metadataValueLabels[value] || { en: value, zh: value }])),
+      none: { en: 'None', zh: '未涉及 DiT Cache' },
+    },
+    'cover.type': {
+      auto: { en: 'Auto cover', zh: '自动封面' },
+      image: { en: 'Image cover', zh: '图片封面' },
+      mermaid: { en: 'Mermaid cover', zh: 'Mermaid 封面' },
+      placeholder: { en: 'Placeholder cover', zh: '占位封面' },
+    },
+  };
+  const fallbackMetadataLabels = {
+    fields: metadataFilterLabels,
+    values: fallbackMetadataValueLabels,
+  };
+  let metadataLabels = fallbackMetadataLabels;
+  let searchRequestId = 0;
+
+  function splitSearchTerms(value) {
+    return value.toLowerCase().split(/\s+/).filter(Boolean);
+  }
+
+  function includesAllTerms(value, terms) {
+    const normalized = value.toLowerCase();
+    return terms.every(term => normalized.includes(term));
+  }
+
+  function fullTextSnippet(value, terms) {
+    if (!value || !terms.length) return '';
+    const normalized = value.toLowerCase();
+    const positions = terms.map(term => normalized.indexOf(term)).filter(position => position >= 0);
+    if (!positions.length) return '';
+    const start = Math.max(0, Math.min(...positions) - 70);
+    const end = Math.min(value.length, start + 210);
+    return `${start ? '...' : ''}${value.slice(start, end).trim()}${end < value.length ? '...' : ''}`;
+  }
+
+  function highlightSearchTerms(value, terms) {
+    if (!value || !terms.length) return escHtml(value || '');
+    const expression = new RegExp(`(${terms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    let html = '';
+    let cursor = 0;
+    for (const match of value.matchAll(expression)) {
+      html += escHtml(value.slice(cursor, match.index));
+      html += `<mark class="search-highlight">${escHtml(match[0])}</mark>`;
+      cursor = match.index + match[0].length;
+    }
+    return html + escHtml(value.slice(cursor));
+  }
+
+  function scopeKey(category, subcategory) {
+    return `${category}\u0000${subcategory}`;
+  }
+
+  function categoryLabel(category) {
+    return category === 'Embodie_AI' ? 'Embodied AI' : category;
+  }
+
+  function mergeMetadataLabels(fallback, incoming) {
+    const mergedValues = { ...(fallback.values || {}) };
+    for (const [field, labels] of Object.entries(incoming.values || {})) {
+      mergedValues[field] = { ...(mergedValues[field] || {}), ...labels };
+    }
+    return {
+      fields: { ...(fallback.fields || {}), ...(incoming.fields || {}) },
+      values: mergedValues,
+    };
+  }
+
+  function metadataFieldLabel(field) {
+    const label = metadataLabels.fields?.[field] || metadataFilterLabels[field];
+    return label?.[currentLanguage] || label?.en || field;
+  }
+
+  function metadataValueLabel(field, value) {
+    const label = metadataLabels.values?.[field]?.[value] || metadataValueLabels[value];
+    if (label) return label[currentLanguage] || label.en || value;
+    if (value === 'none') return currentLanguage === 'zh' ? '无' : 'None';
+    return formatModelName(value);
+  }
+
+  function selectedSubcategoriesFor(category, source = selectedSubcategories) {
+    const prefix = `${category}\u0000`;
+    return [...source]
+      .filter(key => key.startsWith(prefix))
+      .map(key => key.slice(prefix.length));
+  }
+
+  function categoryReportCount(category, subcategory = null) {
+    return (actualRepoModels[category] || repoModels[category] || []).reduce(
+      (total, model) => total + (!subcategory || model.subcategory === subcategory ? model.reports.length : 0), 0
+    );
+  }
+
+  function allReports() {
+    const reports = [];
+    for (const [category, models] of Object.entries(actualRepoModels || repoModels)) {
+      for (const model of models || []) {
+        for (const report of model.reports || []) reports.push({ category, model, report });
+      }
+    }
+    return reports;
+  }
+
+  function metadataValues(field) {
+    const enumOptions = metadataFilterOptions[field];
+    if (Array.isArray(enumOptions) && enumOptions.length) {
+      return enumOptions;
+    }
+    const values = new Set();
+    for (const { report } of allReports()) {
+      for (const value of report?.[field] || []) values.add(value);
+    }
+    return [...values].sort((left, right) => {
+      if (left === 'none') return 1;
+      if (right === 'none') return -1;
+      return metadataValueLabel(field, left).localeCompare(metadataValueLabel(field, right));
+    });
+  }
+
+  function isScopedFieldActive(item, subcategorySource = selectedSubcategories) {
+    return subcategorySource.has(scopeKey(item.category, item.subcategory));
+  }
+
+  function activeMetadataFilterFields(subcategorySource = selectedSubcategories) {
+    return [
+      ...baseMetadataFilterFields,
+      ...scopedMetadataFilterFields
+        .filter(item => isScopedFieldActive(item, subcategorySource))
+        .map(item => item.field)
+    ];
+  }
+
+  function pruneInactiveScopedMetadataFilters(subcategorySource = selectedSubcategories, metadataSource = selectedMetadataFilters) {
+    for (const item of scopedMetadataFilterFields) {
+      if (!isScopedFieldActive(item, subcategorySource)) {
+        metadataSource.get(item.field)?.clear();
+      }
+    }
+  }
+
+  function renderMetadataFilterOptions() {
+    const container = document.getElementById('metadataFilterOptions');
+    if (!container) return;
+    container.innerHTML = activeMetadataFilterFields().map(field => {
+      const selected = selectedMetadataFilters.get(field) || new Set();
+      const options = metadataValues(field);
+      return `
+        <section>
+          <p class="mb-2 text-xs font-semibold text-slate-600">${escHtml(metadataFieldLabel(field))}</p>
+          <div class="flex flex-wrap gap-2">
+            ${options.map(value => `<button type="button" onclick="toggleMetadataFilter('${escJs(field)}','${escJs(value)}')"
+              class="${selected.has(value) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-slate-100/80 text-slate-600 hover:bg-tech-accent/10 hover:text-tech-accent'} rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold transition-colors">
+              ${escHtml(metadataValueLabel(field, value))}
+            </button>`).join('')}
+          </div>
+        </section>`;
+    }).join('');
+  }
+
+  function renderScopeFilterOptions() {
+    const categoryContainer = document.getElementById('scopeCategoryOptions');
+    const subcategoryContainer = document.getElementById('scopeSubcategoryOptions');
+    const subcategorySection = document.getElementById('scopeSubcategorySection');
+    if (!categoryContainer || !subcategoryContainer || !subcategorySection) return;
+
+    const categories = Object.keys(repoModels).filter(category => !(repoConfig[category] || {}).flat);
+    categoryContainer.innerHTML = categories.map(category => `
+      <button type="button" onclick="toggleCategoryFilter('${escJs(category)}')"
+        class="${selectedCategories.has(category) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-white/50 text-slate-600 border-black/5 hover:border-tech-accent/30 hover:text-tech-accent'} flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors">
+        <span class="text-xs font-semibold">${escHtml(categoryLabel(category))}</span>
+        <span class="text-[10px] opacity-70">${categoryReportCount(category)}</span>
+      </button>`).join('');
+
+    const subcategories = [];
+    for (const category of selectedCategories) {
+      for (const subcategory of (getSubcategories(category) || [])) {
+        subcategories.push({ category, name: subcategory.name });
+      }
+    }
+    subcategorySection.classList.toggle('hidden', subcategories.length === 0);
+    subcategoryContainer.innerHTML = subcategories.map(({ category, name }) => {
+      const key = scopeKey(category, name);
+      return `<button type="button" onclick="toggleSubcategoryFilter('${escJs(category)}','${escJs(name)}')"
+        class="${selectedSubcategories.has(key) ? 'bg-tech-accent text-white border-tech-accent' : 'bg-slate-100/80 text-slate-600 hover:bg-tech-accent/10 hover:text-tech-accent'} rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">
+        ${escHtml(categoryLabel(category))} / ${escHtml(formatModelName(name))}
+      </button>`;
+    }).join('');
+    renderMetadataFilterOptions();
+  }
+
+  function updateScopeFilterUI() {
+    const metadataSelectionCount = [...selectedMetadataFilters.values()]
+      .reduce((total, selected) => total + selected.size, 0);
+    const selectionCount = selectedCategories.size + selectedSubcategories.size + metadataSelectionCount;
+    const badge = document.getElementById('scopeFilterBadge');
+    const button = document.getElementById('scopeFilterButton');
+    if (badge) {
+      badge.textContent = String(selectionCount);
+      badge.classList.toggle('hidden', selectionCount === 0);
+      badge.classList.toggle('flex', selectionCount > 0);
+    }
+    if (button) button.classList.toggle('text-tech-accent', selectionCount > 0);
+    renderScopeFilterOptions();
+  }
+
+  function copySet(source, target) {
+    target.clear();
+    for (const value of source) target.add(value);
+  }
+
+  function copyMetadataFilters(source, target) {
+    for (const field of metadataFilterFields) {
+      copySet(source.get(field) || new Set(), target.get(field) || new Set());
+    }
+  }
+
+  function toggleScopeFilter(event) {
+    event?.stopPropagation();
+    const panel = document.getElementById('scopeFilterPanel');
+    const button = document.getElementById('scopeFilterButton');
+    if (!panel) return;
+    const willOpen = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', !willOpen);
+    button?.setAttribute('aria-expanded', String(willOpen));
+  }
+
+  function closeScopeFilter(event) {
+    event?.stopPropagation();
+    document.getElementById('scopeFilterPanel')?.classList.add('hidden');
+    document.getElementById('scopeFilterButton')?.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleCategoryFilter(category) {
+    if (selectedCategories.has(category)) {
+      selectedCategories.delete(category);
+      for (const key of [...selectedSubcategories]) {
+        if (key.startsWith(`${category}\u0000`)) selectedSubcategories.delete(key);
+      }
+    } else {
+      selectedCategories.add(category);
+    }
+    pruneInactiveScopedMetadataFilters();
+    updateScopeFilterUI();
+  }
+
+  function toggleSubcategoryFilter(category, subcategory) {
+    const key = scopeKey(category, subcategory);
+    if (selectedSubcategories.has(key)) selectedSubcategories.delete(key);
+    else selectedSubcategories.add(key);
+    pruneInactiveScopedMetadataFilters();
+    updateScopeFilterUI();
+  }
+
+  function toggleMetadataFilter(field, value) {
+    const selected = selectedMetadataFilters.get(field);
+    if (!selected) return;
+    if (selected.has(value)) selected.delete(value);
+    else selected.add(value);
+    updateScopeFilterUI();
+  }
+
+  function applyScopeFilter(event) {
+    event?.stopPropagation();
+    copySet(selectedCategories, appliedCategories);
+    copySet(selectedSubcategories, appliedSubcategories);
+    pruneInactiveScopedMetadataFilters(selectedSubcategories, selectedMetadataFilters);
+    copyMetadataFilters(selectedMetadataFilters, appliedMetadataFilters);
+    pruneInactiveScopedMetadataFilters(appliedSubcategories, appliedMetadataFilters);
+    document.getElementById('scopeFilterPanel')?.classList.add('hidden');
+    document.getElementById('scopeFilterButton')?.setAttribute('aria-expanded', 'false');
+    filterContent(true);
+  }
+
+  function clearScopeFilter(event) {
+    event?.stopPropagation();
+    selectedCategories.clear();
+    selectedSubcategories.clear();
+    for (const selected of selectedMetadataFilters.values()) selected.clear();
+    appliedCategories.clear();
+    appliedSubcategories.clear();
+    for (const selected of appliedMetadataFilters.values()) selected.clear();
+    updateScopeFilterUI();
+    filterContent(true);
+  }
+
+  function matchesScope(category, subcategory) {
+    if (!appliedCategories.size) return true;
+    if (!appliedCategories.has(category)) return false;
+    const selected = selectedSubcategoriesFor(category, appliedSubcategories);
+    return selected.length === 0 || selected.includes(subcategory || '');
+  }
+
+  function matchesMetadataFilters(report) {
+    return activeMetadataFilterFields(appliedSubcategories).every(field => {
+      const selected = appliedMetadataFilters.get(field);
+      return !selected?.size || (report?.[field] || []).some(value => selected.has(value));
+    });
+  }
+
+  async function filterContent(forceRefresh = false) {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    const appliedMetadataFields = activeMetadataFilterFields(appliedSubcategories);
+    const hasMetadataFilter = appliedMetadataFields.some(field => (appliedMetadataFilters.get(field) || new Set()).size > 0);
+    if (!searchTerm && appliedCategories.size === 0 && !hasMetadataFilter) {
+      lastSearchTerm = '';
+      showHome();
+      return;
+    }
+
+    // When called from oninput without a value change (e.g. focus), skip
+    // redundant work. When called explicitly (Enter key), always proceed so
+    // the user can re-trigger a search while reading a document.
+    if (!forceRefresh && searchTerm === lastSearchTerm) return;
+    lastSearchTerm = searchTerm;
+    const requestId = ++searchRequestId;
+    const terms = splitSearchTerms(searchTerm);
+    const searchIndex = searchTerm ? await loadFullTextSearchIndex() : new Map();
+    if (requestId !== searchRequestId) return;
+
+    // Collect all matching reports across all categories
+    const results = [];
+    for (const category of Object.keys(repoModels)) {
+      const modelsSource = actualRepoModels[category] || repoModels[category] || [];
+      for (const model of modelsSource) {
+        const modelMatch = model.name.toLowerCase().includes(searchTerm);
+        if (model.reports.length > 0) {
+          for (const report of model.reports) {
+            const reportTitleStr = reportTitle(report);
+            const metadata = `${category} ${model.name} ${model.subcategory || ''} ${reportTitleStr}`;
+            const metadataMatch = !searchTerm || includesAllTerms(metadata, terms);
+            const searchKey = `${category}\u0000${model.name}\u0000${reportFile(report)}`;
+            const body = searchIndex.get(`${searchKey}\u0000${currentLanguage}`)
+              || searchIndex.get(`${searchKey}\u0000zh`) || '';
+            const bodyMatch = !!searchTerm && includesAllTerms(body, terms);
+            const keywordMatch = !searchTerm || metadataMatch || bodyMatch;
+            const scopeMatch = matchesScope(category, model.subcategory || '');
+            const metadataFilterMatch = matchesMetadataFilters(report);
+            if (keywordMatch && scopeMatch && metadataFilterMatch) {
+              results.push({
+                category,
+                model: model.name,
+                subcategory: model.subcategory || '',
+                report,
+                reportTitle: reportTitleStr,
+                snippet: bodyMatch ? fullTextSnippet(body, terms) : '',
+                score: metadataMatch ? 2 : 1
+              });
+            }
+          }
+        } else if (!hasMetadataFilter && appliedCategories.size === 0 && (modelMatch || category.toLowerCase().includes(searchTerm))) {
+          results.push({ category, model: model.name, subcategory: model.subcategory || '', report: null, reportTitle: formatModelName(model.name) });
+        }
+      }
+    }
+
+    // Switch to categoryView to display results (clear report-only UI in case
+    // the search was triggered from within a report view).
+    document.getElementById('homeView').classList.add('hidden');
+    document.getElementById('categoryView').classList.remove('hidden');
+    document.getElementById('categoryView').classList.add('search-results-view');
+    document.getElementById('reportView').classList.add('hidden');
+    document.getElementById('notFoundView').classList.add('hidden');
+    clearTOC();
+    hideReadingProgress();
+
+    renderCrumb([{ label: 'Search Results' }]);
+    const selectedScopes = [...appliedCategories].map(category => {
+      const subs = selectedSubcategoriesFor(category, appliedSubcategories);
+      return subs.length ? `${categoryLabel(category)} / ${subs.map(formatModelName).join(', ')}` : categoryLabel(category);
+    });
+    const selectedMetadata = appliedMetadataFields.flatMap(field =>
+      [...(appliedMetadataFilters.get(field) || [])]
+        .map(value => `${metadataFieldLabel(field)}: ${metadataValueLabel(field, value)}`)
+    );
+    const headerEl = document.getElementById('categoryHeader');
+    if (headerEl) {
+      const criteria = [searchTerm ? `"${searchTerm}"` : '', ...selectedScopes, ...selectedMetadata]
+        .filter(Boolean).join(' + ');
+      headerEl.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for ${criteria}`;
+    }
+    results.sort((left, right) => (right.score || 0) - (left.score || 0));
+
+    const filterBar = document.getElementById('activeFilterBar');
+    if (filterBar) {
+      const hasActiveFilter = appliedCategories.size > 0 || hasMetadataFilter;
+      filterBar.classList.toggle('hidden', !hasActiveFilter);
+      filterBar.classList.toggle('flex', hasActiveFilter);
+      document.getElementById('activeFilterScopes').textContent = [...selectedScopes, ...selectedMetadata].join(' + ');
+    }
+
+    const reportsContainer = document.getElementById('categoryReports');
+    let html = '';
+
+    for (const r of results) {
+      // Build a hierarchical path for context:  Category > Subcategory > Model
+      const pathParts = [r.category];
+      if (r.subcategory) pathParts.push(formatModelName(r.subcategory));
+      pathParts.push(formatModelName(r.model));
+      const hierarchyPath = pathParts.join('  ›  ');
+
+      if (r.report) {
+        html += `
+          <article onclick="showReport('${escJs(r.category)}', '${escJs(r.model)}', '${escJs(r.reportTitle)}', '${escJs(reportFile(r.report))}')" class="search-result-card glass-card rounded-2xl overflow-hidden flex w-full items-stretch group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            ${renderReportCover(r.report, r.category, r.model, 'search-result-cover')}
+            <div class="search-result-body p-4 flex-1 min-w-0 flex flex-col justify-start">
+              <div class="search-result-meta flex gap-2 mb-1.5 flex-nowrap">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${escHtml(r.category)}</span>
+                ${r.subcategory ? `<span class="px-2 py-0.5 text-slate-500 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.subcategory))}</span>` : ''}
+                <span class="px-2 py-0.5 text-coffee-brown/60 text-[10px] font-medium uppercase rounded-full tracking-wider bg-slate-100 dark:bg-white/10">${escHtml(formatModelName(r.model))}</span>
+              </div>
+              <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
+              <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
+              <p class="search-result-description text-slate-500 text-sm leading-relaxed">${r.snippet ? highlightSearchTerms(r.snippet, terms) : `Technical report in the ${escHtml(formatModelName(r.model))} series.`}</p>
+            </div>
+          </article>
+        `;
+      } else {
+        const repoUrl = getRepoUrl(r.category);
+        html += `
+          <article onclick="window.open('${escHtml(repoUrl)}', '_blank')" class="search-result-card glass-card rounded-2xl overflow-hidden flex w-full items-stretch group cursor-pointer transition-all hover:shadow-xl hover:shadow-black/5">
+            <div class="search-result-cover bg-slate-100 dark:bg-white/5 flex items-center justify-center">
+              <span class="material-symbols-outlined text-5xl text-slate-300">folder_open</span>
+            </div>
+            <div class="search-result-body p-4 flex-1 min-w-0 flex flex-col justify-start">
+              <div class="search-result-meta flex gap-2 mb-1.5">
+                <span class="px-2 py-0.5 text-tech-accent text-[10px] font-bold uppercase rounded-full tracking-wider" style="background-color: rgba(107, 82, 132, 0.1);">${escHtml(r.category)}</span>
+              </div>
+              <h3 class="search-result-title text-lg font-bold text-coffee-brown mb-1 group-hover:text-tech-accent transition-colors">${escHtml(r.reportTitle)}</h3>
+              <p class="text-slate-400 text-xs mb-2">${escHtml(hierarchyPath)}</p>
+              <p class="search-result-description text-slate-500 text-sm leading-relaxed mb-2">No dedicated tech report yet. View available files in repository.</p>
+              <span class="text-xs text-tech-accent flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:13px">open_in_new</span>Browse GitCode Repo
+              </span>
+            </div>
+          </article>
+        `;
+      }
+    }
+
+    if (html === '') {
+      html = '<p class="text-slate-500 text-center py-8">No reports found matching your search.</p>';
+    }
+
+    reportsContainer.innerHTML = html;
+  }
+
+  // Apply syntax highlighting and add copy buttons to all code blocks in a container
+  // Render any ```mermaid``` code blocks in the container into SVG diagrams.
+  // Runs before highlight.js so mermaid fences are consumed first.
+  let mermaidSeq = 0;
+  async function renderMermaidBlocks(container) {
+    if (!window.mermaid) return;
+    // marked emits fenced code as <pre><code class="language-mermaid">.
+    const blocks = container.querySelectorAll('code.language-mermaid, code.lang-mermaid');
+    for (const code of blocks) {
+      const pre = code.closest('pre');
+      const source = code.textContent;
+      const holder = document.createElement('div');
+      holder.className = 'mermaid-diagram';
+      try {
+        const { svg } = await window.mermaid.render(`mermaid-svg-${++mermaidSeq}`, source);
+        holder.innerHTML = svg;
+        (pre || code).replaceWith(holder);
+      } catch (e) {
+        console.warn('Mermaid render failed:', e.message);
+        // Leave the original code block in place so the source stays visible.
+      }
+    }
+  }
+
+  function enhanceCodeBlocks(container) {
+    // Mermaid first — turns ```mermaid``` fences into diagrams and removes their <pre>.
+    renderMermaidBlocks(container);
+
+    const preBlocks = container.querySelectorAll('pre');
+    preBlocks.forEach(pre => {
+      const code = pre.querySelector('code');
+      // Skip mermaid blocks — renderMermaidBlocks handles (and removes) them.
+      if (code && /\b(language|lang)-mermaid\b/.test(code.className)) return;
+      if (code) {
+        hljs.highlightElement(code);
+      }
+
+      // Wrap pre in a div for positioning
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      // Add copy button
+      const btn = document.createElement('button');
+      btn.className = 'code-copy-btn';
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px">content_copy</span> Copy';
+      btn.addEventListener('click', () => {
+        const text = pre.querySelector('code') ? pre.querySelector('code').textContent : pre.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('copied');
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px">check</span> Copied!';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px">content_copy</span> Copy';
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  }
+
+  function enhanceReportTables(container) {
+    container.querySelectorAll('.report-markdown table').forEach(table => {
+      if (table.parentElement?.classList.contains('table-scroll-wrapper')) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-scroll-wrapper';
+      wrapper.tabIndex = 0;
+      wrapper.setAttribute('role', 'region');
+      wrapper.setAttribute('aria-label', 'Scrollable table');
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+  }
+</script>
+
+</body>
+</html>

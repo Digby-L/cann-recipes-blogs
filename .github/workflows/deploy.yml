@@ -1,11 +1,7 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [ "main" ]
-  schedule:
-    # Re-fetch content from GitCode repos daily at 2:17 AM UTC
-    - cron: '17 2 * * *'
+  # Static content is refreshed locally and deployment is started manually.
   workflow_dispatch:
 
 permissions:
@@ -32,9 +28,45 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Fetch content from GitCode repos
+      - name: Build local content index
         run: |
-          python build_content.py || echo "WARNING: GitCode fetch failed, using committed content"
+          python validate_metadata.py
+          python site/build_content.py
+
+      - name: Validate generated content index
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("site/content/index.json").read_text(encoding="utf-8"))
+          expected = 0
+          for category in manifest.values():
+            if category.get("flat"):
+              category_reports = category.get("reports", [])
+            else:
+              category_reports = [
+                  report
+                  for subcategory in category.get("subcategories", [])
+                  for model in subcategory.get("models", [])
+                  for report in model.get("reports", [])
+              ]
+            expected += len(category_reports)
+          if expected == 0:
+            raise SystemExit("Invalid manifest: no reports discovered")
+          print(f"Validated manifest with {expected} reports")
+
+          search_index = json.loads(Path("site/content/search-index.json").read_text(encoding="utf-8"))
+          if len(search_index) < expected or any(not item.get("text") for item in search_index):
+              raise SystemExit(
+                  f"Invalid search index: expected at least {expected}, generated {len(search_index)}"
+              )
+          print(f"Validated {len(search_index)} full-text search entries")
+          PY
+
+      - name: Assemble Pages artifact
+        run: |
+          cp -R infer train embodied cann_features models site/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -42,7 +74,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'site'
 
       - name: Deploy to GitHub Pages
         id: deployment

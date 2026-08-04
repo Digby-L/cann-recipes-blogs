@@ -1,2 +1,10 @@
-__pycache__
-.claude/
+__pycache__/
+*.py[cod]
+site/__pycache__/
+site/content/reports/
+site/content/assets/
+site/infer/
+site/train/
+site/embodied/
+site/cann_features/
+site/models/
